@@ -1,0 +1,5 @@
+ezpublish:
+    system:
+        eng:
+            user:
+                login_template: "NetgenEzSocialConnectBundle:user:login.html.twig"

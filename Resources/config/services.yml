@@ -1,0 +1,13 @@
+parameters:
+        netgen.interactive_event_listener.class: Netgen\Bundle\EzSocialConnectBundle\EventListener\InteractiveLoginListener
+        netgen.oauth.user_provider.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider
+
+services:
+    netgen.interactive_event_listener:
+        class: %netgen.interactive_event_listener.class%
+        arguments: [@ezpublish.api.repository, @ezpublish.config.resolver, %netgen.oauth.user_group%]
+        tags:
+            - { name: kernel.event_subscriber }
+
+    netgen.oauth.user_provider:
+        class: %netgen.oauth.user_provider.class%
