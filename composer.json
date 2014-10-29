@@ -1,0 +1,20 @@
+{
+    "name": "netgen/ez-social-connect",
+    "description": "Bundle for eZ Publish which enables sign in with social networks",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Netgen",
+            "homepage": "http://www.netgenlabs.com",
+            "email": "info@netgen.hr"
+        }
+    ],
+    "require": {
+        "ezsystems/ezpublish-kernel": "*",
+        "hwi/oauth-bundle": "0.4.*@dev"
+    },
+    "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
+    "autoload": {
+        "psr-0": { "Netgen\\Bundle\\EzSocialConnectBundle": "" }
+    }
+}
