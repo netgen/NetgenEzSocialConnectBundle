@@ -60,7 +60,8 @@ security:
 
 /ezpublish/config/parameters.yml
 -------------------------------
-netgen.oauth.user_group: 11
+netgen.oauth.user_group:
+    facebook: 11
 -------------------------------
 
 
