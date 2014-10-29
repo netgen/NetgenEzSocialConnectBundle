@@ -1,0 +1,82 @@
+<div id="fb-root"></div>
+<script src="https://apis.google.com/js/client:platform.js" async defer></script>
+<script>
+    window.fbAsyncInit = function() {
+        // init the FB JS SDK
+        FB.init({
+            appId      : '808033489246752',                        // App ID from the app dashboard
+            channelUrl : '//ezpublish.ezsc',      // Channel file for x-domain comms
+            status     : true,                                 // Check Facebook Login status
+            xfbml      : true,                                  // Look for social plugins on the page
+            version:  'v2.0'
+        });
+    };
+
+    // Load the SDK asynchronously
+    (function(d, s, id){
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {return;}
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    function fb_login() {
+        FB.getLoginStatus(function(response) {
+            if (response.status === 'connected') {
+                // connected
+                //alert('Already connected, redirect to login page to create token.');
+                document.location = "{{ url("hwi_oauth_service_redirect", {service: "facebook"}) }}";
+            } else {
+                // not_authorized
+                FB.login(function(response) {
+                    if (response.authResponse) {
+                        document.location = "{{ url("hwi_oauth_service_redirect", {service: "facebook"}) }}";
+                    } else {
+                        //alert('Cancelled.');
+                    }
+                }, {scope: 'email'});
+            }
+        });
+    }
+
+    function signinCallback(authResult) {
+        if (authResult['status']['signed_in']) {
+            // Update the app to reflect a signed in user
+            // Hide the sign-in button now that the user is authorized, for example:
+            //document.getElementById('signinButton').setAttribute('style', 'display: none');
+            document.location = "{{ url("hwi_oauth_service_redirect", {service: "google"}) }}";
+        } else {
+            // Update the app to reflect a signed out user
+            // Possible error values:
+            //   "user_signed_out" - User is signed-out
+            //   "access_denied" - User denied access to your app
+            //   "immediate_failed" - Could not automatically log in the user
+            console.log('Sign-in state: ' + authResult['error']);
+        }
+    }
+</script>
+
+{% for owner in owners %}
+    {% if owner == "facebook" %}
+        <fb:login-button scope="public_profile,email" onlogin="fb_login();">
+        </fb:login-button>
+    {% elseif owner == "google" %}
+        <span id="signinButton">
+            <span
+                  class="g-signin"
+                  data-callback="signinCallback"
+                  data-clientid="956549951250-h1hlnd4vtb1apfh70vdma78966j42vom.apps.googleusercontent.com"
+                  data-cookiepolicy="single_host_origin"
+                  data-scope="email profile"
+                  data-width="icon-only" data-theme="light" >
+            </span>
+        </span>
+    {% endif %}
+{% endfor %}
+
+{#
+{% for owner in hwi_oauth_resource_owners() %}
+      <a href="{{ hwi_oauth_login_url(owner) }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
+{% endfor %}
+#}

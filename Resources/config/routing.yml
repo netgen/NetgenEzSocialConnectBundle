@@ -2,6 +2,10 @@ facebook_login:
     pattern: /login/login_facebook
     defaults: { _controller: ezpublish.security.controller:loginAction }
 
+google_login:
+    pattern: /login/login_google
+    defaults: { _controller: ezpublish.security.controller:loginAction }
+
 
 hwi_oauth_redirect:
     resource: "@HWIOAuthBundle/Resources/config/routing/redirect.xml"
