@@ -17,14 +17,10 @@ INSTALL.md:
 ---------------------------
 
 
-/ezpublish/config/ezpublish.yml
--------------------------------
-    imports:
-    - { resource: "@NetgenEzSocialConnectBundle/Resources/config/override.yml" }
-
 /ezpublish/config/routing.yml
+-------------------------------
     _netgen_hwi_ez_login:
-        resource: "@NetgenEzSocialConnect/Resources/config/routing.yml"
+        resource: "@NetgenHWIeZConnectBundle/Resources/config/routing.yml"
         prefix:   /login
 -------------------------------
 
@@ -53,5 +49,8 @@ security:
             anonymous: ~
 -------------------------------
 
+
 /ezpublish/config/parameters.yml
+-------------------------------
 netgen.oauth.user_group: 11
+-------------------------------
