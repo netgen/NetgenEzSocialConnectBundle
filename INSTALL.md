@@ -1,5 +1,13 @@
 INSTALL.md:
 
+/ezpublish/EzPublishKernel.php enable bundles
+----------------------------
+new HWIOAuthBundle(),
+new EzSocialConnectBundle\NetgenEzSocialConnectBundle()
+----------------------------
+
+
+
 /ezpublish/config/config.yml
 ----------------------------
     hwi_oauth:
@@ -19,8 +27,8 @@ INSTALL.md:
 
 /ezpublish/config/routing.yml
 -------------------------------
-    _netgen_hwi_ez_login:
-        resource: "@NetgenHWIeZConnectBundle/Resources/config/routing.yml"
+    _netgen_ez_social_login:
+        resource: "@NetgenEzSocialConnectBundle/Resources/config/routing.yml"
         prefix:   /login
 -------------------------------
 
@@ -54,3 +62,10 @@ security:
 -------------------------------
 netgen.oauth.user_group: 11
 -------------------------------
+
+
+in template:
+-------------------------------
+{% include 'NetgenEzSocialConnectBundle:social:social_buttons.html.twig' with { owners: hwi_oauth_resource_owners() } %}
+-------------------------------
+
