@@ -7,7 +7,6 @@ new EzSocialConnectBundle\NetgenEzSocialConnectBundle()
 ----------------------------
 
 
-
 /ezpublish/config/config.yml
 ----------------------------
     hwi_oauth:
@@ -16,13 +15,25 @@ new EzSocialConnectBundle\NetgenEzSocialConnectBundle()
     resource_owners:
         facebook:
             type: facebook
-            client_id: 808033489246752
-            client_secret: 5b3abc2ae6c0eff9cd9d89bc470a37b0
+            client_id: %facebook.client_id%
+            client_secret: %facebook.secret%
             scope: "email"
     services:
         hwi_oauth.user.provider.entity:
             class: HWI\Bundle\OAuthBundle\Security\Core\User\OAuthUserProvider
+
+    twig:
+        globals:
+            facebook_id: %facebook.client_id%
 ---------------------------
+
+
+/ezpublish/config/parameters.yml
+-------------------------------
+facebook.client_id: <facebook_client_id>
+netgen.oauth.user_group:
+    facebook: 11
+-------------------------------
 
 
 /ezpublish/config/routing.yml
@@ -39,29 +50,27 @@ security:
     providers:
         chain_provider:
             chain:
-                providers: [oauth, ezpublish]
+                providers: [ezpublish, oautha]
         ezpublish:
             id: ezpublish.security.user_provider
         oauth:
             id: hwi_oauth.user.provider.entity
     firewalls:
-        firewall_name:
+        ezpublish_front:
             oauth:
+                provider: oauth
                 resource_owners:
-                    facebook: /login/login_facebook
+                    facebook: facebook_login
                 login_path: /login
-                check_path: /login_check
                 failure_path: /login
+                default_target_path: /
                 oauth_user_provider:
                     service: netgen.oauth.user_provider
+            pattern: ^/
             anonymous: ~
--------------------------------
-
-
-/ezpublish/config/parameters.yml
--------------------------------
-netgen.oauth.user_group:
-    facebook: 11
+            form_login:
+                provider: ezpublish
+            logout: ~
 -------------------------------
 
 
