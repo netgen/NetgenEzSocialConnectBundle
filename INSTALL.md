@@ -9,7 +9,7 @@ new EzSocialConnectBundle\NetgenEzSocialConnectBundle()
 
 /ezpublish/config/config.yml
 ----------------------------
-    hwi_oauth:
+hwi_oauth:
     # name of the firewall in which this bundle is active, this setting MUST be set
     firewall_name: ezpublish_front
     resource_owners:
@@ -18,19 +18,16 @@ new EzSocialConnectBundle\NetgenEzSocialConnectBundle()
             client_id: %facebook.client_id%
             client_secret: %facebook.secret%
             scope: "email"
-    services:
-        hwi_oauth.user.provider.entity:
-            class: HWI\Bundle\OAuthBundle\Security\Core\User\OAuthUserProvider
-
-    twig:
-        globals:
-            facebook_id: %facebook.client_id%
+services:
+    hwi_oauth.user.provider.entity:
+        class: HWI\Bundle\OAuthBundle\Security\Core\User\OAuthUserProvider
 ---------------------------
 
 
 /ezpublish/config/parameters.yml
 -------------------------------
 facebook.client_id: <facebook_client_id>
+facebook.secret: <facebook_secret>
 netgen.oauth.user_group:
     facebook: 11
 -------------------------------

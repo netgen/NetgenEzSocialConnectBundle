@@ -1,0 +1,2 @@
+parameters:
+    netgen_social_connect.default.facebook_id: %facebook.client_id%
