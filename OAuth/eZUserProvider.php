@@ -33,16 +33,33 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
         $user = new OAuthEzUser( $response->getNickname() );
 
         $real_name = $response->getRealName();
+
         if ( !empty($real_name) )
         {
             $real_name = explode(' ', $real_name );
-            $user->setFirstName( $real_name[0] );
-            $user->setLastName( $real_name[1] );
+            if( count($real_name) >= 2 )
+            {
+                $user->setFirstName( $real_name[0] );
+                $user->setLastName( $real_name[1] );
+            }
+            else
+            {
+                $user->setFirstName( $real_name[0] );
+                $user->setLastName( '' );
+            }
+        }
+        if ( !$response->getEmail() )
+        {
+
+            $email = md5( 'socialbundle' . $response->getResourceOwner()->getName() . '_' . $response->getResponse()['id_str'] ) . '@localhost.local';
+            $user->setEmail( $email );
+        }
+        else
+        {
+            $user->setEmail( $response->getEmail() );
         }
 
-        $user->setEmail( $response->getEmail() );
         $user->setResourceOwner( $response->getResourceOwner()->getName() );
-
         return $user;
     }
 }

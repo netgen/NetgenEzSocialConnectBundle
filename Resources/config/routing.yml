@@ -6,6 +6,13 @@ google_login:
     pattern: /login/login_google
     defaults: { _controller: ezpublish.security.controller:loginAction }
 
+twitter_login:
+    pattern: /login/login_twitter
+    defaults: { _controller: ezpublish.security.controller:loginAction }
+
+linkedin_login:
+    pattern: /login/login_linkedin
+    defaults: { _controller: ezpublish.security.controller:loginAction }
 
 hwi_oauth_redirect:
     resource: "@HWIOAuthBundle/Resources/config/routing/redirect.xml"

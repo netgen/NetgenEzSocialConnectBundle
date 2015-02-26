@@ -1,2 +1,5 @@
 parameters:
     netgen_social_connect.default.facebook_id: %facebook.client_id%
+    netgen_social_connect.default.twitter_id: %twitter.client_id%
+    netgen_social_connect.default.linkedin_id: %linkedin.client_id%
+    netgen_social_connect.default.google_id: %google.client_id%
