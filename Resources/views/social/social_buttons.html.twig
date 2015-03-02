@@ -2,7 +2,7 @@
 <script src="https://apis.google.com/js/client:platform.js" async defer></script>
 
 <script type="text/javascript" src="//platform.linkedin.com/in.js">
-    api_key: 776ckpprda9ggt
+    api_key:  {{ ezpublish.configResolver.getParameter( 'linkedin_id', 'netgen_social_connect' ) }}
     authorize: true
     onLoad: onLinkedInLoad
     scope:r_basicprofile r_emailaddress
@@ -100,7 +100,7 @@
             <span
                     class="g-signin"
                     data-callback="signinCallback"
-                    data-clientid="1026203891666-tf6m85boq232uh7ddscmc7qd2mc51ilu.apps.googleusercontent.com"
+                    data-clientid="{{ ezpublish.configResolver.getParameter( 'google_id', 'netgen_social_connect' ) }}"
                     data-cookiepolicy="single_host_origin"
                     data-scope="email profile"
                     data-width="icon-only" data-theme="light" >

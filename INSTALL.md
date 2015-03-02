@@ -18,18 +18,52 @@ hwi_oauth:
             client_id: %facebook.client_id%
             client_secret: %facebook.secret%
             scope: "email"
+        twitter:
+            type: twitter
+            client_id: %twitter.client_id%
+            client_secret: %twitter.secret%
+            scope: "email"
+        linkedin:
+            type: linkedin
+            client_id: %linkedin.client_id%
+            client_secret: %linkedin.secret%
+            scope: "r_emailaddress"
+        google:
+            type: google
+            client_id: %google.client_id%
+            client_secret: %google.secret%
+            scope: "email   "
+
 services:
     hwi_oauth.user.provider.entity:
         class: HWI\Bundle\OAuthBundle\Security\Core\User\OAuthUserProvider
 ---------------------------
 
-
 /ezpublish/config/parameters.yml
 -------------------------------
-facebook.client_id: <facebook_client_id>
-facebook.secret: <facebook_secret>
-netgen.oauth.user_group:
-    facebook: 11
+parameters:
+    secret: 7194040f66983788d7a952af6f9d2ff241ffe202
+    locale_fallback: en
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: null
+    mailer_password: null
+    debug_toolbar: true
+    debug_redirects: false
+    use_assetic_controller: true
+    facebook.client_id: <facebook_client_id>
+    facebook.secret: <facebook_secret>
+    twitter.client_id: <twitter_client_id>
+    twitter.secret: <twitter_secret>
+    linkedin.client_id: <linkedin_client_id>
+    linkedin.secret: <linkedin_secret>
+    google.client_id: <google_client_id>
+    google.secret: <google_secret>
+    netgen.oauth.user_group:
+        facebook: 11
+        twitter: 11
+        linkedin: 11
+        google: 11
 -------------------------------
 
 
@@ -47,7 +81,7 @@ security:
     providers:
         chain_provider:
             chain:
-                providers: [ezpublish, oautha]
+               providers: [ezpublish, oauth]
         ezpublish:
             id: ezpublish.security.user_provider
         oauth:
@@ -58,6 +92,9 @@ security:
                 provider: oauth
                 resource_owners:
                     facebook: facebook_login
+                    twitter: twitter_login
+                    linkedin: linkedin_login
+                    google: google_login
                 login_path: /login
                 failure_path: /login
                 default_target_path: /
@@ -69,7 +106,6 @@ security:
                 provider: ezpublish
             logout: ~
 -------------------------------
-
 
 in template:
 -------------------------------
