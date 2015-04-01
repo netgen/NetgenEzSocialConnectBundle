@@ -88,7 +88,16 @@ class InteractiveLoginListener implements EventSubscriberInterface
             if ( !empty($last_name) )
                 $userCreateStruct->setField('last_name', $last_name);
 
-            $userCreateStruct->enabled = true;
+            // XML Block field type (attribute)
+            // Creates XML Block content from string
+            $text = "'Biography will be soon available.'";
+            $parser = new \eZSimplifiedXMLInputParser( 0 );
+            $parser->setParseLineBreaks(true);
+            $xmlDocument = $parser->process($text);
+            $xml = \eZXMLTextType::domString($xmlDocument);
+
+            $userCreateStruct->setField('bio', $xml);
+            $userCreateStruct->setField('agreement_to_terms', true);
 
             $userGroup = $userService->loadUserGroup($this->userGroup[$resourceOwner]);
 
