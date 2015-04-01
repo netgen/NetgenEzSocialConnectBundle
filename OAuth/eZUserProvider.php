@@ -45,9 +45,18 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
             else
             {
                 $user->setFirstName( $real_name[0] );
-                $user->setLastName( '' );
+                $user->setLastName( $real_name[0] );
             }
         }
+
+        else
+        {
+            $userEmail = $response->getEmail();
+            $emailArray = explode( '@', $userEmail );
+            $user->setFirstName( $emailArray[0] );
+            $user->setLastName( $emailArray[0] );
+        }
+
         if ( !$response->getEmail() )
         {
 

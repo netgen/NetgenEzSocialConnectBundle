@@ -53,6 +53,10 @@ class InteractiveLoginListener implements EventSubscriberInterface
         $oauthUser = $event->getAuthenticationToken()->getUser();
 
         $username = $oauthUser->getUsername();
+        if ( empty( $username ) )
+        {
+            $username = $oauthUser->getFirstName();
+        }
         $password = md5( $username );
         $email = $oauthUser->getEmail();
         $first_name = $oauthUser->getFirstName();
@@ -84,22 +88,16 @@ class InteractiveLoginListener implements EventSubscriberInterface
             if ( !empty($last_name) )
                 $userCreateStruct->setField('last_name', $last_name);
 
-            // Created user needs to be enabled
             $userCreateStruct->enabled = true;
 
             $userGroup = $userService->loadUserGroup($this->userGroup[$resourceOwner]);
 
-            try {
-                $user = $userService->createUser(
-                    $userCreateStruct,
-                    array($userGroup)
-                );
-                // set as current user
-                $event->setApiUser($user);
+            $user = $userService->createUser(
+                $userCreateStruct,
+                array($userGroup)
+            );
 
-            } catch (InvalidArgumentException $e) {
-                // TODO: handle exception
-            }
+            $event->setApiUser($user);
         }
     }
 } 
