@@ -60,7 +60,7 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
         if ( !$response->getEmail() )
         {
 
-            $email = md5( 'socialbundle' . $response->getResourceOwner()->getName() . '_' . $response->getResponse()['id_str'] ) . '@localhost.local';
+            $email = md5( 'socialbundle' . $response->getResourceOwner()->getName() ) . '@localhost.local';
             $user->setEmail( $email );
         }
         else
