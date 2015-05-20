@@ -99,7 +99,15 @@ class InteractiveLoginListener implements EventSubscriberInterface
 
                 if( !empty($imageName[0]) )
                 {
-                    $imageFileName = 'var/Imported/' . basename( $imageName[ 0 ] );
+                    $storageDir = 'var/kavli/storage/social/';
+                    if( !is_dir( $storageDir ) )
+                    {
+                        if( !mkdir( $storageDir ) )
+                        {
+                            throw new \Exception('Failed to create dir');
+                        }
+                    }
+                    $imageFileName = $storageDir . basename( $imageName[ 0 ] );
                 }
                 if( !empty( $imageFileName ) && file_put_contents( $imageFileName, $data ) )
                 {
