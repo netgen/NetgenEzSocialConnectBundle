@@ -62,6 +62,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
         $first_name = $oauthUser->getFirstName();
         $last_name = $oauthUser->getLastName();
         $resourceOwner = $oauthUser->getResourceOwner();
+        $imageLink = $oauthUser->getImagelink();
 
         // try to load existing user by email (if more than one, return the first one)
         $user = $userService->loadUsersByEmail( $email );
@@ -88,6 +89,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
             if ( !empty($last_name) )
                 $userCreateStruct->setField('last_name', $last_name);
 
+
             // XML Block field type (attribute)
             // Creates XML Block content from string
             $text = "'Biography will be soon available.'";
@@ -98,6 +100,34 @@ class InteractiveLoginListener implements EventSubscriberInterface
 
             $userCreateStruct->setField('bio', $xml);
             $userCreateStruct->setField('agreement_to_terms', true);
+
+            $imageFileName = null;
+            if( !empty($imageLink) )
+            {
+                // download image from facebook
+                $data = file_get_contents( $imageLink );
+
+                preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName );
+
+                if( !empty($imageName[0]) )
+                {
+                    $imageFileName = 'var/Imported/' . basename( $imageName[ 0 ] );
+                }
+                if( !empty( $imageFileName ) && file_put_contents( $imageFileName, $data ) )
+                {
+                    \eZLog::write( 'Local image created ' . $imageFileName );
+                }
+                else
+                {
+                    \eZLog::write( 'Problem while saving image ' . $imageLink );
+                }
+                // upload image to ez
+                $userCreateStruct->setField( 'image', $imageFileName );
+            }
+
+            // Created user needs to be enabled
+            $userCreateStruct->enabled = true;
+
 
             $userGroup = $userService->loadUserGroup($this->userGroup[$resourceOwner]);
 

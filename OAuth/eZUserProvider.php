@@ -3,17 +3,9 @@
 namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
-use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
-use eZ\Publish\API\Repository\UserService;
-use eZ\Publish\API\Repository\Exceptions\InvalidArgumentException;
-use eZ\Publish\API\Repository\Repository;
-use eZ\Publish\Core\MVC\Symfony\Event\InteractiveLoginEvent;
-use eZ\Publish\Core\MVC\Symfony\MVCEvents;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ChainConfigResolver;
 
 
 class eZUserProvider implements OAuthAwareUserProviderInterface
@@ -48,7 +40,6 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
                 $user->setLastName( $real_name[0] );
             }
         }
-
         else
         {
             $userEmail = $response->getEmail();
@@ -59,7 +50,6 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
 
         if ( !$response->getEmail() )
         {
-
             $email = md5( 'socialbundle' . $response->getResourceOwner()->getName() ) . '@localhost.local';
             $user->setEmail( $email );
         }
@@ -69,6 +59,12 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
         }
 
         $user->setResourceOwner( $response->getResourceOwner()->getName() );
+
+        if( $response->getProfilePicture() )
+        {
+            $user->setImageLink( $response->getProfilePicture() );
+        }
+
         return $user;
     }
 }

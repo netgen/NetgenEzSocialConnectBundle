@@ -6,10 +6,11 @@ use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthUser;
 
 class OAuthEzUser extends OAuthUser
 {
-    private $first_name;
-    private $last_name;
-    private $email;
-    private $resourceOwner;
+    protected $first_name;
+    protected $last_name;
+    protected $email;
+    protected $resourceOwner;
+    protected $imageLink;
 
     public function setFirstName( $name )
     {
@@ -49,6 +50,16 @@ class OAuthEzUser extends OAuthUser
     public function getResourceOwner()
     {
         return $this->resourceOwner;
+    }
+
+    public function setImageLink( $imageLink )
+    {
+        $this->imageLink = $imageLink;
+    }
+
+    public function getImageLink()
+    {
+        return $this->imageLink;
     }
 
 }
