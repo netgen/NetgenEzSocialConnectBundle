@@ -16,13 +16,13 @@ class InteractiveLoginListener implements EventSubscriberInterface
     /**
      * @var \eZ\Publish\API\Repository\Repository $repository
      */
-    private $repository;
+    protected $repository;
 
     /** @var  \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ConfigResolver $configResolver */
-    private $configResolver;
+    protected $configResolver;
 
     /** @var int $userGroup */
-    private $userGroup;
+    protected $userGroup;
 
     public function __construct( Repository $repository,
                                  ChainConfigResolver $configResolver,
