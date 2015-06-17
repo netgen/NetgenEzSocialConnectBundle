@@ -23,8 +23,11 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
     {
         $userId = $response->getUsername();
 
+
+        $login = $response->getNickname() . '-' . $userId; // unique login for ez
+
         /** @var OAuthEzUser $user */
-        $user = new OAuthEzUser( $response->getNickname(), $userId );
+        $user = new OAuthEzUser( $login , $userId );
 
         $real_name = $response->getRealName();
 
