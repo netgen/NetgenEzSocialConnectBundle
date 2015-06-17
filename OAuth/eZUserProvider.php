@@ -21,8 +21,10 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
      */
     public function loadUserByOAuthUserResponse(UserResponseInterface $response)
     {
+        $userId = $response->getUsername();
+
         /** @var OAuthEzUser $user */
-        $user = new OAuthEzUser( $response->getNickname() );
+        $user = new OAuthEzUser( $response->getNickname(), $userId );
 
         $real_name = $response->getRealName();
 
@@ -43,14 +45,22 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
         else
         {
             $userEmail = $response->getEmail();
-            $emailArray = explode( '@', $userEmail );
-            $user->setFirstName( $emailArray[0] );
-            $user->setLastName( $emailArray[0] );
+            if( !empty($userEmail) )
+            {
+                $emailArray = explode( '@', $userEmail );
+                $user->setFirstName( $emailArray[ 0 ] );
+                $user->setLastName( $emailArray[ 0 ] );
+            }
+            else
+            {
+                $user->setFirstName( $response->getNickname() );
+                $user->setLastName( $response->getResourceOwner()->getName() );
+            }
         }
 
         if ( !$response->getEmail() )
         {
-            $email = md5( 'socialbundle' . $response->getResourceOwner()->getName() ) . '@localhost.local';
+            $email = md5( 'socialbundle' . $response->getResourceOwner()->getName() . $userId ) . '@localhost.local';
             $user->setEmail( $email );
         }
         else

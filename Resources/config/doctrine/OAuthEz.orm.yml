@@ -1,0 +1,15 @@
+Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz:
+    type: entity
+    table: ngsocialconnect
+    id:
+        ezUserId:
+            type: integer
+            column: ez_user_id
+            id: true
+    fields:
+        resourceUserId:
+            type: string
+            column: resource_user_id
+        resourceName:
+            type: string
+            column: resource_name

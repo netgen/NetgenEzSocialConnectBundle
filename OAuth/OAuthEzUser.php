@@ -6,11 +6,38 @@ use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthUser;
 
 class OAuthEzUser extends OAuthUser
 {
+    /** @var string */
+    protected $originalId;
+    /** @var  string */
     protected $first_name;
+    /** @var  string */
     protected $last_name;
+    /** @var  string */
     protected $email;
+    /** @var  string */
     protected $resourceOwner;
+    /** @var  string */
     protected $imageLink;
+
+    /**
+     * @param string $username
+     * @param string $id original user id from resource
+     */
+    public function __construct( $username, $id )
+    {
+        parent::__construct( $username );
+        $this->originalId = $id;
+    }
+
+    public function setOriginalId( $id )
+    {
+        $this->originalId = $id;
+    }
+
+    public function getOriginalId()
+    {
+        return $this->originalId;
+    }
 
     public function setFirstName( $name )
     {
