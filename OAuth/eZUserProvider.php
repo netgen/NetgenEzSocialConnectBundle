@@ -36,8 +36,8 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
             $real_name = explode(' ', $real_name );
             if( count($real_name) >= 2 )
             {
-                $user->setFirstName( $real_name[0] );
-                $user->setLastName( $real_name[1] );
+                $user->setFirstName( array_shift( $real_name ) );
+                $user->setLastName( implode( ' ', $real_name ) );
             }
             else
             {
