@@ -92,14 +92,14 @@ class InteractiveLoginListener implements EventSubscriberInterface
             $imageFileName = null;
             if( !empty($imageLink) )
             {
-                // download image from facebook
+                // download image from resource
                 $data = file_get_contents( $imageLink );
 
                 preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName );
 
                 if( !empty($imageName[0]) )
                 {
-                    $storageDir = 'var/kavli/storage/social/';
+                    $storageDir = '/tmp/';
                     if( !is_dir( $storageDir ) )
                     {
                         if( !mkdir( $storageDir ) )
