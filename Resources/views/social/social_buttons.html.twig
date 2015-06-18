@@ -106,6 +106,8 @@
                     data-width="icon-only" data-theme="light" >
             </span>
         </span>
+    {% else %}
+        <a href="{{ hwi_oauth_login_url(owner) }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
     {% endif %}
 {% endfor %}
 
