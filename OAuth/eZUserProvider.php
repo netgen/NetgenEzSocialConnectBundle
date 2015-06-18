@@ -71,7 +71,7 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
             $user->setEmail( $response->getEmail() );
         }
 
-        $user->setResourceOwner( $response->getResourceOwner()->getName() );
+        $user->setResourceOwnerName( $response->getResourceOwner()->getName() );
 
         if( $response->getProfilePicture() )
         {

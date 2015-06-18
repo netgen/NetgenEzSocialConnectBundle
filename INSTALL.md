@@ -18,6 +18,9 @@ hwi_oauth:
             client_id: %netgen_social_connect.default.facebook_id%
             client_secret: %netgen_social_connect.facebook.secret%
             scope: "email"
+            infos_url: "https://graph.facebook.com/me?fields=id,name,email,picture.type(large)"
+            paths:
+                profilepicture: picture.data.url
         twitter:
             type: twitter
             client_id: %netgen_social_connect.default.twitter_id%

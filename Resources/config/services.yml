@@ -5,7 +5,12 @@ parameters:
 services:
     netgen.interactive_event_listener:
         class: %netgen.interactive_event_listener.class%
-        arguments: [@ezpublish.api.repository, @ezpublish.config.resolver, %netgen.oauth.user_group%]
+        arguments:
+            - @ezpublish.api.repository
+            - @ezpublish.config.resolver
+            - %netgen.oauth.user_group%
+            - @ezpublish.field_helper
+            - @doctrine.orm.entity_manager
         tags:
             - { name: kernel.event_subscriber }
 
