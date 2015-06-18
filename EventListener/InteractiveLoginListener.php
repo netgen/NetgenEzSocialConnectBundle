@@ -130,7 +130,9 @@ class InteractiveLoginListener implements EventSubscriberInterface
             catch( NotFoundException $e )
             {
                 // something went wrong - data is in the table, but the user does not exist
-                // fallback to creating new user
+                // remove falty data and fallback to creating new user
+                $this->entityManager->remove( $OAuthEzEntity[0] );
+                $this->entityManager->flush();
             }
         }
 
