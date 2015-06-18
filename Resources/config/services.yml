@@ -1,18 +1,25 @@
 parameters:
         netgen.interactive_event_listener.class: Netgen\Bundle\EzSocialConnectBundle\EventListener\InteractiveLoginListener
         netgen.oauth.user_provider.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider
+        netgen.social_connect.helper.class: Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
 
 services:
     netgen.interactive_event_listener:
         class: %netgen.interactive_event_listener.class%
         arguments:
-            - @ezpublish.api.repository
-            - @ezpublish.config.resolver
-            - %netgen.oauth.user_group%
             - @ezpublish.field_helper
             - @doctrine.orm.entity_manager
+            - @netgen.social_connect.helper
         tags:
             - { name: kernel.event_subscriber }
 
     netgen.oauth.user_provider:
         class: %netgen.oauth.user_provider.class%
+
+    netgen.social_connect.helper:
+        class: %netgen.social_connect.helper.class%
+        arguments:
+            - @ezpublish.api.repository
+            - @doctrine.orm.entity_manager
+            - @ezpublish.config.resolver
+            - %netgen.oauth.user_group%
