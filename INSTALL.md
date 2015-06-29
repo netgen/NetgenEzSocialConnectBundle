@@ -15,27 +15,33 @@ hwi_oauth:
     resource_owners:
         facebook:
             type: facebook
-            client_id: %netgen_social_connect.default.facebook_id%
-            client_secret: %netgen_social_connect.facebook.secret%
+            client_id: %netgen_social_connect.default.facebook.id%
+            client_secret: %netgen_social_connect.default.facebook.secret%
             scope: "email"
             infos_url: "https://graph.facebook.com/me?fields=id,name,email,picture.type(large)"
             paths:
                 profilepicture: picture.data.url
         twitter:
             type: twitter
-            client_id: %netgen_social_connect.default.twitter_id%
-            client_secret: %netgen_social_connect.twitter.secret%
+            client_id: %netgen_social_connect.default.twitter.id%
+            client_secret: %netgen_social_connect.default.twitter.secret%
             scope: "email"
         linkedin:
             type: linkedin
-            client_id: %netgen_social_connect.default.linkedin_id%
-            client_secret: %netgen_social_connect.linkedin.secret%
+            client_id: %netgen_social_connect.default.linkedin.id%
+            client_secret: %netgen_social_connect.default.linkedin.secret%
             scope: "r_emailaddress"
         google:
             type: google
-            client_id: %netgen_social_connect.default.google_id%
-            client_secret: %netgen_social_connect.google.secret%
-            scope: "email   "
+            client_id: %netgen_social_connect.default.google.id%
+            client_secret: %netgen_social_connect.default.google.secret%
+            scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
+
+netgen_ez_social_connect:
+    resource_owners:
+        facebook: { useConfigResolver: true }
+        twitter: { useConfigResolver: true }            
+            
 
 services:
     hwi_oauth.user.provider.entity:
@@ -45,14 +51,14 @@ services:
 /ezpublish/config/parameters.yml
 -------------------------------
 parameters:
-    netgen_social_connect.default.facebook_id: <facebook_client_id>
-    netgen_social_connect.facebook.secret: <facebook_secret>
-    netgen_social_connect.default.twitter_id: <twitter_client_id>
-    netgen_social_connect.twitter.secret: <twitter secret>
-    netgen_social_connect.default.linkedin_id: <linkedin_client_id>
-    netgen_social_connect.linkedin.secret: <linkedin_secret>
-    netgen_social_connect.default.google_id: <google_client_id>
-    netgen_social_connect.google.secret: <google_secret>
+    netgen_social_connect.default.facebook.id: <facebook_client_id>
+    netgen_social_connect.default.facebook.secret: <facebook_secret>
+    netgen_social_connect.default.twitter.id: <twitter_client_id>
+    netgen_social_connect.default.twitter.secret: <twitter secret>
+    netgen_social_connect.default.linkedin.id: <linkedin_client_id>
+    netgen_social_connect.default.linkedin.secret: <linkedin_secret>
+    netgen_social_connect.default.google.id: <google_client_id>
+    netgen_social_connect.default.google.secret: <google_secret>
     netgen.oauth.user_group:
         facebook: 11
         twitter: 11
