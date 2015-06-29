@@ -2,7 +2,7 @@
 <script src="https://apis.google.com/js/client:platform.js" async defer></script>
 
 <script type="text/javascript" src="//platform.linkedin.com/in.js">
-    api_key:  {{ ezpublish.configResolver.getParameter( 'linkedin_id', 'netgen_social_connect' ) }}
+    api_key:  {{ ezpublish.configResolver.getParameter( 'linkedin.id', 'netgen_social_connect' ) }}
     authorize: true
     onLoad: onLinkedInLoad
     scope:r_basicprofile r_emailaddress
@@ -37,7 +37,7 @@
     window.fbAsyncInit = function() {
         // init the FB JS SDK
         FB.init({
-            appId      : '{{ ezpublish.configResolver.getParameter( 'facebook_id', 'netgen_social_connect' )|raw|escape( 'js' ) }}',                        // App ID from the app dashboard
+            appId      : '{{ ezpublish.configResolver.getParameter( 'facebook.id', 'netgen_social_connect' )|raw|escape( 'js' ) }}',                        // App ID from the app dashboard
             channelUrl : '//ezpublish.ezsc',      // Channel file for x-domain comms
             status     : true,                                 // Check Facebook Login status
             xfbml      : true,                                  // Look for social plugins on the page
@@ -100,7 +100,7 @@
             <span
                     class="g-signin"
                     data-callback="signinCallback"
-                    data-clientid="{{ ezpublish.configResolver.getParameter( 'google_id', 'netgen_social_connect' ) }}"
+                    data-clientid="{{ ezpublish.configResolver.getParameter( 'google.id', 'netgen_social_connect' ) }}"
                     data-cookiepolicy="single_host_origin"
                     data-scope="email profile"
                     data-width="icon-only" data-theme="light" >
@@ -110,9 +110,3 @@
         <a href="{{ hwi_oauth_login_url(owner) }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
     {% endif %}
 {% endfor %}
-
-{#
-{% for owner in hwi_oauth_resource_owners() %}
-      <a href="{{ hwi_oauth_login_url(owner) }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
-{% endfor %}
-#}

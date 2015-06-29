@@ -18,8 +18,18 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('netgen_hw_ie_z_connect');
+        $rootNode = $treeBuilder->root('netgen_ez_social_connect');
 
+        $rootNode
+            ->children()
+            ->arrayNode( 'resource_owners' )
+                ->useAttributeAsKey( 'resource_owner_name' )
+                ->prototype('array')
+                    ->children()
+                        ->scalarNode( 'useConfigResolver' )->end()
+                ->end()
+            ->end()
+        ->end();
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.

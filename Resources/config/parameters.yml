@@ -1,5 +1,5 @@
 parameters:
-    netgen_social_connect.default.facebook_id: ~
-    netgen_social_connect.default.twitter_id: ~
-    netgen_social_connect.default.linkedin_id: ~
-    netgen_social_connect.default.google_id: ~
+    netgen_social_connect.default.facebook.id: ~
+    netgen_social_connect.default.twitter.id: ~
+    netgen_social_connect.default.linkedin.id: ~
+    netgen_social_connect.default.google.id: ~
