@@ -25,4 +25,3 @@ services:
             - @ezpublish.api.repository
             - @doctrine.orm.entity_manager
             - @ezpublish.config.resolver
-            - %netgen.oauth.user_group%

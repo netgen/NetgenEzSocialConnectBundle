@@ -6,6 +6,7 @@ use eZ\Publish\API\Repository\Repository;
 use Doctrine\ORM\EntityManagerInterface;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\API\Repository\Values\User\User;
+use Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 
@@ -20,21 +21,16 @@ class SocialLoginHelper
     /** @var  ConfigResolverInterface */
     protected $configResolver;
 
-    /** @var array $userGroup */
-    protected $userGroup;
-
 
     public function __construct(
         Repository $repository,
         EntityManagerInterface $entityManager,
-        ConfigResolverInterface $configResolver,
-        array $userGroup
+        ConfigResolverInterface $configResolver
     )
     {
         $this->repository = $repository;
         $this->entityManager = $entityManager;
         $this->configResolver = $configResolver;
-        $this->userGroup = $userGroup;
     }
 
     public function downloadExternalImage( $imageLink )
@@ -174,7 +170,18 @@ class SocialLoginHelper
 
         $userCreateStruct->enabled = true;
 
-        $userGroup = $userService->loadUserGroup( $this->userGroup[ $oauthUser->getResourceOwnerName() ] );
+        if( !$this->configResolver->hasParameter( 'oauth.user_group', 'netgen_social_connect' ) )
+        {
+            throw new MissingConfigurationException( 'oauth.user_group' );
+        }
+        $userGroupIds = $this->configResolver->getParameter( 'oauth.user_group', 'netgen_social_connect' );
+
+        if( empty( $userGroupIds[ $oauthUser->getResourceOwnerName() ] ) )
+        {
+            throw new MissingConfigurationException( 'oauth.user_group.' . $oauthUser->getResourceOwnerName()  );
+        }
+
+        $userGroup = $userService->loadUserGroup( $userGroupIds[ $oauthUser->getResourceOwnerName() ] );
 
         $user = $userService->createUser(
             $userCreateStruct,

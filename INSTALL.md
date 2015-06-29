@@ -59,7 +59,7 @@ parameters:
     netgen_social_connect.default.linkedin.secret: <linkedin_secret>
     netgen_social_connect.default.google.id: <google_client_id>
     netgen_social_connect.default.google.secret: <google_secret>
-    netgen.oauth.user_group:
+    netgen_social_connect.default.oauth.user_group:
         facebook: 11
         twitter: 11
         linkedin: 11
