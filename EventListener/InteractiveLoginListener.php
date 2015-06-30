@@ -96,15 +96,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
 
                 if ( $oauthUser->getEmail() !== $user->email && !strpos(strrev( $oauthUser->getEmail() ), 'lacol.tsohlacol') === 0 )
                 {
-                    try
-                    {
-                        $this->loginHelper->updateUserFields( $user, array( "email" => $oauthUser->getEmail() ) );
-                    }
-                    catch ( \Exception $e )
-                    {
-                        // fail silently - just create a log
-                        \eZLog::write( 'ERROR - SocialConnect - failed to update email on user with id ' . $user->id );
-                    }
+                    $this->loginHelper->updateUserFields( $user, array( "email" => $oauthUser->getEmail() ) );
                 }
 
                 $event->setApiUser( $user );

@@ -272,20 +272,28 @@ class SocialLoginHelper
      */
     public function updateUserFields( User $user, array $fields )
     {
-        $userService = $this->repository->getUserService();
-
-        $this->repository->setCurrentUser(
-            $this->repository->getUserService()->loadUserByLogin("admin")
-        );
-
-        $userUpdateStruct = $userService->newUserUpdateStruct();
-        foreach ( $fields as $name => $value )
+        try
         {
-            $userUpdateStruct->$name = $value;
-        }
-        $userService->updateUser( $user, $userUpdateStruct );
+            $userService = $this->repository->getUserService();
 
-        $this->repository->setCurrentUser( $user );
+            $this->repository->setCurrentUser(
+                $this->repository->getUserService()->loadUserByLogin("admin")
+            );
+
+            $userUpdateStruct = $userService->newUserUpdateStruct();
+            foreach ( $fields as $name => $value )
+            {
+                $userUpdateStruct->$name = $value;
+            }
+            $userService->updateUser( $user, $userUpdateStruct );
+
+            $this->repository->setCurrentUser( $user );
+        }
+        catch ( \Exception $e )
+        {
+            // fail silently - just create a log
+            \eZLog::write( 'ERROR - SocialConnect - failed to update email on user with id ' . $user->id );
+        }
     }
 
     /**
