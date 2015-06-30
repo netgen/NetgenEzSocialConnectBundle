@@ -10,6 +10,7 @@ use Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Symfony\Component\Filesystem\Exception\IOException;
+use Psr\Log\LoggerInterface;
 
 class SocialLoginHelper
 {
@@ -22,16 +23,26 @@ class SocialLoginHelper
     /** @var  ConfigResolverInterface */
     protected $configResolver;
 
+    /** @var  \Psr\Log\LoggerInterface */
+    protected $logger;
 
+    /**
+     * @param Repository $repository
+     * @param EntityManagerInterface $entityManager
+     * @param ConfigResolverInterface $configResolver
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         Repository $repository,
         EntityManagerInterface $entityManager,
-        ConfigResolverInterface $configResolver
+        ConfigResolverInterface $configResolver,
+        LoggerInterface $logger
     )
     {
         $this->repository = $repository;
         $this->entityManager = $entityManager;
         $this->configResolver = $configResolver;
+        $this->logger = $logger;
     }
 
     /**
@@ -64,13 +75,19 @@ class SocialLoginHelper
         }
         if ( !empty( $imageFileName ) && file_put_contents( $imageFileName, $data ) )
         {
-            \eZLog::write( 'Local image created ' . $imageFileName );
+            if ( $this->logger !== null )
+            {
+                $this->logger->notice( "Local image created: {$imageFileName}." );
+            }
 
             return $imageFileName;
         }
         else
         {
-            \eZLog::write( 'Problem while saving image ' . $imageLink );
+            if ( $this->logger !== null )
+            {
+                $this->logger->error( "Problem while saving image {$imageLink}.");
+            }
 
             return null;
         }
@@ -292,7 +309,13 @@ class SocialLoginHelper
         catch ( \Exception $e )
         {
             // fail silently - just create a log
-            \eZLog::write( 'ERROR - SocialConnect - failed to update email on user with id ' . $user->id );
+            if ( $this->logger !== null )
+            {
+                $fieldNames = array_keys( $fields );
+                $fieldNamesString = implode( ', ', $fieldNames );
+
+                $this->logger->error( "SocialConnect - failed to update fields '{$fieldNamesString}' on user with id {$user->id}" );
+            }
         }
     }
 
