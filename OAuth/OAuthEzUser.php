@@ -69,14 +69,14 @@ class OAuthEzUser extends OAuthUser
         return $this->email;
     }
 
-    public function setResourceOwnerName( $resourceOwner )
+    public function setResourceOwnerName( $resourceOwnerName )
     {
-        $this->resourceOwner = $resourceOwner;
+        $this->resourceOwnerName = $resourceOwnerName;
     }
 
     public function getResourceOwnerName()
     {
-        return $this->resourceOwner;
+        return $this->resourceOwnerName;
     }
 
     public function setImageLink( $imageLink )

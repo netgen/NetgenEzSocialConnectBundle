@@ -10,6 +10,11 @@ use Netgen\Bundle\EzSocialConnectBundle\DependencyInjection\Configuration;
 
 class AddConfigResolverCompilerPass implements  CompilerPassInterface
 {
+    /**
+     * Adds config resolver to all configured resource owners
+     *
+     * @param ContainerBuilder $container
+     */
     public function process( ContainerBuilder $container )
     {
         $extensionConfig = $container->getExtensionConfig('netgen_ez_social_connect');

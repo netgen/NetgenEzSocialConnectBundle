@@ -9,6 +9,7 @@ use eZ\Publish\API\Repository\Values\User\User;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
+use Symfony\Component\Filesystem\Exception\IOException;
 
 class SocialLoginHelper
 {
@@ -33,9 +34,18 @@ class SocialLoginHelper
         $this->configResolver = $configResolver;
     }
 
+    /**
+     * Downloads image from external link to local file system
+     *
+     * @param string $imageLink
+     *
+     * @return null|string
+     *
+     * @throws IOException if failed to create local directory
+     */
     public function downloadExternalImage( $imageLink )
     {
-        // download image from facebook
+        // download image from external link
         $data = file_get_contents( $imageLink );
 
         preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName );
@@ -47,7 +57,7 @@ class SocialLoginHelper
             {
                 if( !mkdir( $storageDir ) )
                 {
-                    throw new \Exception('Failed to create dir');
+                    throw new IOException('Failed to create dir', 0, null, $storageDir);
                 }
             }
             $imageFileName = $storageDir . basename( $imageName[ 0 ] );
@@ -66,6 +76,12 @@ class SocialLoginHelper
         }
     }
 
+    /**
+     * Adds profile image to ez user from external link
+     *
+     * @param User $user
+     * @param string $imageLink External link
+     */
     public function addProfileImage( $user, $imageLink )
     {
         $userService = $this->repository->getUserService();
@@ -86,6 +102,12 @@ class SocialLoginHelper
         $contentService->publishVersion( $userDraft->versionInfo );
     }
 
+    /**
+     * Adds entry to the table
+     *
+     * @param User $user
+     * @param OAuthEzUser $authEzUser
+     */
     public function addToTable( User $user, OAuthEzUser $authEzUser )
     {
         $OAuthEzEntity = new OAuthEz();
@@ -98,12 +120,24 @@ class SocialLoginHelper
         $this->entityManager->flush();
     }
 
+    /**
+     * Removes entry from the table
+     *
+     * @param OAuthEz $userEntity
+     */
     public function removeFromTable( OAuthEz $userEntity )
     {
         $this->entityManager->remove( $userEntity );
         $this->entityManager->flush();
     }
 
+    /**
+     * Loads from table by OAuthEzUser entity
+     *
+     * @param OAuthEzUser $oauthUser
+     *
+     * @return null|OAuthEzUser
+     */
     public function loadFromTable( OAuthEzUser $oauthUser )
     {
         $results =
@@ -127,6 +161,14 @@ class SocialLoginHelper
         return $results[0];
     }
 
+    /**
+     * Loads from table by ez user id and resource name
+     *
+     * @param $ezUserId
+     * @param $resourceOwnerName
+     *
+     * @return null|OAuthEzUser
+     */
     public function loadFromTableByEzId( $ezUserId, $resourceOwnerName )
     {
         $results =
@@ -147,6 +189,15 @@ class SocialLoginHelper
         return $results[0];
     }
 
+    /**
+     * Creates ez user from OAuthEzUser entity
+     *
+     * @param OAuthEzUser $oauthUser
+     *
+     * @return User
+     *
+     * @throws MissingConfigurationException if user group parameter is not set up
+     */
     public function createEzUser( OAuthEzUser $oauthUser )
     {
         $userService = $this->repository->getUserService();
@@ -213,7 +264,13 @@ class SocialLoginHelper
         return $user;
     }
 
-    public function updateUserFields( User $user, $fields )
+    /**
+     * Updates ez user fields
+     *
+     * @param User $user
+     * @param array $fields
+     */
+    public function updateUserFields( User $user, array $fields )
     {
         $userService = $this->repository->getUserService();
 
@@ -231,6 +288,13 @@ class SocialLoginHelper
         $this->repository->setCurrentUser( $user );
     }
 
+    /**
+     * Loads ez user from the repository
+     *
+     * @param $userId
+     *
+     * @return User
+     */
     public function loadEzUserById( $userId )
     {
         return $this->repository->getUserService()->loadUser( $userId );

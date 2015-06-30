@@ -12,6 +12,7 @@ use eZ\Publish\Core\Helper\FieldHelper;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class InteractiveLoginListener implements EventSubscriberInterface
 {
@@ -21,16 +22,17 @@ class InteractiveLoginListener implements EventSubscriberInterface
     /** @var  EntityManagerInterface */
     protected $entityManager;
 
-    /** @var SocialLoginHelper SocialLoginHelper */
+    /** @var SocialLoginHelper */
     protected $loginHelper;
 
+    /** @var  SessionInterface */
     protected $session;
 
     public function __construct(
         FieldHelper $fieldHelper,
         EntityManagerInterface $entityManager,
         SocialLoginHelper $loginHelper,
-        $session
+        SessionInterface $session
     )
     {
         $this->fieldHelper = $fieldHelper;

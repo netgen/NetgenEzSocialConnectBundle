@@ -9,7 +9,7 @@ class MissingConfigurationException extends Exception
     /**
      * Constructor
      *
-     * @param string $configName
+     * @param string $paramName
      */
     public function __construct( $paramName )
     {

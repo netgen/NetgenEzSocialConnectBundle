@@ -11,6 +11,11 @@ class TwitterResourceOwner extends BaseTwitterResourceOwner
     /** @var  ConfigResolverInterface */
     protected $configResolver;
 
+    /**
+     * Sets config resolver and appropriate client id and client secret
+     *
+     * @param ConfigResolverInterface $configResolver
+     */
     public function setConfigResolver( ConfigResolverInterface $configResolver )
     {
         $this->configResolver = $configResolver;
