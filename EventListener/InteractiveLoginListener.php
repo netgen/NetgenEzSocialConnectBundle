@@ -56,7 +56,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
      */
     public function onInteractiveLogin( InteractiveLoginEvent $event )
     {
-        if( $this->session->has( 'social_connect_ez_user_id' ) )
+        if ( $this->session->has( 'social_connect_ez_user_id' ) )
         {
             //there is user id in session, it means we have to connect the user to it
             $connectEzId = $this->session->get( 'social_connect_ez_user_id' );
@@ -80,7 +80,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
         /** @var OAuthEz $oauthEzUserEntity */
         $oauthEzUserEntity = $this->loginHelper->loadFromTable( $oauthUser );
 
-        if( !empty( $oauthEzUserEntity ) )
+        if ( !empty( $oauthEzUserEntity ) )
         {
             try
             {
@@ -94,13 +94,13 @@ class InteractiveLoginListener implements EventSubscriberInterface
                     $this->loginHelper->addProfileImage( $user, $imageLink );
                 }
 
-                if( $oauthUser->getEmail() !== $user->email && !strpos(strrev( $oauthUser->getEmail() ), 'lacol.tsohlacol') === 0 )
+                if ( $oauthUser->getEmail() !== $user->email && !strpos(strrev( $oauthUser->getEmail() ), 'lacol.tsohlacol') === 0 )
                 {
                     try
                     {
                         $this->loginHelper->updateUserFields( $user, array( "email" => $oauthUser->getEmail() ) );
                     }
-                    catch( \Exception $e )
+                    catch ( \Exception $e )
                     {
                         // fail silently - just create a log
                         \eZLog::write( 'ERROR - SocialConnect - failed to update email on user with id ' . $user->id );
@@ -111,7 +111,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
 
                 return;
             }
-            catch( NotFoundException $e )
+            catch ( NotFoundException $e )
             {
                 // something went wrong - data is in the table, but the user does not exist
                 // remove falty data and fallback to creating new user

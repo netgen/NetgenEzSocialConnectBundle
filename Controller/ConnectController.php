@@ -27,7 +27,7 @@ class ConnectController extends Controller
 
         $OAuthEz = $loginHelper->loadFromTableByEzId( $userContentId, $resource_name );
 
-        if( !empty( $OAuthEz ) )
+        if ( !empty( $OAuthEz ) )
         {
             throw new UserAlreadyConnected( $resource_name );
         }

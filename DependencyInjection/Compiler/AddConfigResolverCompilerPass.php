@@ -17,21 +17,21 @@ class AddConfigResolverCompilerPass implements  CompilerPassInterface
      */
     public function process( ContainerBuilder $container )
     {
-        $extensionConfig = $container->getExtensionConfig('netgen_ez_social_connect');
+        $extensionConfig = $container->getExtensionConfig( 'netgen_ez_social_connect' );
 
         $configuration = new Configuration();
         $processor = new Processor();
 
         $config = $processor->processConfiguration( $configuration, $extensionConfig );
 
-        $resourceOwners = !empty($config["resource_owners"]) ? $config["resource_owners"] : null;
+        $resourceOwners = !empty( $config[ "resource_owners" ] ) ? $config[ "resource_owners" ] : null;
 
-        foreach( $resourceOwners as $name => $owner )
+        foreach ( $resourceOwners as $name => $owner )
         {
-            if( $owner["useConfigResolver"] )
+            if ( $owner[ "useConfigResolver" ] )
             {
-                $resourceOwnerDefinition = $container->findDefinition('hwi_oauth.resource_owner.' . $name);
-                $resourceOwnerDefinition->addMethodCall('setConfigResolver', array(new Reference( 'ezpublish.config.resolver' )));
+                $resourceOwnerDefinition = $container->findDefinition( 'hwi_oauth.resource_owner.' . $name );
+                $resourceOwnerDefinition->addMethodCall( 'setConfigResolver', array( new Reference( 'ezpublish.config.resolver' )));
             }
         }
     }

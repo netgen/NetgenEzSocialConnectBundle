@@ -19,7 +19,7 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
      *
      * @throws UsernameNotFoundException if the user is not found
      */
-    public function loadUserByOAuthUserResponse(UserResponseInterface $response)
+    public function loadUserByOAuthUserResponse( UserResponseInterface $response )
     {
         $userId = $response->getUsername();
         $login = $response->getNickname() . '-' . $userId; // unique login for ez
@@ -39,14 +39,14 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
             }
             else
             {
-                $user->setFirstName( $real_name[0] );
-                $user->setLastName( $real_name[0] );
+                $user->setFirstName( $real_name[ 0 ] );
+                $user->setLastName( $real_name[ 0 ] );
             }
         }
         else
         {
             $userEmail = $response->getEmail();
-            if( !empty($userEmail) )
+            if ( !empty( $userEmail ) )
             {
                 $emailArray = explode( '@', $userEmail );
                 $user->setFirstName( $emailArray[ 0 ] );
@@ -71,7 +71,7 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
 
         $user->setResourceOwnerName( $response->getResourceOwner()->getName() );
 
-        if( $response->getProfilePicture() )
+        if ( $response->getProfilePicture() )
         {
             $user->setImageLink( $response->getProfilePicture() );
         }

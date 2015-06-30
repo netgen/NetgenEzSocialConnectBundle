@@ -50,19 +50,19 @@ class SocialLoginHelper
 
         preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName );
 
-        if( !empty($imageName[0]) )
+        if ( !empty( $imageName[ 0 ] ) )
         {
             $storageDir = '/tmp/';
-            if( !is_dir( $storageDir ) )
+            if ( !is_dir( $storageDir ) )
             {
-                if( !mkdir( $storageDir ) )
+                if ( !mkdir( $storageDir ) )
                 {
                     throw new IOException('Failed to create dir', 0, null, $storageDir);
                 }
             }
             $imageFileName = $storageDir . basename( $imageName[ 0 ] );
         }
-        if( !empty( $imageFileName ) && file_put_contents( $imageFileName, $data ) )
+        if ( !empty( $imageFileName ) && file_put_contents( $imageFileName, $data ) )
         {
             \eZLog::write( 'Local image created ' . $imageFileName );
 
@@ -95,7 +95,7 @@ class SocialLoginHelper
         $languages = $this->configResolver->getParameter( 'languages' );
         $userDraft = $contentService->createContentDraft( $user->content->versionInfo->contentInfo );
         $userUpdateStruct = $contentService->newContentUpdateStruct();
-        $userUpdateStruct->initialLanguageCode = $languages[0];
+        $userUpdateStruct->initialLanguageCode = $languages[ 0 ];
         $userUpdateStruct->setField( 'image', $imageFileName );
         $userDraft = $contentService->updateContent( $userDraft->versionInfo, $userUpdateStruct );
 
@@ -153,12 +153,12 @@ class SocialLoginHelper
                     )
                 );
 
-        if( !is_array( $results ) || empty( $results ) )
+        if ( !is_array( $results ) || empty( $results ) )
         {
             return null;
         }
 
-        return $results[0];
+        return $results[ 0 ];
     }
 
     /**
@@ -181,12 +181,12 @@ class SocialLoginHelper
                     )
                 );
 
-        if( !is_array( $results ) || empty( $results ) )
+        if ( !is_array( $results ) || empty( $results ) )
         {
             return null;
         }
 
-        return $results[0];
+        return $results[ 0 ];
     }
 
     /**
@@ -241,13 +241,13 @@ class SocialLoginHelper
 
         $userCreateStruct->enabled = true;
 
-        if( !$this->configResolver->hasParameter( 'oauth.user_group', 'netgen_social_connect' ) )
+        if ( !$this->configResolver->hasParameter( 'oauth.user_group', 'netgen_social_connect' ) )
         {
             throw new MissingConfigurationException( 'oauth.user_group' );
         }
         $userGroupIds = $this->configResolver->getParameter( 'oauth.user_group', 'netgen_social_connect' );
 
-        if( empty( $userGroupIds[ $oauthUser->getResourceOwnerName() ] ) )
+        if ( empty( $userGroupIds[ $oauthUser->getResourceOwnerName() ] ) )
         {
             throw new MissingConfigurationException( 'oauth.user_group.' . $oauthUser->getResourceOwnerName()  );
         }
@@ -279,7 +279,7 @@ class SocialLoginHelper
         );
 
         $userUpdateStruct = $userService->newUserUpdateStruct();
-        foreach( $fields as $name => $value )
+        foreach ( $fields as $name => $value )
         {
             $userUpdateStruct->$name = $value;
         }

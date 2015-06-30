@@ -16,13 +16,13 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('netgen_ez_social_connect');
+        $rootNode = $treeBuilder->root( 'netgen_ez_social_connect' );
 
         $rootNode
             ->children()
             ->arrayNode( 'resource_owners' )
                 ->useAttributeAsKey( 'resource_owner_name' )
-                ->prototype('array')
+                ->prototype( 'array' )
                     ->children()
                         ->scalarNode( 'useConfigResolver' )->end()
                 ->end()
