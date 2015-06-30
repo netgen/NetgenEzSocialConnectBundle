@@ -21,3 +21,7 @@ hwi_oauth_redirect:
 hwi_oauth_login:
     resource: "@HWIOAuthBundle/Resources/config/routing/login.xml"
     prefix:   /login
+
+netgen_social_connect_ez:
+    pattern: /ezconnect/{resource_name}
+    defaults: { _controller: netgen.social_connect.controller.connect:connectUser }

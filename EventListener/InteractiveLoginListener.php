@@ -24,15 +24,19 @@ class InteractiveLoginListener implements EventSubscriberInterface
     /** @var SocialLoginHelper SocialLoginHelper */
     protected $loginHelper;
 
+    protected $session;
+
     public function __construct(
         FieldHelper $fieldHelper,
         EntityManagerInterface $entityManager,
-        SocialLoginHelper $loginHelper
+        SocialLoginHelper $loginHelper,
+        $session
     )
     {
         $this->fieldHelper = $fieldHelper;
         $this->entityManager = $entityManager;
         $this->loginHelper = $loginHelper;
+        $this->session = $session;
     }
 
     public static function getSubscribedEvents()
@@ -44,11 +48,29 @@ class InteractiveLoginListener implements EventSubscriberInterface
 
     /**
      * Authenticates external user, or creates new eZ user if one does not already exist
+     * If user id is in session, connect ez user to external one
      *
      * @param InteractiveLoginEvent $event
      */
     public function onInteractiveLogin( InteractiveLoginEvent $event )
     {
+        if( $this->session->has( 'social_connect_ez_user_id' ) )
+        {
+            //there is user id in session, it means we have to connect the user to it
+            $connectEzId = $this->session->get( 'social_connect_ez_user_id' );
+            $this->session->remove( 'social_connect_ez_user_id' );
+
+            $ezUser = $this->loginHelper->loadEzUserById( $connectEzId );
+            /** @var OAuthEzUser $oauthUser */
+            $oauthUser = $event->getAuthenticationToken()->getUser();
+
+            $this->loginHelper->addToTable( $ezUser, $oauthUser );
+
+            $event->setApiUser( $ezUser );
+
+            return;
+        }
+
         /** @var OAuthEzUser $oauthUser */
         $oauthUser = $event->getAuthenticationToken()->getUser();
         $imageLink = $oauthUser->getImageLink();
@@ -70,7 +92,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
                     $this->loginHelper->addProfileImage( $user, $imageLink );
                 }
 
-                if( $oauthUser->getEmail() !== $user->email )
+                if( $oauthUser->getEmail() !== $user->email && !strpos(strrev( $oauthUser->getEmail() ), 'lacol.tsohlacol') === 0 )
                 {
                     try
                     {

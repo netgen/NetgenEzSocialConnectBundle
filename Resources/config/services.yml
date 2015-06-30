@@ -2,6 +2,7 @@ parameters:
         netgen.social_connect.interactive_event_listener.class: Netgen\Bundle\EzSocialConnectBundle\EventListener\InteractiveLoginListener
         netgen.social_connect.oauth_user_provider.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider
         netgen.social_connect.helper.class: Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
+        netgen.social_connect.controller.connect.class: Netgen\Bundle\EzSocialConnectBundle\Controller\ConnectController
         hwi_oauth.resource_owner.facebook.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\FacebookResourceOwner
         hwi_oauth.resource_owner.twitter.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\TwitterResourceOwner
         hwi_oauth.resource_owner.google.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\GoogleResourceOwner
@@ -13,6 +14,7 @@ services:
             - @ezpublish.field_helper
             - @doctrine.orm.entity_manager
             - @netgen.social_connect.helper
+            - @session
         tags:
             - { name: kernel.event_subscriber }
 
@@ -25,3 +27,7 @@ services:
             - @ezpublish.api.repository
             - @doctrine.orm.entity_manager
             - @ezpublish.config.resolver
+
+    netgen.social_connect.controller.connect:
+        class: %netgen.social_connect.controller.connect.class%
+        parent: ezpublish.controller.base

@@ -127,6 +127,26 @@ class SocialLoginHelper
         return $results[0];
     }
 
+    public function loadFromTableByEzId( $ezUserId, $resourceOwnerName )
+    {
+        $results =
+            $this->entityManager
+                ->getRepository( 'NetgenEzSocialConnectBundle:OAuthEz' )
+                ->findBy(
+                    array(
+                        'ezUserId' => $ezUserId,
+                        'resourceName' => $resourceOwnerName
+                    )
+                );
+
+        if( !is_array( $results ) || empty( $results ) )
+        {
+            return null;
+        }
+
+        return $results[0];
+    }
+
     public function createEzUser( OAuthEzUser $oauthUser )
     {
         $userService = $this->repository->getUserService();

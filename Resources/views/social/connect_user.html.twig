@@ -1,0 +1,5 @@
+<div class="social-connect">{{ "connect_with"|trans( {}, 'social_connect' ) }}:</div>
+
+{% for owner in hwi_oauth_resource_owners() %}
+    <a href="{{ path( 'netgen_social_connect_ez', { resource_name: owner } ) }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
+{% endfor %}
