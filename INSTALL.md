@@ -29,6 +29,12 @@ public function registerBundles()
 }
 ```
 
+# Update the database
+```
+php ezpublish/console doctrine:schema:update --force
+```
+This will add ngsocialconnect table to the database.
+
 # Import the routing
 ```
 # ezpublish/config/routing.yml
