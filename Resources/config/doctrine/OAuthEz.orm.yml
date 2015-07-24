@@ -6,10 +6,10 @@ Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz:
             type: integer
             column: ez_user_id
             id: true
+        resourceName:
+            type: string
+            column: resource_name
     fields:
         resourceUserId:
             type: string
             column: resource_user_id
-        resourceName:
-            type: string
-            column: resource_name
