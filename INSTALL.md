@@ -17,7 +17,7 @@ As this bundle uses HWIOAuthBundle, installation is pretty much similar.
 # Add HWIOAuthBundle and NetgenEzSocialConnectBundle to the project via composer
 ```
 // ezpublish/EzPublishKernel.php
-    
+
 public function registerBundles()
 {
     $bundles = array(
@@ -38,6 +38,7 @@ This will add ngsocialconnect table to the database.
 # Import the routing
 ```
 # ezpublish/config/routing.yml
+
 _netgen_ez_social_login:
     resource: "@NetgenEzSocialConnectBundle/Resources/config/routing.yml"
     prefix:   /login
@@ -45,8 +46,8 @@ _netgen_ez_social_login:
 
 # Configure resource owners (social networks)
 ```
-/ezpublish/config/config.yml
-----------------------------
+# ezpublish/config/config.yml
+
 hwi_oauth:
     # name of the firewall in which this bundle is active, this setting MUST be set
     firewall_name: ezpublish_front
@@ -79,6 +80,8 @@ hwi_oauth:
 # Configure which resource owners can use siteaccess specific parameters
 If useConfigResolver option is not set, resource owner will use default parameters.
 ```
+# ezpublish/config/config.yml
+
 netgen_ez_social_connect:
     resource_owners:
         facebook: { useConfigResolver: true }
@@ -87,6 +90,8 @@ netgen_ez_social_connect:
 
 # Configure the firewall
 ```
+# ezpublish/config/security.yml
+
 security:
     providers:
         chain_provider:
@@ -120,8 +125,9 @@ security:
 # Set up the parameters
 Set the id and key for each of the networks you wish to use.
 Also, define the user group where the new users should be created.
-/ezpublish/config/parameters.yml
--------------------------------
+```
+# ezpublish/config/parameters.yml
+
 parameters:
     netgen_social_connect.default.facebook.id: <facebook_client_id>
     netgen_social_connect.default.facebook.secret: <facebook_secret>
@@ -136,7 +142,7 @@ parameters:
         twitter: 11
         linkedin: 11
         google: 11
--------------------------------
+```
 
 # Include the template
 Last step is to include the template with social buttons in your login template.
