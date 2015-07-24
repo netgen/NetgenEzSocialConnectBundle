@@ -5,9 +5,6 @@ This bundle makes use of the [HWIOAuthBundle](https://github.com/hwi/HWIOAuthBun
 ## Installation
 For installation instructions, see [INSTALL.md](https://github.com/netgen/NetgenEzSocialConnectBundle/blob/master/INSTALL.md)
 
-## Usage
-For usage, see [USAGE.md](https://github.com/netgen/NetgenEzSocialConnectBundle/blob/master/USAGE.md)
-
 ## Features
 * When logging in with social network for the first time, it creates new ezuser
 * Fetches most important data (if available) - username, real name, email, profile picture
