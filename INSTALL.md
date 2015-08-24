@@ -148,7 +148,7 @@ parameters:
 Last step is to include the template with social buttons in your login template.
 You can ofcourse use your own template, based on this one.
 ```
-{% include 'NetgenEzSocialConnectBundle:social:social_buttons.html.twig' with { owners: hwi_oauth_resource_owners() } %}
+{% include 'NetgenEzSocialConnectBundle:social:social_buttons.html.twig' %}
 ```
 
 # Connecting exiting users
