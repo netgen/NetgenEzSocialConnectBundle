@@ -101,22 +101,24 @@ class SocialLoginHelper
      */
     public function addProfileImage( $user, $imageLink )
     {
-        $userService = $this->repository->getUserService();
-
-        $this->repository->setCurrentUser(
-            $userService->loadUserByLogin("admin")
-        );
         $imageFileName = $this->downloadExternalImage( $imageLink );
-        $contentService = $this->repository->getContentService();
 
-        $languages = $this->configResolver->getParameter( 'languages' );
-        $userDraft = $contentService->createContentDraft( $user->content->versionInfo->contentInfo );
-        $userUpdateStruct = $contentService->newContentUpdateStruct();
-        $userUpdateStruct->initialLanguageCode = $languages[ 0 ];
-        $userUpdateStruct->setField( 'image', $imageFileName );
-        $userDraft = $contentService->updateContent( $userDraft->versionInfo, $userUpdateStruct );
+        $language = $this->configResolver->getParameter( 'languages' );
+        $language = $language[0];
 
-        $contentService->publishVersion( $userDraft->versionInfo );
+        $this->repository->sudo(
+            function( Repository $repository ) use ( $user, $language, $imageFileName )
+            {
+                $contentService = $repository->getContentService();
+                $userDraft = $contentService->createContentDraft( $user->content->versionInfo->contentInfo );
+                $userUpdateStruct = $contentService->newContentUpdateStruct();
+                $userUpdateStruct->initialLanguageCode = $language;
+                $userUpdateStruct->setField( 'image', $imageFileName );
+                $userDraft = $contentService->updateContent( $userDraft->versionInfo, $userUpdateStruct );
+
+                $contentService->publishVersion( $userDraft->versionInfo );
+            }
+        );
     }
 
     /**
@@ -219,10 +221,6 @@ class SocialLoginHelper
     {
         $userService = $this->repository->getUserService();
 
-        $this->repository->setCurrentUser(
-            $userService->loadUserByLogin( "admin" )
-        );
-
         $loginId = $oauthUser->getOriginalId();
         $username = $oauthUser->getUsername();
         $password = md5( $loginId . $username );
@@ -269,16 +267,20 @@ class SocialLoginHelper
             throw new MissingConfigurationException( 'oauth.user_group.' . $oauthUser->getResourceOwnerName()  );
         }
 
-        $userGroup = $userService->loadUserGroup( $userGroupIds[ $oauthUser->getResourceOwnerName() ] );
+        $userGroupId = $userGroupIds[$oauthUser->getResourceOwnerName()];
+        $newUser = $this->repository->sudo(
+            function( Repository $repository ) use ( $userCreateStruct, $userGroupId )
+            {
+                $userGroup = $repository->getUserService()->loadUserGroup( $userGroupId );
 
-        $user = $userService->createUser(
-            $userCreateStruct,
-            array( $userGroup )
+                return $repository->getUserService()->createUser(
+                    $userCreateStruct,
+                    array( $userGroup )
+                );
+            }
         );
 
-        $this->repository->setCurrentUser( $user );
-
-        return $user;
+        return $newUser;
     }
 
     /**
@@ -291,20 +293,18 @@ class SocialLoginHelper
     {
         try
         {
-            $userService = $this->repository->getUserService();
-
-            $this->repository->setCurrentUser(
-                $this->repository->getUserService()->loadUserByLogin("admin")
-            );
-
-            $userUpdateStruct = $userService->newUserUpdateStruct();
+            $userUpdateStruct = $this->repository->getUserService()->newUserUpdateStruct();
             foreach ( $fields as $name => $value )
             {
                 $userUpdateStruct->$name = $value;
             }
-            $userService->updateUser( $user, $userUpdateStruct );
 
-            $this->repository->setCurrentUser( $user );
+            $this->repository->sudo(
+                function( Repository $repository ) use ( $user, $userUpdateStruct )
+                {
+                    return $repository->getUserService()->updateUser( $user, $userUpdateStruct );
+                }
+            );
         }
         catch ( \Exception $e )
         {
