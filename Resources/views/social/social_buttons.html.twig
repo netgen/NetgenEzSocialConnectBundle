@@ -91,7 +91,7 @@
 </script>
 <script type="in/Login"></script>
 
-{% for owner in owners %}
+{% for owner in hwi_oauth_resource_owners() %}
     {% if owner == "facebook" %}
         <fb:login-button scope="public_profile,email" onlogin="fb_login();">
         </fb:login-button>
