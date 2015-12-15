@@ -27,6 +27,7 @@ services:
             - @ezpublish.api.repository
             - @doctrine.orm.entity_manager
             - @ezpublish.config.resolver
+            - @ezpublish.field_helper
             - @?logger
 
     netgen.social_connect.controller.connect:

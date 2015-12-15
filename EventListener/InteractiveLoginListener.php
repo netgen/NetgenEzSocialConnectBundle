@@ -88,8 +88,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
                 /** @var User $user */
                 $user = $this->loginHelper->loadEzUserById( $ezUserId );
 
-                if ( $this->fieldHelper->isFieldEmpty( $user->content, "image" ) &&
-                    !empty( $imageLink ) )
+                if ( !empty( $imageLink ) )
                 {
                     $this->loginHelper->addProfileImage( $user, $imageLink );
                 }
@@ -115,4 +114,4 @@ class InteractiveLoginListener implements EventSubscriberInterface
         $this->loginHelper->addToTable( $user, $oauthUser );
         $event->setApiUser( $user );
     }
-} 
+}
