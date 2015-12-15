@@ -11,6 +11,7 @@ use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Psr\Log\LoggerInterface;
+use eZ\Publish\Core\Helper\FieldHelper;
 
 class SocialLoginHelper
 {
@@ -26,22 +27,28 @@ class SocialLoginHelper
     /** @var  \Psr\Log\LoggerInterface */
     protected $logger;
 
+    /** @var  \eZ\Publish\Core\Helper\FieldHelper */
+    protected $fieldHelper;
+
     /**
      * @param Repository $repository
      * @param EntityManagerInterface $entityManager
      * @param ConfigResolverInterface $configResolver
+     * @param FieldHelper $fieldHelper
      * @param LoggerInterface $logger
      */
     public function __construct(
         Repository $repository,
         EntityManagerInterface $entityManager,
         ConfigResolverInterface $configResolver,
-        LoggerInterface $logger
+        FieldHelper $fieldHelper,
+        LoggerInterface $logger = null
     )
     {
         $this->repository = $repository;
         $this->entityManager = $entityManager;
         $this->configResolver = $configResolver;
+        $this->fieldHelper = $fieldHelper;
         $this->logger = $logger;
     }
 
@@ -96,24 +103,35 @@ class SocialLoginHelper
     /**
      * Adds profile image to ez user from external link
      *
-     * @param User $user
+     * @param \eZ\Publish\API\Repository\Values\User\User $user
      * @param string $imageLink External link
      */
-    public function addProfileImage( $user, $imageLink )
+    public function addProfileImage( User $user, $imageLink )
     {
+        $imageFieldIdentifier = $this->configResolver->getParameter( 'image_field_identifier', 'netgen_social_connect' );
+        if ( empty($imageFieldIdentifier) )
+        {
+            return;
+        }
+
+        if( !$this->fieldHelper->isFieldEmpty( $user->content, $imageFieldIdentifier ) )
+        {
+            return;
+        }
+
         $imageFileName = $this->downloadExternalImage( $imageLink );
 
         $language = $this->configResolver->getParameter( 'languages' );
         $language = $language[0];
 
         $this->repository->sudo(
-            function( Repository $repository ) use ( $user, $language, $imageFileName )
+            function( Repository $repository ) use ( $user, $language, $imageFileName, $imageFieldIdentifier )
             {
                 $contentService = $repository->getContentService();
                 $userDraft = $contentService->createContentDraft( $user->content->versionInfo->contentInfo );
                 $userUpdateStruct = $contentService->newContentUpdateStruct();
                 $userUpdateStruct->initialLanguageCode = $language;
-                $userUpdateStruct->setField( 'image', $imageFileName );
+                $userUpdateStruct->setField( $imageFieldIdentifier, $imageFileName );
                 $userDraft = $contentService->updateContent( $userDraft->versionInfo, $userUpdateStruct );
 
                 $contentService->publishVersion( $userDraft->versionInfo );
@@ -248,10 +266,11 @@ class SocialLoginHelper
         }
 
         $imageFileName = null;
-        if ( !empty( $imageLink ) )
+        $imageFieldIdentifier = $this->configResolver->getParameter( 'image_field_identifier', 'netgen_social_connect' );
+        if ( !empty( $imageLink ) && !empty($imageFieldIdentifier) )
         {
             $imageFileName = $this->downloadExternalImage( $imageLink );
-            $userCreateStruct->setField( 'image', $imageFileName );
+            $userCreateStruct->setField( $imageFieldIdentifier, $imageFileName );
         }
 
         $userCreateStruct->enabled = true;
