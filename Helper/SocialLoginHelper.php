@@ -109,6 +109,10 @@ class SocialLoginHelper
     public function addProfileImage( User $user, $imageLink )
     {
         $imageFieldIdentifier = $this->configResolver->getParameter( 'image_field_identifier', 'netgen_social_connect' );
+        if ( empty($imageFieldIdentifier) )
+        {
+            return;
+        }
 
         if( !$this->fieldHelper->isFieldEmpty( $user->content, $imageFieldIdentifier ) )
         {
