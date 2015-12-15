@@ -2,40 +2,40 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\EventListener;
 
-use eZ\Publish\Core\MVC\Symfony\Event\InteractiveLoginEvent;
-use eZ\Publish\Core\MVC\Symfony\MVCEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use eZ\Publish\API\Repository\Values\User\User;
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
-use eZ\Publish\Core\Helper\FieldHelper;
-use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
-use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use eZ\Publish\Core\MVC\Symfony\Event\InteractiveLoginEvent;
+use eZ\Publish\Core\MVC\Symfony\MVCEvents;
+use eZ\Publish\API\Repository\Exceptions\NotFoundException;
+use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 
 class InteractiveLoginListener implements EventSubscriberInterface
 {
-    /** @var  FieldHelper */
-    protected $fieldHelper;
 
-    /** @var  EntityManagerInterface */
+    /** @var  \Doctrine\ORM\EntityManagerInterface */
     protected $entityManager;
 
-    /** @var SocialLoginHelper */
+    /** @var \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper */
     protected $loginHelper;
 
-    /** @var  SessionInterface */
+    /** @var  \Symfony\Component\HttpFoundation\Session\SessionInterface */
     protected $session;
 
+    /**
+     * InteractiveLoginListener constructor.
+     *
+     * @param \Doctrine\ORM\EntityManagerInterface $entityManager
+     * @param \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper $loginHelper
+     * @param \Symfony\Component\HttpFoundation\Session\SessionInterface $session
+     */
     public function __construct(
-        FieldHelper $fieldHelper,
         EntityManagerInterface $entityManager,
         SocialLoginHelper $loginHelper,
         SessionInterface $session
     )
     {
-        $this->fieldHelper = $fieldHelper;
         $this->entityManager = $entityManager;
         $this->loginHelper = $loginHelper;
         $this->session = $session;
@@ -52,10 +52,13 @@ class InteractiveLoginListener implements EventSubscriberInterface
      * Authenticates external user, or creates new eZ user if one does not already exist
      * If user id is in session, connect ez user to external one
      *
-     * @param InteractiveLoginEvent $event
+     * @param \eZ\Publish\Core\MVC\Symfony\Event\InteractiveLoginEvent $event
      */
     public function onInteractiveLogin( InteractiveLoginEvent $event )
     {
+        /** @var \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $oauthUser */
+        $oauthUser = $event->getAuthenticationToken()->getUser();
+
         if ( $this->session->has( 'social_connect_ez_user_id' ) )
         {
             //there is user id in session, it means we have to connect the user to it
@@ -63,9 +66,6 @@ class InteractiveLoginListener implements EventSubscriberInterface
             $this->session->remove( 'social_connect_ez_user_id' );
 
             $ezUser = $this->loginHelper->loadEzUserById( $connectEzId );
-            /** @var OAuthEzUser $oauthUser */
-            $oauthUser = $event->getAuthenticationToken()->getUser();
-
             $this->loginHelper->addToTable( $ezUser, $oauthUser );
 
             $event->setApiUser( $ezUser );
@@ -73,11 +73,7 @@ class InteractiveLoginListener implements EventSubscriberInterface
             return;
         }
 
-        /** @var OAuthEzUser $oauthUser */
-        $oauthUser = $event->getAuthenticationToken()->getUser();
-        $imageLink = $oauthUser->getImageLink();
-
-        /** @var OAuthEz $oauthEzUserEntity */
+        /** @var \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz $oauthEzUserEntity */
         $oauthEzUserEntity = $this->loginHelper->loadFromTable( $oauthUser );
 
         if ( !empty( $oauthEzUserEntity ) )
@@ -85,9 +81,9 @@ class InteractiveLoginListener implements EventSubscriberInterface
             try
             {
                 $ezUserId = $oauthEzUserEntity->getEzUserId();
-                /** @var User $user */
                 $user = $this->loginHelper->loadEzUserById( $ezUserId );
 
+                $imageLink = $oauthUser->getImageLink();
                 if ( !empty( $imageLink ) )
                 {
                     $this->loginHelper->addProfileImage( $user, $imageLink );

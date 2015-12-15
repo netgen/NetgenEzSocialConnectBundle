@@ -29,7 +29,7 @@ class SocialLoginHelper
 
     /** @var  \eZ\Publish\Core\Helper\FieldHelper */
     protected $fieldHelper;
-    
+
     /**
      * @param Repository $repository
      * @param EntityManagerInterface $entityManager
@@ -103,7 +103,7 @@ class SocialLoginHelper
     /**
      * Adds profile image to ez user from external link
      *
-     * @param User $user
+     * @param \eZ\Publish\API\Repository\Values\User\User $user
      * @param string $imageLink External link
      */
     public function addProfileImage( User $user, $imageLink )
