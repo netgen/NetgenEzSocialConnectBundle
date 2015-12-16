@@ -56,8 +56,11 @@ class InteractiveLoginListener implements EventSubscriberInterface
      */
     public function onInteractiveLogin( InteractiveLoginEvent $event )
     {
-        /** @var \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $oauthUser */
         $oauthUser = $event->getAuthenticationToken()->getUser();
+
+        if ( !$oauthUser instanceof OAuthEzUser) {
+            return;
+        }
 
         if ( $this->session->has( 'social_connect_ez_user_id' ) )
         {
