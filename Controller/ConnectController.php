@@ -13,7 +13,7 @@ class ConnectController extends Controller
 {
     /**
      * Sets the ez user id into session variable,
-     * and starts the connection to the social network
+     * and starts the connection to the social network.
      *
      * @param Request   $request
      * @param string    $resource_name
@@ -22,7 +22,7 @@ class ConnectController extends Controller
      *
      * @throws UserAlreadyConnected
      */
-    public function connectUser( Request $request, $resource_name )
+    public function connectUser(Request $request, $resource_name)
     {
         $user = $this->getUser();
 
@@ -41,11 +41,17 @@ class ConnectController extends Controller
         {
             throw new UserAlreadyConnected( $resource_name );
         }
-
-        $request->getSession()->set( 'social_connect_ez_user_id', $userContentId );
+        $request->getSession()->set('social_connect_ez_user_id', $userContentId);
         $request->getSession()->save();
-
-        return $this->redirect( $this->generateUrl( 'hwi_oauth_service_redirect', array( 'service' => $resource_name ) ) );
+        return $this->redirect(
+            $this->generateUrl(
+                'hwi_oauth_service_redirect',
+                array(
+                    'service' => $resource_name,
+                    $targetPathParameter => $targetPath
+                )
+            )
+        );
     }
 
     /**
