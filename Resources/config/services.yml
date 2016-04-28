@@ -1,5 +1,4 @@
 parameters:
-        netgen.social_connect.interactive_event_listener.class: Netgen\Bundle\EzSocialConnectBundle\EventListener\InteractiveLoginListener
         netgen.social_connect.oauth_user_provider.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider
         netgen.social_connect.helper.class: Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
         netgen.social_connect.controller.connect.class: Netgen\Bundle\EzSocialConnectBundle\Controller\ConnectController
@@ -8,15 +7,6 @@ parameters:
         hwi_oauth.resource_owner.google.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\GoogleResourceOwner
 
 services:
-    netgen.social_connect.interactive_event_listener:
-        class: %netgen.social_connect.interactive_event_listener.class%
-        arguments:
-            - @doctrine.orm.entity_manager
-            - @netgen.social_connect.helper
-            - @session
-        tags:
-            - { name: kernel.event_subscriber }
-
     netgen.social_connect.oauth_user_provider:
         class: %netgen.social_connect.oauth_user_provider.class%
         arguments:
