@@ -24,7 +24,7 @@ class AddConfigResolverCompilerPass implements  CompilerPassInterface
 
         $config = $processor->processConfiguration( $configuration, $extensionConfig );
 
-        $resourceOwners = !empty( $config[ "resource_owners" ] ) ? $config[ "resource_owners" ] : null;
+        $resourceOwners = !empty( $config[ "resource_owners" ] ) ? $config[ "resource_owners" ] : array();
 
         foreach ( $resourceOwners as $name => $owner )
         {
