@@ -2,6 +2,7 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
+use eZ\Publish\API\Repository\Repository;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
@@ -17,23 +18,23 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     protected $loginHelper;
 
     /**
-     * Injected setter.
+     * eZUserProvider constructor.
      *
+     * @param \eZ\Publish\API\Repository\Repository $repository
      * @param \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper $loginHelper
      */
-    public function setSocialLoginHelper(SocialLoginHelper $loginHelper)
+    public function __construct(Repository $repository, SocialLoginHelper $loginHelper)
     {
+        parent::__construct($repository);
         $this->loginHelper = $loginHelper;
     }
 
     /**
      * Loads the user by a given UserResponseInterface object.
-     *
      * If no eZ user is found those credentials, a real eZ User content object is generated.
      *
-     *
      * @param UserResponseInterface $response
-     *
+
      * @return OAuthEzUser
      *
      * @throws UsernameNotFoundException if the user is not found
@@ -56,8 +57,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
 
                 // If the email is 'localhost.local', we did not fetch it remotely from the OAuth resource provider
                 if (
-                    $OAuthEzUser->getEmail() !== $userContentObject->email
-                    &&
+                    $OAuthEzUser->getEmail() !== $userContentObject->email &&
                     0 !== strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol')
                 ) {
                     $this->loginHelper->updateUserFields($userContentObject, array('email' => $OAuthEzUser->getEmail()));
