@@ -173,7 +173,7 @@ class SocialLoginHelper
      *
      * @param OAuthEzUser $oauthUser
      *
-     * @return null|OAuthEzUser
+     * @return null|OAuthEz
      */
     public function loadFromTable( OAuthEzUser $oauthUser )
     {
@@ -343,7 +343,7 @@ class SocialLoginHelper
      *
      * @param $userId
      *
-     * @return User
+     * @return \eZ\Publish\API\Repository\Values\User\User
      */
     public function loadEzUserById( $userId )
     {

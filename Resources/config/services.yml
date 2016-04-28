@@ -19,6 +19,9 @@ services:
 
     netgen.social_connect.oauth_user_provider:
         class: %netgen.social_connect.oauth_user_provider.class%
+        arguments:
+            - @netgen.social_connect.helper
+            - @ezpublish.security.user_provider
 
     netgen.social_connect.helper:
         class: %netgen.social_connect.helper.class%

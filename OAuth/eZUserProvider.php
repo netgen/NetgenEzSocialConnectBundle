@@ -29,7 +29,7 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
     public function __construct(SocialLoginHelper $loginHelper, UserProviderInterface $userProvider)
     {
         $this->loginHelper = $loginHelper;
-        $this->userProvider = $userProvider;
+        $this->baseUserProvider = $userProvider;
     }
 
     /**
@@ -46,15 +46,12 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
      */
     public function loadUserByOAuthUserResponse(UserResponseInterface $response)
     {
-        /** @var OAuthEzUser $user */
-        $OAuthEzUser = $this->getOAuthEzUser($response);
-
+        $OAuthEzUser = $this->generateOAuthEzUser($response);
         $OAuthEzUserEntity = $this->loginHelper->loadFromTable($OAuthEzUser);
 
-        if (!empty($OAuthEzUserEntity)) {
+        if (!($OAuthEzUserEntity instanceof OAuthEz)) {
             try {
-                // If the user account is not linked to the external table, add the link and fill in available fields.
-
+                // If the user account is linked to the external table, fill in available fields.
                 $ezUserId = $OAuthEzUserEntity->getEzUserId();
                 $userContentObject = $this->loginHelper->loadEzUserById($ezUserId);
 
@@ -63,71 +60,50 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
                     $this->loginHelper->addProfileImage($userContentObject, $imageLink);
                 }
 
+                // If the email is 'localhost.local', we did not fetch it remotely from the OAuth resource provider
                 if ($OAuthEzUser->getEmail() !== $userContentObject->email && !strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol') === 0) {
                     $this->loginHelper->updateUserFields($userContentObject, array("email" => $OAuthEzUser->getEmail()));
                 }
 
-                return $this->userProvider->loadUserByUsername($userContentObject->login);
+                return $this->baseUserProvider->loadUserByUsername($userContentObject->login);
 
             } catch (\eZ\Publish\API\Repository\Exceptions\NotFoundException $e) {
 
-                 // Something went wrong - data is in the table, but the user does not exist.
-                 // Remove faulty data and fall back to creating a new user.
-
+                // Something went wrong - data is in the table, but the user does not exist.
+                // Remove faulty data and fall back to creating a new user.
                 $this->loginHelper->removeFromTable($OAuthEzUserEntity);
-            }
-        } else {
-
-            // Otherwise, try to load the existing, linked user
-            try {
-                $user = $this->userProvider->loadUserByUsername($OAuthEzUser->getUsername());
-
-            } catch (UsernameNotFoundException $e) {
-                $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
-                $this->loginHelper->addToTable($userContentObject, $OAuthEzUser);
             }
         }
 
-        return $user;
+        // Otherwise, try to load the existing, linked user
+        try {
+            $user = $this->baseUserProvider->loadUserByUsername($OAuthEzUser->getUsername());
+
+        // If no users are found, create one and link them
+        } catch (UsernameNotFoundException $e) {
+            $user = $this->loginHelper->createEzUser($OAuthEzUser);
+            $this->loginHelper->addToTable($user, $OAuthEzUser);
+        }
+
+        return $this->baseUserProvider->loadUserByUsername($user->login);
     }
 
     /**
-     * Generates an eZ User object from the OAuth response,
+     * Generates an OAuthEzUser object from the OAuth response,
      *
      * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
      *
      * @return \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
      */
-    protected function getOAuthEzUser(UserResponseInterface $response)
-    {
+    protected function generateOAuthEzUser(UserResponseInterface $response) {
         $userId = $response->getUsername();
         $uniqueLogin = $response->getNickname().'-'.$userId;
 
         $OAuthEzUser = new OAuthEzUser($uniqueLogin, $userId);
 
-        $realName = $response->getRealName();
-
-        if (!empty($realName)) {
-            $realName = explode(' ', $realName);
-
-            if (count($realName) >= 2) {
-                $OAuthEzUser->setFirstName(array_shift($realName));
-                $OAuthEzUser->setLastName(implode(' ', $realName));
-            } else {
-                $OAuthEzUser->setFirstName(reset($realName));
-                $OAuthEzUser->setLastName(reset($realName));
-            }
-        } else {
-            $userEmail = $response->getEmail();
-            if (!empty($userEmail)) {
-                $emailArray = explode('@', $userEmail);
-                $OAuthEzUser->setFirstName(reset($emailArray));
-                $OAuthEzUser->setLastName(reset($emailArray));
-            } else {
-                $OAuthEzUser->setFirstName($response->getNickname());
-                $OAuthEzUser->setLastName($response->getResourceOwner()->getName());
-            }
-        }
+        $username = $this->getUsername($response);
+        $OAuthEzUser->setFirstName($username->firstName);
+        $OAuthEzUser->setLastName($username->lastName);
 
         if (null === $response->getEmail()) {
             $email = md5('socialbundle'.$response->getResourceOwner()->getName().$userId).'@localhost.local';
@@ -143,5 +119,42 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
         }
 
         return $OAuthEzUser;
+    }
+
+    /**
+     * Generates a first and last name from the response
+     *
+     * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
+     *
+     * @return \stdObject
+     */
+    protected function getUsername(UserResponseInterface $response) {
+        $realName = $response->getRealName();
+
+        if (!empty($realName)) {
+            $realName = explode(' ', $realName);
+
+            if (count($realName) >= 2) {
+                $firstName = array_shift($realName);
+                $lastName = implode(' ', $realName);
+            } else {
+                $firstName = reset($realName);
+                $lastName = reset($realName);
+            }
+        } else {
+            $userEmail = $response->getEmail();
+
+            if (!empty($userEmail)) {
+                $emailArray = explode('@', $userEmail);
+
+                $firstName = reset($emailArray);
+                $lastName = reset($emailArray);
+            } else {
+                $firstName = $response->getNickname();
+                $lastName = $response->getResourceOwner()->getName();
+            }
+        }
+
+        return (object)array('firstName' => $firstName, 'lastName' => $lastName);
     }
 }

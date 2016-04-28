@@ -56,61 +56,6 @@ class InteractiveLoginListener implements EventSubscriberInterface
      */
     public function onInteractiveLogin( InteractiveLoginEvent $event )
     {
-        $oauthUser = $event->getAuthenticationToken()->getUser();
-
-        if ( !$oauthUser instanceof OAuthEzUser) {
-            return;
-        }
-
-        if ( $this->session->has( 'social_connect_ez_user_id' ) )
-        {
-            //there is user id in session, it means we have to connect the user to it
-            $connectEzId = $this->session->get( 'social_connect_ez_user_id' );
-            $this->session->remove( 'social_connect_ez_user_id' );
-
-            $ezUser = $this->loginHelper->loadEzUserById( $connectEzId );
-            $this->loginHelper->addToTable( $ezUser, $oauthUser );
-
-            $event->setApiUser( $ezUser );
-
-            return;
-        }
-
-        /** @var \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz $oauthEzUserEntity */
-        $oauthEzUserEntity = $this->loginHelper->loadFromTable( $oauthUser );
-
-        if ( !empty( $oauthEzUserEntity ) )
-        {
-            try
-            {
-                $ezUserId = $oauthEzUserEntity->getEzUserId();
-                $user = $this->loginHelper->loadEzUserById( $ezUserId );
-
-                $imageLink = $oauthUser->getImageLink();
-                if ( !empty( $imageLink ) )
-                {
-                    $this->loginHelper->addProfileImage( $user, $imageLink );
-                }
-
-                if ( $oauthUser->getEmail() !== $user->email && !strpos(strrev( $oauthUser->getEmail() ), 'lacol.tsohlacol') === 0 )
-                {
-                    $this->loginHelper->updateUserFields( $user, array( "email" => $oauthUser->getEmail() ) );
-                }
-
-                $event->setApiUser( $user );
-
-                return;
-            }
-            catch ( NotFoundException $e )
-            {
-                // something went wrong - data is in the table, but the user does not exist
-                // remove falty data and fallback to creating new user
-                $this->loginHelper->removeFromTable( $oauthEzUserEntity );
-            }
-        }
-
-        $user = $this->loginHelper->createEzUser( $oauthUser );
-        $this->loginHelper->addToTable( $user, $oauthUser );
-        $event->setApiUser( $user );
+        // does nothing
     }
 }
