@@ -3,33 +3,27 @@
 namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
+use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
+use eZ\Publish\Core\MVC\Symfony\Security\User\Provider as BaseUserProvider;
 
-class eZUserProvider implements OAuthAwareUserProviderInterface
+class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderInterface
 {
     /**
-     * @var UserProviderInterface
-     */
-    protected $userProvider;
-
-    /**
-     * @var SocialLoginHelper
+     * @var \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
      */
     protected $loginHelper;
 
     /**
-     * eZUserProvider constructor.
+     * Injected setter.
      *
-     * @param SocialLoginHelper     $loginHelper
-     * @param UserProviderInterface $userProvider
+     * @param \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper $loginHelper
      */
-    public function __construct(SocialLoginHelper $loginHelper, UserProviderInterface $userProvider)
+    public function setSocialLoginHelper(SocialLoginHelper $loginHelper)
     {
         $this->loginHelper = $loginHelper;
-        $this->baseUserProvider = $userProvider;
     }
 
     /**
@@ -49,9 +43,9 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
         $OAuthEzUser = $this->generateOAuthEzUser($response);
         $OAuthEzUserEntity = $this->loginHelper->loadFromTable($OAuthEzUser);
 
-        if (!($OAuthEzUserEntity instanceof OAuthEz)) {
+        if ($OAuthEzUserEntity instanceof OAuthEz) {
             try {
-                // If the user account is linked to the external table, fill in available fields.
+                // If the user account is linked to the external table, fill in available fields
                 $ezUserId = $OAuthEzUserEntity->getEzUserId();
                 $userContentObject = $this->loginHelper->loadEzUserById($ezUserId);
 
@@ -61,23 +55,26 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
                 }
 
                 // If the email is 'localhost.local', we did not fetch it remotely from the OAuth resource provider
-                if ($OAuthEzUser->getEmail() !== $userContentObject->email && !strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol') === 0) {
-                    $this->loginHelper->updateUserFields($userContentObject, array("email" => $OAuthEzUser->getEmail()));
+                if (
+                    $OAuthEzUser->getEmail() !== $userContentObject->email
+                    &&
+                    0 !== strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol')
+                ) {
+                    $this->loginHelper->updateUserFields($userContentObject, array('email' => $OAuthEzUser->getEmail()));
                 }
 
-                return $this->baseUserProvider->loadUserByUsername($userContentObject->login);
-
+                return $this->loadUserByUsername($userContentObject->login);
             } catch (\eZ\Publish\API\Repository\Exceptions\NotFoundException $e) {
 
-                // Something went wrong - data is in the table, but the user does not exist.
-                // Remove faulty data and fall back to creating a new user.
+                // Something went wrong - data is in the table, but the user does not exist
+                // Remove faulty data and fall back to creating a new user
                 $this->loginHelper->removeFromTable($OAuthEzUserEntity);
             }
         }
 
         // Otherwise, try to load the existing, linked user
         try {
-            $user = $this->baseUserProvider->loadUserByUsername($OAuthEzUser->getUsername());
+            $user = $this->loadUserByUsername($OAuthEzUser->getUsername());
 
         // If no users are found, create one and link them
         } catch (UsernameNotFoundException $e) {
@@ -85,32 +82,35 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
             $this->loginHelper->addToTable($user, $OAuthEzUser);
         }
 
-        return $this->baseUserProvider->loadUserByUsername($user->login);
+        return $this->loadUserByUsername($user->login);
     }
 
     /**
-     * Generates an OAuthEzUser object from the OAuth response,
+     * Generates an OAuthEzUser object from the OAuth response.
+     *
+     * This is an intermediary object used to generate Ez Users if none exist with those OAuth credentials.
      *
      * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
      *
      * @return \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
      */
-    protected function generateOAuthEzUser(UserResponseInterface $response) {
+    protected function generateOAuthEzUser(UserResponseInterface $response)
+    {
         $userId = $response->getUsername();
         $uniqueLogin = $response->getNickname().'-'.$userId;
 
         $OAuthEzUser = new OAuthEzUser($uniqueLogin, $userId);
 
         $username = $this->getUsername($response);
-        $OAuthEzUser->setFirstName($username->firstName);
-        $OAuthEzUser->setLastName($username->lastName);
+        $OAuthEzUser->setFirstName($username['firstName']);
+        $OAuthEzUser->setLastName($username['lastName']);
 
         if (null === $response->getEmail()) {
             $email = md5('socialbundle'.$response->getResourceOwner()->getName().$userId).'@localhost.local';
-            $OAuthEzUser->setEmail($email);
         } else {
-            $OAuthEzUser->setEmail($response->getEmail());
+            $email = $response->getEmail();
         }
+        $OAuthEzUser->setEmail($email);
 
         $OAuthEzUser->setResourceOwnerName($response->getResourceOwner()->getName());
 
@@ -122,13 +122,14 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
     }
 
     /**
-     * Generates a first and last name from the response
+     * Generates a first and last name from the response.
      *
      * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
      *
-     * @return \stdObject
+     * @return array
      */
-    protected function getUsername(UserResponseInterface $response) {
+    protected function getUsername(UserResponseInterface $response)
+    {
         $realName = $response->getRealName();
 
         if (!empty($realName)) {
@@ -155,6 +156,6 @@ class eZUserProvider implements OAuthAwareUserProviderInterface
             }
         }
 
-        return (object)array('firstName' => $firstName, 'lastName' => $lastName);
+        return array('firstName' => $firstName, 'lastName' => $lastName);
     }
 }
