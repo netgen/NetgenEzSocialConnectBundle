@@ -43,12 +43,13 @@ class ConnectController extends Controller
         }
         $request->getSession()->set('social_connect_ez_user_id', $userContentId);
         $request->getSession()->save();
+
         return $this->redirect(
             $this->generateUrl(
                 'hwi_oauth_service_redirect',
                 array(
                     'service' => $resource_name,
-                    $targetPathParameter => $targetPath
+                    $targetPathParameter => $targetPath,
                 )
             )
         );
@@ -85,6 +86,11 @@ class ConnectController extends Controller
 
         $loginHelper->removeFromTable($OAuthEz);
 
-        return $this->redirect($request->server->get('HTTP_REFERER', '/'));
+        $session = $request->getSession();
+        $session->getFlashBag()->add('notice', 'You have successfully disconnected user from Facebook account!');
+
+        return $this->redirect(
+            $targetPath
+        );
     }
 }

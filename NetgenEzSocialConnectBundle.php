@@ -13,6 +13,6 @@ class NetgenEzSocialConnectBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new AddConfigResolverCompilerPass(), PassConfig::TYPE_AFTER_REMOVING );
+        $container->addCompilerPass(new AddConfigResolverCompilerPass(), PassConfig::TYPE_AFTER_REMOVING);
     }
 }

@@ -31,11 +31,11 @@ class SocialLoginHelper
     protected $fieldHelper;
 
     /**
-     * @param Repository $repository
-     * @param EntityManagerInterface $entityManager
+     * @param Repository              $repository
+     * @param EntityManagerInterface  $entityManager
      * @param ConfigResolverInterface $configResolver
-     * @param FieldHelper $fieldHelper
-     * @param LoggerInterface $logger
+     * @param FieldHelper             $fieldHelper
+     * @param LoggerInterface         $logger
      */
     public function __construct(
         Repository $repository,
@@ -43,8 +43,7 @@ class SocialLoginHelper
         ConfigResolverInterface $configResolver,
         FieldHelper $fieldHelper,
         LoggerInterface $logger = null
-    )
-    {
+    ) {
         $this->repository = $repository;
         $this->entityManager = $entityManager;
         $this->configResolver = $configResolver;
@@ -53,7 +52,7 @@ class SocialLoginHelper
     }
 
     /**
-     * Downloads image from external link to local file system
+     * Downloads image from external link to local file system.
      *
      * @param string $imageLink
      *
@@ -61,173 +60,160 @@ class SocialLoginHelper
      *
      * @throws IOException if failed to create local directory
      */
-    public function downloadExternalImage( $imageLink )
+    public function downloadExternalImage($imageLink)
     {
         // download image from external link
-        $data = file_get_contents( $imageLink );
+        $data = file_get_contents($imageLink);
 
-        preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName );
+        preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName);
 
-        if ( !empty( $imageName[ 0 ] ) )
-        {
+        if (!empty($imageName[ 0 ])) {
             $storageDir = '/tmp/';
-            if ( !is_dir( $storageDir ) )
-            {
-                if ( !mkdir( $storageDir ) )
-                {
+            if (!is_dir($storageDir)) {
+                if (!mkdir($storageDir)) {
                     throw new IOException('Failed to create dir', 0, null, $storageDir);
                 }
             }
-            $imageFileName = $storageDir . basename( $imageName[ 0 ] );
+            $imageFileName = $storageDir.basename($imageName[ 0 ]);
         }
-        if ( !empty( $imageFileName ) && file_put_contents( $imageFileName, $data ) )
-        {
-            if ( $this->logger !== null )
-            {
-                $this->logger->notice( "Local image created: {$imageFileName}." );
+        if (!empty($imageFileName) && file_put_contents($imageFileName, $data)) {
+            if ($this->logger !== null) {
+                $this->logger->notice("Local image created: {$imageFileName}.");
             }
 
             return $imageFileName;
-        }
-        else
-        {
-            if ( $this->logger !== null )
-            {
-                $this->logger->error( "Problem while saving image {$imageLink}.");
+        } else {
+            if ($this->logger !== null) {
+                $this->logger->error("Problem while saving image {$imageLink}.");
             }
 
-            return null;
+            return;
         }
     }
 
     /**
-     * Adds profile image to ez user from external link
+     * Adds profile image to ez user from external link.
      *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
-     * @param string $imageLink External link
+     * @param string                                      $imageLink External link
      */
-    public function addProfileImage( User $user, $imageLink )
+    public function addProfileImage(User $user, $imageLink)
     {
-        $imageFieldIdentifier = $this->configResolver->getParameter( 'image_field_identifier', 'netgen_social_connect' );
-        if ( empty($imageFieldIdentifier) )
-        {
+        $imageFieldIdentifier = $this->configResolver->getParameter('image_field_identifier', 'netgen_social_connect');
+        if (empty($imageFieldIdentifier)) {
             return;
         }
 
-        if( !$this->fieldHelper->isFieldEmpty( $user->content, $imageFieldIdentifier ) )
-        {
+        if (!$this->fieldHelper->isFieldEmpty($user->content, $imageFieldIdentifier)) {
             return;
         }
 
-        $imageFileName = $this->downloadExternalImage( $imageLink );
+        $imageFileName = $this->downloadExternalImage($imageLink);
 
-        $language = $this->configResolver->getParameter( 'languages' );
+        $language = $this->configResolver->getParameter('languages');
         $language = $language[0];
 
         $this->repository->sudo(
-            function( Repository $repository ) use ( $user, $language, $imageFileName, $imageFieldIdentifier )
-            {
+            function (Repository $repository) use ($user, $language, $imageFileName, $imageFieldIdentifier) {
                 $contentService = $repository->getContentService();
-                $userDraft = $contentService->createContentDraft( $user->content->versionInfo->contentInfo );
+                $userDraft = $contentService->createContentDraft($user->content->versionInfo->contentInfo);
                 $userUpdateStruct = $contentService->newContentUpdateStruct();
                 $userUpdateStruct->initialLanguageCode = $language;
-                $userUpdateStruct->setField( $imageFieldIdentifier, $imageFileName );
-                $userDraft = $contentService->updateContent( $userDraft->versionInfo, $userUpdateStruct );
+                $userUpdateStruct->setField($imageFieldIdentifier, $imageFileName);
+                $userDraft = $contentService->updateContent($userDraft->versionInfo, $userUpdateStruct);
 
-                $contentService->publishVersion( $userDraft->versionInfo );
+                $contentService->publishVersion($userDraft->versionInfo);
             }
         );
     }
 
     /**
-     * Adds entry to the table
+     * Adds entry to the table.
      *
-     * @param User $user
+     * @param User        $user
      * @param OAuthEzUser $authEzUser
      */
-    public function addToTable( User $user, OAuthEzUser $authEzUser )
+    public function addToTable(User $user, OAuthEzUser $authEzUser)
     {
         $OAuthEzEntity = new OAuthEz();
         $OAuthEzEntity
-            ->setEzUserId( $user->id )
-            ->setResourceUserId( $authEzUser->getOriginalId() )
-            ->setResourceName( $authEzUser->getResourceOwnerName() );
+            ->setEzUserId($user->id)
+            ->setResourceUserId($authEzUser->getOriginalId())
+            ->setResourceName($authEzUser->getResourceOwnerName());
 
-        $this->entityManager->persist( $OAuthEzEntity );
+        $this->entityManager->persist($OAuthEzEntity);
         $this->entityManager->flush();
     }
 
     /**
-     * Removes entry from the table
+     * Removes entry from the table.
      *
      * @param OAuthEz $userEntity
      */
-    public function removeFromTable( OAuthEz $userEntity )
+    public function removeFromTable(OAuthEz $userEntity)
     {
-        $this->entityManager->remove( $userEntity );
+        $this->entityManager->remove($userEntity);
         $this->entityManager->flush();
     }
 
     /**
-     * Loads from table by OAuthEzUser entity
+     * Loads from table by OAuthEzUser entity.
      *
      * @param OAuthEzUser $oauthUser
      *
      * @return null|OAuthEz
      */
-    public function loadFromTable( OAuthEzUser $oauthUser )
+    public function loadFromTable(OAuthEzUser $oauthUser)
     {
         $results =
             $this->entityManager
-                ->getRepository( 'NetgenEzSocialConnectBundle:OAuthEz' )
+                ->getRepository('NetgenEzSocialConnectBundle:OAuthEz')
                 ->findBy(
                     array(
                         'resourceUserId' => $oauthUser->getOriginalId(),
-                        'resourceName' => $oauthUser->getResourceOwnerName()
+                        'resourceName' => $oauthUser->getResourceOwnerName(),
                     ),
                     array(
-                        'ezUserId' => 'DESC' //get last inserted
+                        'ezUserId' => 'DESC', //get last inserted
                     )
                 );
 
-        if ( !is_array( $results ) || empty( $results ) )
-        {
-            return null;
+        if (!is_array($results) || empty($results)) {
+            return;
         }
 
         return $results[ 0 ];
     }
 
     /**
-     * Loads from table by ez user id and resource name
+     * Loads from table by ez user id and resource name.
      *
      * @param $ezUserId
      * @param $resourceOwnerName
      *
      * @return null|OAuthEzUser
      */
-    public function loadFromTableByEzId( $ezUserId, $resourceOwnerName )
+    public function loadFromTableByEzId($ezUserId, $resourceOwnerName)
     {
         $results =
             $this->entityManager
-                ->getRepository( 'NetgenEzSocialConnectBundle:OAuthEz' )
+                ->getRepository('NetgenEzSocialConnectBundle:OAuthEz')
                 ->findBy(
                     array(
                         'ezUserId' => $ezUserId,
-                        'resourceName' => $resourceOwnerName
+                        'resourceName' => $resourceOwnerName,
                     )
                 );
 
-        if ( !is_array( $results ) || empty( $results ) )
-        {
-            return null;
+        if (!is_array($results) || empty($results)) {
+            return;
         }
 
         return $results[ 0 ];
     }
 
     /**
-     * Creates ez user from OAuthEzUser entity
+     * Creates ez user from OAuthEzUser entity.
      *
      * @param OAuthEzUser $oauthUser
      *
@@ -235,19 +221,19 @@ class SocialLoginHelper
      *
      * @throws MissingConfigurationException if user group parameter is not set up
      */
-    public function createEzUser( OAuthEzUser $oauthUser )
+    public function createEzUser(OAuthEzUser $oauthUser)
     {
         $userService = $this->repository->getUserService();
 
         $loginId = $oauthUser->getOriginalId();
         $username = $oauthUser->getUsername();
-        $password = md5( $loginId . $username );
+        $password = md5($loginId.$username);
         $first_name = $oauthUser->getFirstName();
         $last_name = $oauthUser->getLastName();
         $imageLink = $oauthUser->getImagelink();
 
-        $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier( "user" );
-        $languages = $this->configResolver->getParameter( 'languages' );
+        $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier('user');
+        $languages = $this->configResolver->getParameter('languages');
 
         $userCreateStruct = $userService->newUserCreateStruct(
             $username,
@@ -256,45 +242,39 @@ class SocialLoginHelper
             $languages[ 0 ],
             $contentType
         );
-        if ( !empty( $first_name ) )
-        {
-            $userCreateStruct->setField( 'first_name', $first_name );
+        if (!empty($first_name)) {
+            $userCreateStruct->setField('first_name', $first_name);
         }
-        if ( !empty( $last_name ) )
-        {
-            $userCreateStruct->setField( 'last_name', $last_name );
+        if (!empty($last_name)) {
+            $userCreateStruct->setField('last_name', $last_name);
         }
 
         $imageFileName = null;
-        $imageFieldIdentifier = $this->configResolver->getParameter( 'image_field_identifier', 'netgen_social_connect' );
-        if ( !empty( $imageLink ) && !empty($imageFieldIdentifier) )
-        {
-            $imageFileName = $this->downloadExternalImage( $imageLink );
-            $userCreateStruct->setField( $imageFieldIdentifier, $imageFileName );
+        $imageFieldIdentifier = $this->configResolver->getParameter('image_field_identifier', 'netgen_social_connect');
+        if (!empty($imageLink) && !empty($imageFieldIdentifier)) {
+            $imageFileName = $this->downloadExternalImage($imageLink);
+            $userCreateStruct->setField($imageFieldIdentifier, $imageFileName);
         }
 
         $userCreateStruct->enabled = true;
 
-        if ( !$this->configResolver->hasParameter( 'oauth.user_group', 'netgen_social_connect' ) )
-        {
-            throw new MissingConfigurationException( 'oauth.user_group' );
+        if (!$this->configResolver->hasParameter('oauth.user_group', 'netgen_social_connect')) {
+            throw new MissingConfigurationException('oauth.user_group');
         }
-        $userGroupIds = $this->configResolver->getParameter( 'oauth.user_group', 'netgen_social_connect' );
+        $userGroupIds = $this->configResolver->getParameter('oauth.user_group', 'netgen_social_connect');
 
-        if ( empty( $userGroupIds[ $oauthUser->getResourceOwnerName() ] ) )
-        {
-            throw new MissingConfigurationException( 'oauth.user_group.' . $oauthUser->getResourceOwnerName()  );
+        if (empty($userGroupIds[ $oauthUser->getResourceOwnerName() ])) {
+            throw new MissingConfigurationException('oauth.user_group.'.$oauthUser->getResourceOwnerName());
         }
 
         $userGroupId = $userGroupIds[$oauthUser->getResourceOwnerName()];
         $newUser = $this->repository->sudo(
-            function( Repository $repository ) use ( $userCreateStruct, $userGroupId )
-            {
-                $userGroup = $repository->getUserService()->loadUserGroup( $userGroupId );
+            function (Repository $repository) use ($userCreateStruct, $userGroupId) {
+                $userGroup = $repository->getUserService()->loadUserGroup($userGroupId);
 
                 return $repository->getUserService()->createUser(
                     $userCreateStruct,
-                    array( $userGroup )
+                    array($userGroup)
                 );
             }
         );
@@ -303,50 +283,44 @@ class SocialLoginHelper
     }
 
     /**
-     * Updates ez user fields
+     * Updates ez user fields.
      *
-     * @param User $user
+     * @param User  $user
      * @param array $fields
      */
-    public function updateUserFields( User $user, array $fields )
+    public function updateUserFields(User $user, array $fields)
     {
-        try
-        {
+        try {
             $userUpdateStruct = $this->repository->getUserService()->newUserUpdateStruct();
-            foreach ( $fields as $name => $value )
-            {
+            foreach ($fields as $name => $value) {
                 $userUpdateStruct->$name = $value;
             }
 
             $this->repository->sudo(
-                function( Repository $repository ) use ( $user, $userUpdateStruct )
-                {
-                    return $repository->getUserService()->updateUser( $user, $userUpdateStruct );
+                function (Repository $repository) use ($user, $userUpdateStruct) {
+                    return $repository->getUserService()->updateUser($user, $userUpdateStruct);
                 }
             );
-        }
-        catch ( \Exception $e )
-        {
+        } catch (\Exception $e) {
             // fail silently - just create a log
-            if ( $this->logger !== null )
-            {
-                $fieldNames = array_keys( $fields );
-                $fieldNamesString = implode( ', ', $fieldNames );
+            if ($this->logger !== null) {
+                $fieldNames = array_keys($fields);
+                $fieldNamesString = implode(', ', $fieldNames);
 
-                $this->logger->error( "SocialConnect - failed to update fields '{$fieldNamesString}' on user with id {$user->id}" );
+                $this->logger->error("SocialConnect - failed to update fields '{$fieldNamesString}' on user with id {$user->id}");
             }
         }
     }
 
     /**
-     * Loads ez user from the repository
+     * Loads ez user from the repository.
      *
      * @param $userId
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      */
-    public function loadEzUserById( $userId )
+    public function loadEzUserById($userId)
     {
-        return $this->repository->getUserService()->loadUser( $userId );
+        return $this->repository->getUserService()->loadUser($userId);
     }
 }

@@ -8,30 +8,28 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Netgen\Bundle\EzSocialConnectBundle\DependencyInjection\Configuration;
 
-class AddConfigResolverCompilerPass implements  CompilerPassInterface
+class AddConfigResolverCompilerPass implements CompilerPassInterface
 {
     /**
-     * Adds config resolver to all configured resource owners
+     * Adds config resolver to all configured resource owners.
      *
      * @param ContainerBuilder $container
      */
-    public function process( ContainerBuilder $container )
+    public function process(ContainerBuilder $container)
     {
-        $extensionConfig = $container->getExtensionConfig( 'netgen_ez_social_connect' );
+        $extensionConfig = $container->getExtensionConfig('netgen_ez_social_connect');
 
         $configuration = new Configuration();
         $processor = new Processor();
 
-        $config = $processor->processConfiguration( $configuration, $extensionConfig );
+        $config = $processor->processConfiguration($configuration, $extensionConfig);
 
-        $resourceOwners = !empty( $config[ "resource_owners" ] ) ? $config[ "resource_owners" ] : array();
+        $resourceOwners = !empty($config['resource_owners']) ? $config['resource_owners'] : array();
 
-        foreach ( $resourceOwners as $name => $owner )
-        {
-            if ( $owner[ "useConfigResolver" ] )
-            {
-                $resourceOwnerDefinition = $container->findDefinition( 'hwi_oauth.resource_owner.' . $name );
-                $resourceOwnerDefinition->addMethodCall( 'setConfigResolver', array( new Reference( 'ezpublish.config.resolver' )));
+        foreach ($resourceOwners as $name => $owner) {
+            if ($owner['useConfigResolver']) {
+                $resourceOwnerDefinition = $container->findDefinition('hwi_oauth.resource_owner.'.$name);
+                $resourceOwnerDefinition->addMethodCall('setConfigResolver', array(new Reference('ezpublish.config.resolver')));
             }
         }
     }
