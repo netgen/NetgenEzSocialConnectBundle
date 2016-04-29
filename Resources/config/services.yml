@@ -1,20 +1,17 @@
 parameters:
-        netgen.social_connect.oauth_user_provider.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider
-        netgen.social_connect.helper.class: Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
-        netgen.social_connect.controller.connect.class: Netgen\Bundle\EzSocialConnectBundle\Controller\ConnectController
-        hwi_oauth.resource_owner.facebook.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\FacebookResourceOwner
-        hwi_oauth.resource_owner.twitter.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\TwitterResourceOwner
-        hwi_oauth.resource_owner.google.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\GoogleResourceOwner
+    hwi_oauth.resource_owner.facebook.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\FacebookResourceOwner
+    hwi_oauth.resource_owner.twitter.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\TwitterResourceOwner
+    hwi_oauth.resource_owner.google.class: Netgen\Bundle\EzSocialConnectBundle\OAuth\ResourceOwner\GoogleResourceOwner
 
 services:
     netgen.social_connect.oauth_user_provider:
-        class: %netgen.social_connect.oauth_user_provider.class%
+        class: Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider
         parent: ezpublish.security.user_provider
         arguments:
             - @netgen.social_connect.helper
 
     netgen.social_connect.helper:
-        class: %netgen.social_connect.helper.class%
+        class: Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
         arguments:
             - @ezpublish.api.repository
             - @doctrine.orm.entity_manager
@@ -23,5 +20,5 @@ services:
             - @?logger
 
     netgen.social_connect.controller.connect:
-        class: %netgen.social_connect.controller.connect.class%
+        class: Netgen\Bundle\EzSocialConnectBundle\Controller\ConnectController
         parent: ezpublish.controller.base
