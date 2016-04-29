@@ -9,6 +9,7 @@ use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\User\Provider as BaseUserProvider;
+use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 
 class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderInterface
 {
@@ -41,12 +42,27 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
      */
     public function loadUserByOAuthUserResponse(UserResponseInterface $response)
     {
+        // Intermediary user entity generated from the response
         $OAuthEzUser = $this->generateOAuthEzUser($response);
         $OAuthEzUserEntity = $this->loginHelper->loadFromTable($OAuthEzUser);
 
-        if ($OAuthEzUserEntity instanceof OAuthEz) {
+        // If there is no link, look for an eZ user and connect them
+        if (!$OAuthEzUserEntity instanceof OAuthEz) {
             try {
-                // If the user account is linked to the external table, fill in available fields
+
+              $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
+              $userContentObject = $this->loginHelper->loadEzUserById($securityUser->getAPIUser()->getUserId());
+
+            } catch (UsernameNotFoundException $e) {
+              $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+            }
+
+            $this->loginHelper->addToTable($userContentObject, $OAuthEzUser);
+            $securityUser = $this->loadUserByUsername($userContentObject->login);
+
+        // If a link was found, update profile data for the user
+        } else {
+            try {
                 $ezUserId = $OAuthEzUserEntity->getEzUserId();
                 $userContentObject = $this->loginHelper->loadEzUserById($ezUserId);
 
@@ -59,30 +75,21 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
                 if (
                     $OAuthEzUser->getEmail() !== $userContentObject->email &&
                     0 !== strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol')
-                ) {
+                )
+                {
                     $this->loginHelper->updateUserFields($userContentObject, array('email' => $OAuthEzUser->getEmail()));
                 }
 
-                return $this->loadUserByUsername($userContentObject->login);
-            } catch (\eZ\Publish\API\Repository\Exceptions\NotFoundException $e) {
-
+            } catch (NotFoundException $e) {
                 // Something went wrong - data is in the table, but the user does not exist
                 // Remove faulty data and fall back to creating a new user
                 $this->loginHelper->removeFromTable($OAuthEzUserEntity);
+            } finally {
+                $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
             }
         }
 
-        // Otherwise, try to load the existing, linked user
-        try {
-            $user = $this->loadUserByUsername($OAuthEzUser->getUsername());
-
-        // If no users are found, create one and link them
-        } catch (UsernameNotFoundException $e) {
-            $user = $this->loginHelper->createEzUser($OAuthEzUser);
-            $this->loginHelper->addToTable($user, $OAuthEzUser);
-        }
-
-        return $this->loadUserByUsername($user->login);
+        return $securityUser;
     }
 
     /**
