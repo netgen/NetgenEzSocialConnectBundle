@@ -32,7 +32,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
 
     /**
      * Loads the user by a given UserResponseInterface object.
-     * If no eZ user is found those credentials, a real eZ User content object is generated.
+     * If no eZ user is found with those credentials, a real eZ User content object is generated.
      *
      * @param UserResponseInterface $response
 
