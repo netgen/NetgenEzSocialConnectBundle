@@ -30,6 +30,9 @@ class SocialLoginHelper
     /** @var  \eZ\Publish\Core\Helper\FieldHelper */
     protected $fieldHelper;
 
+    /** @var  array */
+    protected $fieldIdentifiers;
+
     /**
      * @param Repository              $repository
      * @param EntityManagerInterface  $entityManager
@@ -49,6 +52,26 @@ class SocialLoginHelper
         $this->configResolver = $configResolver;
         $this->fieldHelper = $fieldHelper;
         $this->logger = $logger;
+    }
+
+    /**
+     * Chooses from a set of field identifier mappings according to the user class assigned to each siteaccess
+     *
+     * @param $fieldIdentifiers
+     */
+    public function setFieldIdentifiers($fieldIdentifiers)
+    {
+        $this->fieldIdentifiers = $fieldIdentifiers[$this->configResolver->getParameter('user_class', 'netgen_social_connect')];
+    }
+
+    /**
+     * Returns map of user class field identifiers for the current siteaccess
+     *
+     * @return array
+     */
+    public function getFieldIdentifiers()
+    {
+        return $this->fieldIdentifiers;
     }
 
     /**
@@ -99,7 +122,7 @@ class SocialLoginHelper
      */
     public function addProfileImage(User $user, $imageLink)
     {
-        $imageFieldIdentifier = $this->configResolver->getParameter('image_field_identifier', 'netgen_social_connect');
+        $imageFieldIdentifier = $this->fieldIdentifiers['profile_image'];
         if (empty($imageFieldIdentifier)) {
             return;
         }
@@ -232,7 +255,8 @@ class SocialLoginHelper
         $last_name = $oauthUser->getLastName();
         $imageLink = $oauthUser->getImagelink();
 
-        $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier('user');
+        $contentTypeIdentifier = $this->configResolver->getParameter('user_class', 'netgen_social_connect');
+        $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
         $languages = $this->configResolver->getParameter('languages');
 
         $userCreateStruct = $userService->newUserCreateStruct(
@@ -243,14 +267,31 @@ class SocialLoginHelper
             $contentType
         );
         if (!empty($first_name)) {
-            $userCreateStruct->setField('first_name', $first_name);
+            if (empty($this->fieldIdentifiers['first_name'])) {
+                throw new MissingConfigurationException(
+                    'netgen_social_connect.'.$this->configResolver->getParameter('user_class', 'netgen_social_connect').'first_name'
+                );
+            }
+            $userCreateStruct->setField($this->fieldIdentifiers['first_name'], $first_name);
         }
         if (!empty($last_name)) {
-            $userCreateStruct->setField('last_name', $last_name);
+            if (empty($this->fieldIdentifiers['last_name'])) {
+                throw new MissingConfigurationException(
+                    'netgen_social_connect.'.$this->configResolver->getParameter('user_class', 'netgen_social_connect').'.last_name'
+                );
+            }
+            $userCreateStruct->setField($this->fieldIdentifiers['last_name'], $last_name);
         }
 
         $imageFileName = null;
-        $imageFieldIdentifier = $this->configResolver->getParameter('image_field_identifier', 'netgen_social_connect');
+
+        if (empty($this->fieldIdentifiers['profile_image'])) {
+            throw new MissingConfigurationException(
+                'netgen_social_connect.'.$this->configResolver->getParameter('user_class', 'netgen_social_connect').'.profile_image'
+            );
+        }
+        $imageFieldIdentifier = $this->fieldIdentifiers['profile_image'];
+
         if (!empty($imageLink) && !empty($imageFieldIdentifier)) {
             $imageFileName = $this->downloadExternalImage($imageLink);
             $userCreateStruct->setField($imageFieldIdentifier, $imageFileName);
