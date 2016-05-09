@@ -20,6 +20,19 @@ class NetgenEzSocialConnectExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter('netgen_ez_social_connect', $config);
+
+        foreach($config as $key => $value){
+            $concatenatedParam = 'netgen_ez_social_connect.'.$key;
+            $container->setParameter($concatenatedParam, $value);
+
+            if (is_array($value)) {
+                foreach($value as $subKey => $subValue) {
+                    $container->setParameter($concatenatedParam.'.'.$subKey, $subValue);
+                }
+            }
+        }
+
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
         $loader->load('parameters.yml');
