@@ -69,7 +69,7 @@ class SocialLoginHelper
      */
     public function setFieldIdentifiers($fieldIdentifiers)
     {
-        $userClassIdentifier = $this->configResolver->getParameter('user_class', 'netgen_social_connect');
+        $userClassIdentifier = $this->configResolver->getParameter('user_class_identifier', 'netgen_social_connect');
 
         if (!empty($fieldIdentifiers[$userClassIdentifier])) {
             $this->fieldIdentifiers = $fieldIdentifiers[$userClassIdentifier];
@@ -267,7 +267,7 @@ class SocialLoginHelper
         $last_name = $oauthUser->getLastName();
         $imageLink = $oauthUser->getImagelink();
 
-        $contentTypeIdentifier = $this->configResolver->getParameter('user_class', 'netgen_social_connect');
+        $contentTypeIdentifier = $this->configResolver->getParameter('user_class_identifier', 'netgen_social_connect');
         $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
         $languages = $this->configResolver->getParameter('languages');
 

@@ -160,7 +160,7 @@ parameters:
         twitter: 11
         linkedin: 11
         google: 11
-    netgen_social_connect.default.user_class: user
+    netgen_social_connect.default.user_class_identifier_: user
 ```
 
 # Include the template
