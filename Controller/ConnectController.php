@@ -145,7 +145,6 @@ class ConnectController extends Controller
         }
         catch (\RuntimeException $e)
         {
-            // Session might have expired
             $session->getFlashBag()->add('notice', sprintf('You have failed to connect to your %s account!', ucfirst($resourceOwnerName)));
 
             return $this->redirect($targetPath);
@@ -158,16 +157,13 @@ class ConnectController extends Controller
 
         if ($session->has('social_connect_ez_user_id') && $apiUser->id == $session->get('social_connect_ez_user_id'))
         {
-            // We don't need this if it's the same as the apiUser ID
             $session->remove('social_connect_ez_user_id');
 
             // The redirect URL points to the endpoint that requests the access token
             $redirectUrl = $this->generateUrl('netgen_finish_connecting', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-            // We have an authorization code, so attempt to fetch a token from our resource owner
             $token = $resourceOwner->getAccessToken($request, $redirectUrl);
 
-            // Get the UserInformation to store the resource user id in the link table.
             $userInformation = $resourceOwner->getUserInformation($token);
 
             if ($userInformation instanceof PathUserResponse)
@@ -176,7 +172,6 @@ class ConnectController extends Controller
 
                 $loginHelper = $this->get('netgen.social_connect.helper');
 
-                // Finally, add the user <-> resourceowner link to the socialconnect table
                 $loginHelper->addToTable(
                     $loginHelper->loadEzUserById($apiUser->id),
                     $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId)
