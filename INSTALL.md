@@ -88,6 +88,23 @@ netgen_ez_social_connect:
         twitter: { useConfigResolver: true }            
 ```            
 
+# Define user content object mappings for social registration
+If these parameters are not set, field mappings will default to 'first_name', 'last_name', and 'image'. Make sure you do not use 'netgen_ez_social_connect' twice in the same configuration file.
+
+```
+# ezpublish/config/config.yml
+netgen_ez_social_connect:
+    field_identifiers:
+        user:
+            first_name: 'first_name'
+            last_name: 'last_name'
+            profile_image: 'image'
+        some_other_class:           # may be used in another siteaccess
+            first_name: 'intro'
+            last_name: ~            # do not import social data to this field
+            profile_image: 'picture'
+```
+
 # Configure the firewall
 ```
 # ezpublish/config/security.yml
@@ -124,7 +141,8 @@ security:
 
 # Set up the parameters
 Set the id and key for each of the networks you wish to use.
-Also, define the user group where the new users should be created.
+Also define the user group where the new users should be created,
+and the default user field mappings, as defined in config.yml.
 ```
 # ezpublish/config/parameters.yml
 
@@ -142,6 +160,7 @@ parameters:
         twitter: 11
         linkedin: 11
         google: 11
+    netgen_social_connect.default.user_class: user
 ```
 
 # Include the template

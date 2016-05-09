@@ -30,8 +30,16 @@ class SocialLoginHelper
     /** @var  \eZ\Publish\Core\Helper\FieldHelper */
     protected $fieldHelper;
 
-    /** @var  array */
-    protected $fieldIdentifiers;
+    /**
+     * These defaults are usually overridden in config.yml
+     *
+     * @var array
+     */
+    protected $fieldIdentifiers = array(
+        'first_name' => 'first_name',
+        'last_name' => 'last_name',
+        'profile_image' => 'image'
+    );
 
     /**
      * @param Repository              $repository
@@ -61,7 +69,11 @@ class SocialLoginHelper
      */
     public function setFieldIdentifiers($fieldIdentifiers)
     {
-        $this->fieldIdentifiers = $fieldIdentifiers[$this->configResolver->getParameter('user_class', 'netgen_social_connect')];
+        $userClassIdentifier = $this->configResolver->getParameter('user_class', 'netgen_social_connect');
+
+        if (!empty($fieldIdentifiers[$userClassIdentifier])) {
+            $this->fieldIdentifiers = $fieldIdentifiers[$userClassIdentifier];
+        }
     }
 
     /**
@@ -267,29 +279,18 @@ class SocialLoginHelper
             $contentType
         );
         if (!empty($first_name)) {
-            if (empty($this->fieldIdentifiers['first_name'])) {
-                throw new MissingConfigurationException(
-                    'netgen_social_connect.'.$this->configResolver->getParameter('user_class', 'netgen_social_connect').'first_name'
-                );
+            if (!empty($this->fieldIdentifiers['first_name'])) {
+                $userCreateStruct->setField($this->fieldIdentifiers['first_name'], $first_name);
             }
-            $userCreateStruct->setField($this->fieldIdentifiers['first_name'], $first_name);
         }
         if (!empty($last_name)) {
-            if (empty($this->fieldIdentifiers['last_name'])) {
-                throw new MissingConfigurationException(
-                    'netgen_social_connect.'.$this->configResolver->getParameter('user_class', 'netgen_social_connect').'.last_name'
-                );
+            if (!empty($this->fieldIdentifiers['last_name'])) {
+                $userCreateStruct->setField($this->fieldIdentifiers['last_name'], $last_name);
             }
-            $userCreateStruct->setField($this->fieldIdentifiers['last_name'], $last_name);
         }
 
         $imageFileName = null;
 
-        if (empty($this->fieldIdentifiers['profile_image'])) {
-            throw new MissingConfigurationException(
-                'netgen_social_connect.'.$this->configResolver->getParameter('user_class', 'netgen_social_connect').'.profile_image'
-            );
-        }
         $imageFieldIdentifier = $this->fieldIdentifiers['profile_image'];
 
         if (!empty($imageLink) && !empty($imageFieldIdentifier)) {
