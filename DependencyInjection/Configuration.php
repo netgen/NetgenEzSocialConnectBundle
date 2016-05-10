@@ -16,31 +16,38 @@ class Configuration extends SiteaccessAwareConfiguration implements Configuratio
      */
     public function getConfigTreeBuilder()
     {
-
         $treeBuilder = new TreeBuilder();
-                $rootNode = $treeBuilder->root('netgen_ez_social_connect');
+
+        $rootNode = $treeBuilder->root('netgen_ez_social_connect');
 
         $rootNode
             ->children()
                 ->arrayNode('resource_owners')
-                ->useAttributeAsKey('resource_owner_name')
-                    ->prototype('array')
-                        ->children()
-                            ->scalarNode('useConfigResolver')->end()
-        ->end();
+                    ->useAttributeAsKey('resource_owner_name')
+                        ->normalizeKeys(false)
+                        ->prototype('array')
+                            ->children()
+                                ->scalarNode('useConfigResolver')->end()
+                            ->end()
+                        ->end()
+                ->end()
+            ->end()
+        ;
 
         $systemNode = $this->generateScopeBaseNode($rootNode);
         $systemNode
-            ->scalarNode('user_content_type_identifier')->isRequired()->end()
+            ->scalarNode('user_content_type_identifier')
+                ->isRequired()
+            ->end()
 
-            ->arrayNode('fields')
+            ->arrayNode('field_identifiers')
                 ->children()
                     ->scalarNode('first_name')->end()
                     ->scalarNode('last_name')->end()
                     ->scalarNode('profile_image')->end()
                 ->end()
             ->end()
-        ->end();
+        ;
 
         return $treeBuilder;
     }

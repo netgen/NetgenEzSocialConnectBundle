@@ -19,24 +19,23 @@ class NetgenEzSocialConnectExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $configuration = $this->getConfiguration($configs, $container);
+        $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('services.yml');
+        $loader->load('parameters.yml');
+
         $processor = new ConfigurationProcessor($container, 'netgen_ez_social_connect');
+
         $processor->mapConfig(
             $config,
             function ($scopeSettings, $currentScope, ContextualizerInterface $contextualizer)
             {
                 $contextualizer->setContextualParameter('user_content_type_identifier', $currentScope, $scopeSettings['user_content_type_identifier']);
-                $contextualizer->setContextualParameter('first_name', $currentScope, $scopeSettings['fields']['first_name']);
-                $contextualizer->setContextualParameter('last_name', $currentScope, $scopeSettings['fields']['last_name']);
-                $contextualizer->setContextualParameter('profile_image', $currentScope, $scopeSettings['fields']['profile_image']);
-                $contextualizer->setContextualParameter('fields', $currentScope, $scopeSettings['fields']);
             }
         );
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
-        $loader->load('parameters.yml');
+        $processor->mapConfigArray('field_identifiers', $config);
     }
 }

@@ -89,20 +89,24 @@ netgen_ez_social_connect:
 ```            
 
 # Define user content object mappings for social registration
-If these parameters are not set, field mappings will default to 'first_name', 'last_name', and 'image'. Make sure you do not use 'netgen_ez_social_connect' twice in the same configuration file.
+If these parameters are not set, the fields in question will not be mapped to the OAuth resource owner's response.
 
 ```
 # ezpublish/config/config.yml
 netgen_ez_social_connect:
-    field_identifiers:
-        user:
-            first_name: 'first_name'
-            last_name: 'last_name'
-            profile_image: 'image'
-        some_other_class:           # may be used in another siteaccess
-            first_name: 'intro'
-            last_name: ~            # do not import social data to this field
-            profile_image: 'picture'
+    system:
+        default:
+            user_content_class_identifier: user
+            fields:
+	        first_name: 'first_name'
+                last_name: 'last_name'
+                profile_image: 'image'
+        administration_group:
+	    user_content_class_identifier: enhanced_user
+            fields:
+                first_name: 'intro'
+                last_name: ~            # do not import social data to this field
+                profile_image: 'picture'
 ```
 
 # Configure the firewall
@@ -141,8 +145,7 @@ security:
 
 # Set up the parameters
 Set the id and key for each of the networks you wish to use.
-Also define the user group where the new users should be created,
-and the default user field mappings, as defined in config.yml.
+Also, define the user group where the new users should be created.
 ```
 # ezpublish/config/parameters.yml
 
@@ -160,7 +163,6 @@ parameters:
         twitter: 11
         linkedin: 11
         google: 11
-    netgen_social_connect.default.user_class_identifier_: user
 ```
 
 # Include the template

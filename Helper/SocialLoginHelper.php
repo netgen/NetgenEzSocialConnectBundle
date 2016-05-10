@@ -30,8 +30,14 @@ class SocialLoginHelper
     /** @var  \eZ\Publish\Core\Helper\FieldHelper */
     protected $fieldHelper;
 
-    /** @var array */
-    protected $fieldIdentifiers = array();
+    /** @var  string */
+    protected $firstName;
+
+    /** @var  string */
+    protected $lastName;
+
+    /** @var  string */
+    protected $imageField;
 
     /**
      * @param Repository              $repository
@@ -52,28 +58,13 @@ class SocialLoginHelper
         $this->configResolver = $configResolver;
         $this->fieldHelper = $fieldHelper;
         $this->logger = $logger;
-    }
 
-    /**
-     * If the configuration is left empty, the fields will not be mapped
-     *
-     * @param $fieldIdentifiers
-     */
-    public function setFieldIdentifiers($fieldIdentifiers)
-    {
-        $this->fieldIdentifiers['first_name']    = !empty($fieldIdentifiers['first_name'])    ? $fieldIdentifiers['first_name'] :    '';
-        $this->fieldIdentifiers['last_name']     = !empty($fieldIdentifiers['last_name'])     ? $fieldIdentifiers['last_name'] :     '';
-        $this->fieldIdentifiers['profile_image'] = !empty($fieldIdentifiers['profile_image']) ? $fieldIdentifiers['profile_image'] : '';
-    }
 
-    /**
-     * Returns map of user class field identifiers for the current siteaccess
-     *
-     * @return array
-     */
-    public function getFieldIdentifiers()
-    {
-        return $this->fieldIdentifiers;
+        $fields = $this->configResolver->getParameter('field_identifiers', 'netgen_ez_social_connect');
+
+        $this->firstName = $fields['first_name'];
+        $this->lastName = $fields['last_name'];
+        $this->imageField = $fields['profile_image'];
     }
 
     /**
@@ -124,7 +115,7 @@ class SocialLoginHelper
      */
     public function addProfileImage(User $user, $imageLink)
     {
-        $imageFieldIdentifier = $this->fieldIdentifiers['profile_image'];
+        $imageFieldIdentifier = $this->imageField;
         if (empty($imageFieldIdentifier)) {
             return;
         }
@@ -257,7 +248,7 @@ class SocialLoginHelper
         $last_name = $oauthUser->getLastName();
         $imageLink = $oauthUser->getImagelink();
 
-        $contentTypeIdentifier = $this->configResolver->getParameter('user_class_identifier', 'netgen_social_connect');
+        $contentTypeIdentifier = $this->configResolver->getParameter('user_content_type_identifier', 'netgen_social_connect');
         $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
         $languages = $this->configResolver->getParameter('languages');
 
@@ -268,20 +259,21 @@ class SocialLoginHelper
             $languages[ 0 ],
             $contentType
         );
+
         if (!empty($first_name)) {
-            if (!empty($this->fieldIdentifiers['first_name'])) {
-                $userCreateStruct->setField($this->fieldIdentifiers['first_name'], $first_name);
+            if (!empty($this->firstName)) {
+                $userCreateStruct->setField($this->firstName, $first_name);
             }
         }
         if (!empty($last_name)) {
-            if (!empty($this->fieldIdentifiers['last_name'])) {
-                $userCreateStruct->setField($this->fieldIdentifiers['last_name'], $last_name);
+            if (!empty($this->lastName)) {
+                $userCreateStruct->setField($this->lastName, $last_name);
             }
         }
 
         $imageFileName = null;
 
-        $imageFieldIdentifier = $this->fieldIdentifiers['profile_image'];
+        $imageFieldIdentifier = $this->imageField;
 
         if (!empty($imageLink) && !empty($imageFieldIdentifier)) {
             $imageFileName = $this->downloadExternalImage($imageLink);

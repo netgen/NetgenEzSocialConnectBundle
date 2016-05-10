@@ -18,8 +18,6 @@ services:
             - @ezpublish.config.resolver
             - @ezpublish.field_helper
             - @?logger
-        calls:
-            - [ setFieldIdentifiers, [ 'fields;netgen_ez_social_connect$' ] ]
 
     netgen.social_connect.controller.connect:
         class: Netgen\Bundle\EzSocialConnectBundle\Controller\ConnectController
