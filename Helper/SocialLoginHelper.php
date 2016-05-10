@@ -30,16 +30,8 @@ class SocialLoginHelper
     /** @var  \eZ\Publish\Core\Helper\FieldHelper */
     protected $fieldHelper;
 
-    /**
-     * These defaults are usually overridden in config.yml
-     *
-     * @var array
-     */
-    protected $fieldIdentifiers = array(
-        'first_name' => 'first_name',
-        'last_name' => 'last_name',
-        'profile_image' => 'image'
-    );
+    /** @var array */
+    protected $fieldIdentifiers = array();
 
     /**
      * @param Repository              $repository
@@ -63,17 +55,15 @@ class SocialLoginHelper
     }
 
     /**
-     * Chooses from a set of field identifier mappings according to the user class assigned to each siteaccess
+     * If the configuration is left empty, the fields will not be mapped
      *
      * @param $fieldIdentifiers
      */
     public function setFieldIdentifiers($fieldIdentifiers)
     {
-        $userClassIdentifier = $this->configResolver->getParameter('user_class_identifier', 'netgen_social_connect');
-
-        if (!empty($fieldIdentifiers[$userClassIdentifier])) {
-            $this->fieldIdentifiers = $fieldIdentifiers[$userClassIdentifier];
-        }
+        $this->fieldIdentifiers['first_name']    = !empty($fieldIdentifiers['first_name'])    ? $fieldIdentifiers['first_name'] :    '';
+        $this->fieldIdentifiers['last_name']     = !empty($fieldIdentifiers['last_name'])     ? $fieldIdentifiers['last_name'] :     '';
+        $this->fieldIdentifiers['profile_image'] = !empty($fieldIdentifiers['profile_image']) ? $fieldIdentifiers['profile_image'] : '';
     }
 
     /**
