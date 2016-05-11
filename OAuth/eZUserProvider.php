@@ -84,9 +84,9 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
                 // Something went wrong - data is in the table, but the user does not exist
                 // Remove faulty data and fall back to creating a new user
                 $this->loginHelper->removeFromTable($OAuthEzUserEntity);
-            } finally {
-                $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
             }
+
+            $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
         }
 
         return $securityUser;
