@@ -248,7 +248,7 @@ class SocialLoginHelper
         $last_name = $oauthUser->getLastName();
         $imageLink = $oauthUser->getImagelink();
 
-        $contentTypeIdentifier = $this->configResolver->getParameter('user_content_type_identifier', 'netgen_social_connect');
+        $contentTypeIdentifier = $this->configResolver->getParameter('user_content_type_identifier', 'netgen_ez_social_connect');
         $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
         $languages = $this->configResolver->getParameter('languages');
 
