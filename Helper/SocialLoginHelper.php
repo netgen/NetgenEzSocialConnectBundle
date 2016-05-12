@@ -228,6 +228,15 @@ class SocialLoginHelper
         return $results[ 0 ];
     }
 
+    /**
+     * Checks whether a social account is already linked to an eZ user.
+     * This is used to prevent multiple eZ users being linked to the same social account.
+     *
+     * @param string $resourceOwnerName
+     * @param string $resourceUserId
+     *
+     * @return bool
+     */
     public function resourceUserIsLinked($resourceOwnerName, $resourceUserId)
     {
         $results =
