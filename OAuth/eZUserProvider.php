@@ -9,7 +9,6 @@ use eZ\Publish\Core\Repository\Values\User\User;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\User\Provider as BaseUserProvider;
 use eZ\Publish\API\Repository\Exceptions\NotFoundException;
@@ -53,11 +52,11 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
      * Loads the user by a given UserResponseInterface object.
      * If no eZ user is found with those credentials, a real eZ User content object is generated.
      *
-     * @param UserResponseInterface $response
+     * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
 
-     * @return OAuthEzUser
+     * @return \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
      *
-     * @throws UsernameNotFoundException if the user is not found
+     * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
      */
     public function loadUserByOAuthUserResponse(UserResponseInterface $response)
     {
@@ -127,7 +126,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
 
         $OAuthEzUser = new OAuthEzUser($uniqueLogin, $userId);
 
-        $username = $this->getUsername($response);
+        $username = $this->getRealName($response);
         $OAuthEzUser->setFirstName($username['firstName']);
         $OAuthEzUser->setLastName($username['lastName']);
 
@@ -154,7 +153,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
      *
      * @return array
      */
-    protected function getUsername(UserResponseInterface $response)
+    protected function getRealName(UserResponseInterface $response)
     {
         $realName = $response->getRealName();
 
@@ -190,7 +189,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
      *
      * @param string $email
      *
-     * @return SecurityUser|null
+     * @return \eZ\Publish\Core\MVC\Symfony\Security\User|null
      */
     protected function getFirstUserByEmail($email)
     {
