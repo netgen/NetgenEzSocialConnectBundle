@@ -3,6 +3,8 @@
 namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
 use eZ\Publish\API\Repository\Repository;
+use eZ\Publish\Core\MVC\Symfony\Security\User as SecurityUser;
+use eZ\Publish\Core\Repository\Values\User\User;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
@@ -27,6 +29,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     public function __construct(Repository $repository, SocialLoginHelper $loginHelper)
     {
         parent::__construct($repository);
+
         $this->loginHelper = $loginHelper;
     }
 
@@ -42,23 +45,24 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
      */
     public function loadUserByOAuthUserResponse(UserResponseInterface $response)
     {
-        // Intermediary user entity generated from the response
+        // Intermediary user entity generated from the response, not stored in the database
         $OAuthEzUser = $this->generateOAuthEzUser($response);
         $OAuthEzUserEntity = $this->loginHelper->loadFromTable($OAuthEzUser);
 
         // If there is no link, look for an eZ user and connect them
         if (!$OAuthEzUserEntity instanceof OAuthEz) {
-            try {
 
-              $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
-              $userContentObject = $this->loginHelper->loadEzUserById($securityUser->getAPIUser()->getUserId());
+            $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
 
-            } catch (UsernameNotFoundException $e) {
+            if (null !== $securityUser) {
+                $userContentObject = $this->loginHelper->loadEzUserById($securityUser->getAPIUser()->getUserId());
+            } else {
               $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
             }
 
             $this->loginHelper->addToTable($userContentObject, $OAuthEzUser);
-            $securityUser = $this->loadUserByUsername($userContentObject->login);
+
+            $securityUser = $this->getFirstUserByEmail($userContentObject->email);
 
         // If a link was found, update profile data for the user
         } else {
@@ -86,7 +90,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
                 $this->loginHelper->removeFromTable($OAuthEzUserEntity);
             }
 
-            $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
+            $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
         }
 
         return $securityUser;
@@ -164,5 +168,24 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         }
 
         return array('firstName' => $firstName, 'lastName' => $lastName);
+    }
+
+    /**
+     * Converts a value object User to a Security user.
+     * Emails as logins should be unique in eZ 5+, so we can safely take the first user encountered.
+     *
+     * @param $email
+     * @return SecurityUser|null
+     */
+    protected function getFirstUserByEmail($email)
+    {
+        $users = $this->repository->getUserService()->loadUsersByEmail($email);
+        $user = reset($users);
+
+        if ($user instanceof User) {
+            return new SecurityUser($user, array('ROLE_USER'));
+        }
+
+        return null;
     }
 }
