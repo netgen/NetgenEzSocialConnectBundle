@@ -1,6 +1,6 @@
 # INSTALLATION INSTRUCTIONS
 
-As this bundle uses HWIOAuthBundle, installation follows pretty much the same procedure.
+This bundle uses HWIOAuthBundle, and the installation process is similar.
 
 # Add bundle to the project via composer
 ```
@@ -9,12 +9,7 @@ As this bundle uses HWIOAuthBundle, installation follows pretty much the same pr
     ...
 ```
 
-# Enable the bundle in the kernel
-# INSTALLATION INSTRUCTIONS
-
-As this bundle uses HWIOAuthBundle, installation is pretty much similar.
-
-# Add HWIOAuthBundle and NetgenEzSocialConnectBundle to the project via composer
+# Register HWIOAuthBundle and NetgenEzSocialConnectBundle in the kernel
 ```
 // ezpublish/EzPublishKernel.php
 
@@ -33,7 +28,7 @@ public function registerBundles()
 ```
 php ezpublish/console doctrine:schema:update --force
 ```
-This will add ngsocialconnect table to the database.
+This will add the ngsocialconnect table to the database.
 
 # Import the routing
 ```
@@ -77,8 +72,8 @@ hwi_oauth:
             scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
 ```
 
-# Configure which resource owners can use siteaccess specific parameters
-If useConfigResolver option is not set, resource owner will use default parameters.
+# Configure which resource owners can use siteaccess-specific parameters
+If the useConfigResolver option is not set, the resource owner will use the default parameters.
 ```
 # ezpublish/config/config.yml
 
@@ -88,10 +83,10 @@ netgen_social_connect:
         twitter: { useConfigResolver: true }            
 ```            
 
-# Define user content object mappings for social registration
+# Define user content object settings for social registration
 If these parameters are not set, the fields in question will not be mapped to the OAuth resource owner's response.
 
-If the parameter 'merge_social_accounts' set to true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user.
+If the parameter 'merge_social_accounts' is set to true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user.
 Otherwise, multiple eZ users will be created, each linked to one social account. A new eZ user with a dummy email will always be created for users not disclosing their email.
 
 ```
@@ -149,7 +144,7 @@ security:
 
 # Set up the parameters
 Set the id and key for each of the networks you wish to use.
-Also, define the user group where the new users should be created.
+Also, define the user group in which the new users should be created.
 ```
 # ezpublish/config/parameters.yml
 
@@ -170,14 +165,14 @@ parameters:
 ```
 
 # Include the template
-Last step is to include the template with social buttons in your login template.
-You can ofcourse use your own template, based on this one.
+The last step is to include the template with social buttons in your login template.
+You can, of course, use your own template, based on this one.
 ```
 {% include 'NetgenEzSocialConnectBundle:social:social_buttons.html.twig' %}
 ```
 
 # Connecting exiting users
-If you would like your existing users to be able to connect their ez account to the social network, so they would in future be able to log in with social network account, simply include another template on the profile page:
+If you would like your existing users to be able to connect their ez account to the social network, so they would be able to log in with social network account in the future, simply include another template on the profile page:
 ```
 {% include 'NetgenEzSocialConnectBundle:social:connect_user.html.twig' %}
 ```
