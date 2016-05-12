@@ -26,7 +26,7 @@ class NetgenEzSocialConnectExtension extends Extension
         $loader->load('services.yml');
         $loader->load('parameters.yml');
 
-        $processor = new ConfigurationProcessor($container, 'netgen_ez_social_connect');
+        $processor = new ConfigurationProcessor($container, 'netgen_social_connect');
 
         $processor->mapConfig(
             $config,
@@ -38,5 +38,13 @@ class NetgenEzSocialConnectExtension extends Extension
         );
 
         $processor->mapConfigArray('field_identifiers', $config);
+    }
+
+    /**
+     * @return string
+     */
+    public function getAlias()
+    {
+        return 'netgen_social_connect';
     }
 }

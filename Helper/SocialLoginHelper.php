@@ -60,7 +60,7 @@ class SocialLoginHelper
         $this->logger = $logger;
 
 
-        $fields = $this->configResolver->getParameter('field_identifiers', 'netgen_ez_social_connect');
+        $fields = $this->configResolver->getParameter('field_identifiers', 'netgen_social_connect');
 
         $this->firstName = $fields['first_name'];
         $this->lastName = $fields['last_name'];
@@ -248,7 +248,7 @@ class SocialLoginHelper
         $last_name = $oauthUser->getLastName();
         $imageLink = $oauthUser->getImagelink();
 
-        $contentTypeIdentifier = $this->configResolver->getParameter('user_content_type_identifier', 'netgen_ez_social_connect');
+        $contentTypeIdentifier = $this->configResolver->getParameter('user_content_type_identifier', 'netgen_social_connect');
         $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
         $languages = $this->configResolver->getParameter('languages');
 

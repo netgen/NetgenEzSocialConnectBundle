@@ -82,7 +82,7 @@ If useConfigResolver option is not set, resource owner will use default paramete
 ```
 # ezpublish/config/config.yml
 
-netgen_ez_social_connect:
+netgen_social_connect:
     resource_owners:
         facebook: { useConfigResolver: true }
         twitter: { useConfigResolver: true }            
@@ -91,11 +91,15 @@ netgen_ez_social_connect:
 # Define user content object mappings for social registration
 If these parameters are not set, the fields in question will not be mapped to the OAuth resource owner's response.
 
+If the parameter 'merge_social_accounts' set to true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user.
+Otherwise, multiple eZ users will be created, each linked to one social account. A new eZ user with a dummy email will always be created for users not disclosing their email.
+
 ```
 # ezpublish/config/config.yml
-netgen_ez_social_connect:
+netgen__social_connect:
     system:
         default:
+            merge_social_accounts: true
             user_content_class_identifier: user
             fields:
 	        first_name: 'first_name'

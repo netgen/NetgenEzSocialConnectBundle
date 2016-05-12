@@ -18,7 +18,7 @@ class Configuration extends SiteaccessAwareConfiguration implements Configuratio
     {
         $treeBuilder = new TreeBuilder();
 
-        $rootNode = $treeBuilder->root('netgen_ez_social_connect');
+        $rootNode = $treeBuilder->root('netgen_social_connect');
 
         $rootNode
             ->children()
