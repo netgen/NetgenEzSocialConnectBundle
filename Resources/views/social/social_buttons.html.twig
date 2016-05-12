@@ -74,10 +74,14 @@
     }
 
     function signinCallback(authResult) {
-        if (authResult['status']['signed_in']) {
+
+        // Only redirect to Google OAuth if the user explicitly requests it
+        // Source: http://stackoverflow.com/questions/15484533/preventing-automatic-sign-in-when-using-google-sign-in
+        if (authResult['status']['signed_in'] && authResult.status.method == 'PROMPT') {
             // Update the app to reflect a signed in user
             // Hide the sign-in button now that the user is authorized, for example:
             //document.getElementById('signinButton').setAttribute('style', 'display: none');
+
             document.location = "{{ url("hwi_oauth_service_redirect", {service: "google"}) }}";
         } else {
             // Update the app to reflect a signed out user
@@ -87,6 +91,7 @@
             //   "immediate_failed" - Could not automatically log in the user
             console.log('Sign-in state: ' + authResult['error']);
         }
+
     }
 </script>
 <script type="in/Login"></script>
