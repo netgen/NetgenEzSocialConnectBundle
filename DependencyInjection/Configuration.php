@@ -37,14 +37,24 @@ class Configuration extends SiteaccessAwareConfiguration implements Configuratio
         $systemNode = $this->generateScopeBaseNode($rootNode);
         $systemNode
             ->scalarNode('user_content_type_identifier')
+                ->defaultValue('user')
                 ->isRequired()
+            ->end()
+            ->scalarNode('merge_social_accounts')
+                ->defaultValue(false)
             ->end()
 
             ->arrayNode('field_identifiers')
                 ->children()
-                    ->scalarNode('first_name')->end()
-                    ->scalarNode('last_name')->end()
-                    ->scalarNode('profile_image')->end()
+                    ->scalarNode('first_name')->
+                        defaultValue('first_name')
+                    ->end()
+                    ->scalarNode('last_name')
+                        ->defaultValue('last_name')
+                    ->end()
+                    ->scalarNode('profile_image')
+                        ->defaultValue('image')
+                    ->end()
                 ->end()
             ->end()
         ;

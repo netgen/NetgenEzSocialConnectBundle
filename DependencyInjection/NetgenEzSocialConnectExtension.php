@@ -33,6 +33,7 @@ class NetgenEzSocialConnectExtension extends Extension
             function ($scopeSettings, $currentScope, ContextualizerInterface $contextualizer)
             {
                 $contextualizer->setContextualParameter('user_content_type_identifier', $currentScope, $scopeSettings['user_content_type_identifier']);
+                $contextualizer->setContextualParameter('merge_social_accounts', $currentScope, $scopeSettings['merge_social_accounts']);
             }
         );
 

@@ -9,6 +9,8 @@ services:
         parent: ezpublish.security.user_provider
         arguments:
             - @netgen.social_connect.helper
+        calls:
+            - [setMergeAccountsFlag, ["$merge_social_accounts;netgen_ez_social_connect$"]]
 
     netgen.social_connect.helper:
         class: Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper

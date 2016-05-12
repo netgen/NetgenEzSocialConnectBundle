@@ -4,6 +4,7 @@ namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
 use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\Core\MVC\Symfony\Security\User as SecurityUser;
+use Symfony\Component\Security\Core\User\UserInterface as SecurityUserInterface;
 use eZ\Publish\Core\Repository\Values\User\User;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
@@ -21,6 +22,11 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     protected $loginHelper;
 
     /**
+     * @var bool
+     */
+    protected $mergeAccountsFlag;
+
+    /**
      * eZUserProvider constructor.
      *
      * @param \eZ\Publish\API\Repository\Repository $repository
@@ -31,6 +37,16 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         parent::__construct($repository);
 
         $this->loginHelper = $loginHelper;
+    }
+
+    /**
+     * Injected setter
+     *
+     * @param bool $flag
+     */
+    public function setMergeAccountsFlag($flag = false)
+    {
+        $this->mergeAccountsFlag = $flag;
     }
 
     /**
@@ -54,8 +70,8 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
 
             $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
 
-            if (null !== $securityUser) {
-                $userContentObject = $this->loginHelper->loadEzUserById($securityUser->getAPIUser()->getUserId());
+            if ($this->mergeAccountsFlag && $securityUser instanceof SecurityUserInterface) {
+                $userContentObject = $securityUser->getAPIUser();
             } else {
               $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
             }
@@ -67,8 +83,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         // If a link was found, update profile data for the user
         } else {
             try {
-                $ezUserId = $OAuthEzUserEntity->getEzUserId();
-                $userContentObject = $this->loginHelper->loadEzUserById($ezUserId);
+                $userContentObject = $this->loginHelper->loadEzUserById($OAuthEzUserEntity->getEzUserId());
 
                 $imageLink = $OAuthEzUser->getImageLink();
                 if (!empty($imageLink)) {
@@ -173,7 +188,8 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     /**
      * Converts a value object User to a Security user.
      *
-     * @param $email
+     * @param string $email
+     *
      * @return SecurityUser|null
      */
     protected function getFirstUserByEmail($email)
