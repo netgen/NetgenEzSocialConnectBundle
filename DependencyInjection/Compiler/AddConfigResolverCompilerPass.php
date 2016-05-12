@@ -17,7 +17,7 @@ class AddConfigResolverCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        $extensionConfig = $container->getExtensionConfig('netgen_ez_social_connect');
+        $extensionConfig = $container->getExtensionConfig('netgen_social_connect');
 
         $configuration = new Configuration();
         $processor = new Processor();
