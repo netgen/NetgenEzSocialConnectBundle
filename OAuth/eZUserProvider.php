@@ -172,7 +172,6 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
 
     /**
      * Converts a value object User to a Security user.
-     * Emails as logins should be unique in eZ 5+, so we can safely take the first user encountered.
      *
      * @param $email
      * @return SecurityUser|null
