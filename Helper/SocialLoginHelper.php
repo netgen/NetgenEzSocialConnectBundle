@@ -228,6 +228,25 @@ class SocialLoginHelper
         return $results[ 0 ];
     }
 
+    public function resourceUserIsLinked($resourceOwnerName, $resourceUserId)
+    {
+        $results =
+            $this->entityManager
+                ->getRepository('NetgenEzSocialConnectBundle:OAuthEz')
+                ->findBy(
+                    array(
+                        'resourceUserId' => $resourceUserId,
+                        'resourceName' => $resourceOwnerName,
+                    )
+                );
+
+        if (!is_array($results) || empty($results)) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Creates ez user from OAuthEzUser entity.
      *

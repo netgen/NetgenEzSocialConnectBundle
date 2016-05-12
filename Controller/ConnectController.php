@@ -4,9 +4,7 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Controller;
 
 use eZ\Bundle\EzPublishCoreBundle\Controller;
 use eZ\Publish\Core\Base\Exceptions\NotFoundException;
-use HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface;
 use HWI\Bundle\OAuthBundle\OAuth\Response\PathUserResponse;
-use HWI\Bundle\OAuthBundle\Security\OAuthUtils;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnected;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +15,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class ConnectController extends Controller
 {
     /**
-     * @param Request $request
+     * @param \Symfony\Component\HttpFoundation\Request $request
      * @param $resourceName
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -34,6 +32,7 @@ class ConnectController extends Controller
             throw new NotFoundException('connected user', $userContentId.'/'.$resourceName);
         }
         $loginHelper->removeFromTable($OAuthEz);
+        /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
         $session->getFlashBag()->add('notice', 'You have successfully disconnected user from Facebook account!');
 
@@ -46,12 +45,12 @@ class ConnectController extends Controller
      * Sets the ez user id into session variable,
      * and starts the connection to the social network.
      *
-     * @param Request   $request
-     * @param string    $resource_name
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param string $resourceName
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      *
-     * @throws UserAlreadyConnected
+     * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnected
      */
     public function connectUser(Request $request, $resourceName)
     {
@@ -76,7 +75,7 @@ class ConnectController extends Controller
         $request->getSession()->set( 'social_connect_ez_user_id', $userContentId);
         $request->getSession()->set( 'social_connect_resource_owner', $resourceName);
 
-        /** @var OAuthUtils $OAuthUtils */
+        /** @var \HWI\Bundle\OAuthBundle\Security\OAuthUtils $OAuthUtils */
         $OAuthUtils = $this->container->get('hwi_oauth.security.oauth_utils');
 
         return $this->redirect(
@@ -93,7 +92,7 @@ class ConnectController extends Controller
      *
      * @param string $name
      *
-     * @return ResourceOwnerInterface
+     * @return \HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface
      *
      * @throws \RuntimeException if there is no resource owner with the given name.
      */
@@ -121,23 +120,25 @@ class ConnectController extends Controller
 
     /**
      * Given a request with an authorization code, fetches a token, retrieves a user resource id
-     * Then, a link is saved between the logged in user and the resource owner
+     * Then, a link is saved between the logged-in user and the resource owner
      *
      * On failure or success, redirect to the target path with a flash notice
      *
-     * @param Request $request
+     * @param \Symfony\Component\HttpFoundation\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function finishConnecting(Request $request)
     {
         $targetPath = $request->query->get($this->container->getParameter('hwi_oauth.target_path_parameter'), '/');
+        /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
 
         // Delete any previous flashes to prevent clutter in case the endpoint isn't consuming them
         $session->getFlashBag()->clear();
 
         $resourceOwnerName = $session->get('social_connect_resource_owner');
+        $message = sprintf('You have failed to connect to your %s account!', ucfirst($resourceOwnerName));
 
         try
         {
@@ -145,7 +146,7 @@ class ConnectController extends Controller
         }
         catch (\RuntimeException $e)
         {
-            $session->getFlashBag()->add('notice', sprintf('You have failed to connect to your %s account!', ucfirst($resourceOwnerName)));
+            $session->getFlashBag()->add('notice', $message);
 
             return $this->redirect($targetPath);
         }
@@ -172,17 +173,22 @@ class ConnectController extends Controller
 
                 $loginHelper = $this->get('netgen.social_connect.helper');
 
-                $loginHelper->addToTable(
-                    $loginHelper->loadEzUserById($apiUser->id),
-                    $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId)
-                );
-                $session->getFlashBag()->add('notice', sprintf('You have connected to your %s account!', ucfirst($resourceOwnerName)));
-
-                return $this->redirect($targetPath);
+                if (!$loginHelper->resourceUserIsLinked($resourceOwnerName, $resourceUserId))
+                {
+                    $loginHelper->addToTable(
+                        $loginHelper->loadEzUserById($apiUser->id),
+                        $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId)
+                    );
+                    $message = sprintf('You have connected to your %s account!', ucfirst($resourceOwnerName));
+                }
+                else
+                {
+                    $message = sprintf('This %s account is already connected to another user!', ucfirst($resourceOwnerName));
+                }
             }
         }
 
-        $session->getFlashBag()->add('notice', sprintf('You have failed to connect to your %s account!', ucfirst($resourceOwnerName)));
+        $session->getFlashBag()->add('notice', $message);
 
         return $this->redirect($targetPath);
     }
@@ -190,10 +196,11 @@ class ConnectController extends Controller
     /**
      * Wrapper for intermediary OAuthEzUser object for addToTable call
      *
+     * @param string $username
      * @param string $resourceOwnerName
      * @param string $resourceUserId
      *
-     * @return OAuthEzUser
+     * @return \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
      */
     protected function getOAuthEzUser($username, $resourceOwnerName, $resourceUserId)
     {
