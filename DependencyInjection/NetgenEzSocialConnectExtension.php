@@ -6,13 +6,14 @@ use eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\SiteAccessAw
 use eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\SiteAccessAware\ContextualizerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
 /**
  * This is the class that loads and manages your bundle configuration.
  */
-class NetgenEzSocialConnectExtension extends Extension
+class NetgenEzSocialConnectExtension extends Extension implements PrependExtensionInterface
 {
     /**
      * {@inheritdoc}
@@ -24,7 +25,6 @@ class NetgenEzSocialConnectExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
-        $loader->load('parameters.yml');
 
         $processor = new ConfigurationProcessor($container, 'netgen_social_connect');
 
@@ -49,5 +49,16 @@ class NetgenEzSocialConnectExtension extends Extension
     public function getAlias()
     {
         return 'netgen_social_connect';
+    }
+
+    /**
+     * Prepend configuration for resource owners used in config.yml
+     *
+     * @param ContainerBuilder $container
+     */
+    public function prepend(ContainerBuilder $container)
+    {
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('parameters.yml');
     }
 }
