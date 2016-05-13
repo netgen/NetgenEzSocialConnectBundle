@@ -58,13 +58,33 @@ class SocialLoginHelper
         $this->configResolver = $configResolver;
         $this->fieldHelper = $fieldHelper;
         $this->logger = $logger;
+    }
 
+    /**
+     * Injected setter
+     *
+     * @param $firstName
+     */
+    public function setFirstName($firstName){
+        $this->firstName = $firstName;
+    }
 
-        $fields = $this->configResolver->getParameter('field_identifiers', 'netgen_social_connect');
+    /**
+     * Injected setter
+     *
+     * @param $lastName
+     */
+    public function setLastName($lastName){
+        $this->lastName = $lastName;
+    }
 
-        $this->firstName = $fields['first_name'];
-        $this->lastName = $fields['last_name'];
-        $this->imageField = $fields['profile_image'];
+    /**
+     * Injected setter
+     *
+     * @param $imageField
+     */
+    public function setProfileImage($imageField){
+        $this->imageField = $imageField;
     }
 
     /**

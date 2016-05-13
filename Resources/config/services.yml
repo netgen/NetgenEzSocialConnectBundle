@@ -20,6 +20,11 @@ services:
             - @ezpublish.config.resolver
             - @ezpublish.field_helper
             - @?logger
+        calls:
+            - [setFirstName,    ["$first_name;netgen_social_connect$"]]
+            - [setLastName,     ["$last_name;netgen_social_connect$"]]
+            - [setProfileImage, ["$profile_image;netgen_social_connect$"]]
+        lazy: true
 
     netgen.social_connect.controller.connect:
         class: Netgen\Bundle\EzSocialConnectBundle\Controller\ConnectController
