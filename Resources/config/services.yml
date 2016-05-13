@@ -11,6 +11,7 @@ services:
             - @netgen.social_connect.helper
         calls:
             - [setMergeAccountsFlag, ["$merge_social_accounts;netgen_social_connect$"]]
+        lazy: true
 
     netgen.social_connect.helper:
         class: Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
