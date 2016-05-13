@@ -4,7 +4,7 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Exception;
 
 use Exception;
 
-class UserAlreadyConnected extends Exception
+class UserAlreadyConnectedException extends Exception
 {
     /**
      * Constructor.

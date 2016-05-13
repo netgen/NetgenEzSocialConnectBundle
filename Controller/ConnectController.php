@@ -5,12 +5,14 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Controller;
 use eZ\Bundle\EzPublishCoreBundle\Controller;
 use eZ\Publish\Core\Base\Exceptions\NotFoundException;
 use HWI\Bundle\OAuthBundle\OAuth\Response\PathUserResponse;
-use Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnected;
+use Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnectedException;
+use Netgen\Bundle\EzSocialConnectBundle\Exception\UserNotLoggedInException;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
 
 class ConnectController extends Controller
 {
@@ -23,6 +25,10 @@ class ConnectController extends Controller
      */
     public function disconnectUser(Request $request, $resourceName)
     {
+        if (!$this->getUser() instanceof UserInterface) {
+            throw new UserNotLoggedInException($resourceName, "Cannot disconnect from '%s'. Please log in first.");
+        }
+
         $targetPathParameter = $this->container->getParameter('hwi_oauth.target_path_parameter');
         $targetPath = $request->query->get($targetPathParameter, '/');
         $userContentId = $this->getUser()->getAPIUser()->id;
@@ -50,7 +56,7 @@ class ConnectController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      *
-     * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnected
+     * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnectedException
      */
     public function connectUser(Request $request, $resourceName)
     {
