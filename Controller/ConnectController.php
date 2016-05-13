@@ -26,7 +26,7 @@ class ConnectController extends Controller
     public function disconnectUser(Request $request, $resourceName)
     {
         if (!$this->getUser() instanceof UserInterface) {
-            throw new UserNotLoggedInException($resourceName, "Cannot disconnect from '%s'. Please log in first.");
+            throw new UserNotLoggedInException(sprintf("Cannot disconnect from '%s'. Please log in first.", $resourceName));
         }
 
         $targetPathParameter = $this->container->getParameter('hwi_oauth.target_path_parameter');
