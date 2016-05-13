@@ -9,10 +9,8 @@ use Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnectedException;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class ConnectController extends Controller
 {
@@ -26,7 +24,7 @@ class ConnectController extends Controller
     public function disconnectUser(Request $request, $resourceName)
     {
         if (!$this->getUser() instanceof UserInterface) {
-            throw new AccessDeniedException(sprintf("Cannot disconnect from '%s'. Please log in first.", $resourceName));
+            throw new AccessDeniedHttpException(sprintf("Cannot disconnect from '%s'. Please log in first.", $resourceName));
         }
 
         $targetPathParameter = $this->container->getParameter('hwi_oauth.target_path_parameter');
