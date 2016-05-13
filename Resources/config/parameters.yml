@@ -1,1 +1,14 @@
 parameters:
+    netgen_social_connect.default.facebook.id:      'CHANGEME'
+    netgen_social_connect.default.facebook.secret:  'CHANGEME'
+    netgen_social_connect.default.twitter.id:       'CHANGEME'
+    netgen_social_connect.default.twitter.secret:   'CHANGEME'
+    netgen_social_connect.default.linkedin.id:      'CHANGEME'
+    netgen_social_connect.default.linkedin.secret:  'CHANGEME'
+    netgen_social_connect.default.google.id:        'CHANGEME'
+    netgen_social_connect.default.google.secret:    'CHANGEME'
+    netgen_social_connect.default.oauth.user_group:
+        facebook: 11
+        twitter: 11
+        linkedin: 11
+        google: 11
