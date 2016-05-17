@@ -32,9 +32,14 @@ class ConnectController extends Controller
         $userContentId = $this->getUser()->getAPIUser()->id;
         $loginHelper = $this->get('netgen.social_connect.helper');
         $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName);
+
         if (empty($OAuthEz)) {
             throw new NotFoundException('connected user', $userContentId.'/'.$resourceName);
         }
+        if (!$OAuthEz->isIsDisconnectable()) {
+            throw new AccessDeniedHttpException(sprintf("Cannot disconnect from '%s' as it is the main social login.", $resourceName));
+        }
+
         $loginHelper->removeFromTable($OAuthEz);
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
@@ -181,7 +186,8 @@ class ConnectController extends Controller
                 {
                     $loginHelper->addToTable(
                         $loginHelper->loadEzUserById($apiUser->id),
-                        $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId)
+                        $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId),
+                        true
                     );
                     $message = sprintf('You have connected to your %s account!', ucfirst($resourceOwnerName));
                 }

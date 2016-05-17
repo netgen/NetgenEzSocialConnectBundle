@@ -13,3 +13,6 @@ Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz:
         resourceUserId:
             type: string
             column: resource_user_id
+        isDisconnectable:
+            type: boolean
+            column: is_disconnectable

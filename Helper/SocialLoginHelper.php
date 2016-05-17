@@ -15,13 +15,13 @@ use eZ\Publish\Core\Helper\FieldHelper;
 
 class SocialLoginHelper
 {
-    /** @var Repository Repository */
+    /** @var \eZ\Publish\API\Repository\Repository Repository */
     protected $repository;
 
-    /** @var  EntityManagerInterface */
+    /** @var  \Doctrine\ORM\EntityManagerInterface */
     protected $entityManager;
 
-    /** @var  ConfigResolverInterface */
+    /** @var  \eZ\Publish\Core\MVC\ConfigResolverInterface */
     protected $configResolver;
 
     /** @var  \Psr\Log\LoggerInterface */
@@ -40,11 +40,11 @@ class SocialLoginHelper
     protected $imageField;
 
     /**
-     * @param Repository              $repository
-     * @param EntityManagerInterface  $entityManager
-     * @param ConfigResolverInterface $configResolver
-     * @param FieldHelper             $fieldHelper
-     * @param LoggerInterface         $logger
+     * @param \eZ\Publish\API\Repository\Repository        $repository
+     * @param \Doctrine\ORM\EntityManagerInterface         $entityManager
+     * @param \eZ\Publish\Core\MVC\ConfigResolverInterface $configResolver
+     * @param \eZ\Publish\Core\Helper\FieldHelper          $fieldHelper
+     * @param \Psr\Log\LoggerInterface                     $logger
      */
     public function __construct(
         Repository $repository,
@@ -94,7 +94,7 @@ class SocialLoginHelper
      *
      * @return null|string
      *
-     * @throws IOException if failed to create local directory
+     * @throws \Symfony\Component\Filesystem\Exception\IOException if failed to create local directory
      */
     public function downloadExternalImage($imageLink)
     {
@@ -166,16 +166,18 @@ class SocialLoginHelper
     /**
      * Adds entry to the table.
      *
-     * @param User        $user
-     * @param OAuthEzUser $authEzUser
+     * @param \eZ\Publish\API\Repository\Values\User\User            $user
+     * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $authEzUser
+     * @param bool                                                   $isDisconnectable
      */
-    public function addToTable(User $user, OAuthEzUser $authEzUser)
+    public function addToTable(User $user, OAuthEzUser $authEzUser, $isDisconnectable = false)
     {
         $OAuthEzEntity = new OAuthEz();
         $OAuthEzEntity
             ->setEzUserId($user->id)
             ->setResourceUserId($authEzUser->getOriginalId())
-            ->setResourceName($authEzUser->getResourceOwnerName());
+            ->setResourceName($authEzUser->getResourceOwnerName())
+            ->setIsDisconnectable($isDisconnectable);
 
         $this->entityManager->persist($OAuthEzEntity);
         $this->entityManager->flush();
@@ -184,7 +186,7 @@ class SocialLoginHelper
     /**
      * Removes entry from the table.
      *
-     * @param OAuthEz $userEntity
+     * @param \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz $userEntity
      */
     public function removeFromTable(OAuthEz $userEntity)
     {
@@ -195,10 +197,10 @@ class SocialLoginHelper
     /**
      * Loads from table by resource user id and resource name.
      *
-     * @param $resourceUserId
-     * @param $resourceOwnerName
+     * @param string $resourceUserId
+     * @param string $resourceOwnerName
      *
-     * @return null|OAuthEzUser
+     * @return null|\Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
      */
     public function loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName)
     {
@@ -225,10 +227,10 @@ class SocialLoginHelper
     /**
      * Loads from table by ez user id and resource name.
      *
-     * @param $ezUserId
-     * @param $resourceOwnerName
+     * @param string $ezUserId
+     * @param string $resourceOwnerName
      *
-     * @return null|OAuthEzUser
+     * @return null|\Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
      */
     public function loadFromTableByEzId($ezUserId, $resourceOwnerName)
     {
@@ -252,11 +254,11 @@ class SocialLoginHelper
     /**
      * Creates ez user from OAuthEzUser entity.
      *
-     * @param OAuthEzUser $oauthUser
+     * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $oauthUser
      *
-     * @return User
+     * @return \eZ\Publish\API\Repository\Values\User\User
      *
-     * @throws MissingConfigurationException if user group parameter is not set up
+     * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException if user group parameter is not set up
      */
     public function createEzUser(OAuthEzUser $oauthUser)
     {
@@ -330,8 +332,8 @@ class SocialLoginHelper
     /**
      * Updates ez user fields.
      *
-     * @param User  $user
-     * @param array $fields
+     * @param \eZ\Publish\API\Repository\Values\User\User $user
+     * @param array                                       $fields
      */
     public function updateUserFields(User $user, array $fields)
     {
@@ -360,7 +362,7 @@ class SocialLoginHelper
     /**
      * Loads ez user from the repository.
      *
-     * @param $userId
+     * @param string $userId
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      */

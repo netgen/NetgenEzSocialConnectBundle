@@ -20,6 +20,27 @@ class OAuthEz
     private $resourceName;
 
     /**
+     * @var boolean
+     */
+    private $isDisconnectable;
+
+    /**
+     * @return boolean
+     */
+    public function isIsDisconnectable()
+    {
+        return $this->isDisconnectable;
+    }
+
+    /**
+     * @param boolean $isDisconnectable
+     */
+    public function setIsDisconnectable($isDisconnectable)
+    {
+        $this->isDisconnectable = $isDisconnectable;
+    }
+
+    /**
      * Set user id from eZ.
      *
      * @param $ezUserId
