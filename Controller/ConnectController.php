@@ -37,7 +37,7 @@ class ConnectController extends Controller
             throw new NotFoundException('connected user', $userContentId.'/'.$resourceName);
         }
         if (!$OAuthEz->isIsDisconnectable()) {
-            throw new AccessDeniedHttpException(sprintf("Cannot disconnect from '%s' as it is the main social login.", $resourceName));
+            throw new \InvalidArgumentException(sprintf("Cannot disconnect from '%s' as it is the main social login.", $resourceName));
         }
 
         $loginHelper->removeFromTable($OAuthEz);
