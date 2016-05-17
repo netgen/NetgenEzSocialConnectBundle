@@ -60,9 +60,12 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
      */
     public function loadUserByOAuthUserResponse(UserResponseInterface $response)
     {
+        $OAuthEzUserEntity = $this->loginHelper->loadFromTableByResourceUserId(
+            $response->getUsername(), $response->getResourceOwner()->getName()
+        );
+
         // Intermediary user entity generated from the response, not stored in the database
         $OAuthEzUser = $this->generateOAuthEzUser($response);
-        $OAuthEzUserEntity = $this->loginHelper->loadFromTable($OAuthEzUser);
 
         // If there is no link, look for an eZ user and connect them
         if (!$OAuthEzUserEntity instanceof OAuthEz) {

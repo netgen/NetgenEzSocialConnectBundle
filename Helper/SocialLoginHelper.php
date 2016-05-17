@@ -193,21 +193,22 @@ class SocialLoginHelper
     }
 
     /**
-     * Loads from table by OAuthEzUser entity.
+     * Loads from table by resource user id and resource name.
      *
-     * @param OAuthEzUser $oauthUser
+     * @param $resourceUserId
+     * @param $resourceOwnerName
      *
-     * @return null|OAuthEz
+     * @return null|OAuthEzUser
      */
-    public function loadFromTable(OAuthEzUser $oauthUser)
+    public function loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName)
     {
         $results =
             $this->entityManager
                 ->getRepository('NetgenEzSocialConnectBundle:OAuthEz')
                 ->findBy(
                     array(
-                        'resourceUserId' => $oauthUser->getOriginalId(),
-                        'resourceName' => $oauthUser->getResourceOwnerName(),
+                        'resourceUserId' => $resourceUserId,
+                        'resourceName' => $resourceOwnerName,
                     ),
                     array(
                         'ezUserId' => 'DESC', //get last inserted
@@ -215,10 +216,10 @@ class SocialLoginHelper
                 );
 
         if (!is_array($results) || empty($results)) {
-            return;
+            return null;
         }
 
-        return $results[ 0 ];
+        return $results[0];
     }
 
     /**
@@ -242,38 +243,10 @@ class SocialLoginHelper
                 );
 
         if (!is_array($results) || empty($results)) {
-            return;
+            return null;
         }
 
-        return $results[ 0 ];
-    }
-
-    /**
-     * Checks whether a social account is already linked to an eZ user.
-     * This is used to prevent multiple eZ users being linked to the same social account.
-     *
-     * @param string $resourceOwnerName
-     * @param string $resourceUserId
-     *
-     * @return bool
-     */
-    public function resourceUserIsLinked($resourceOwnerName, $resourceUserId)
-    {
-        $results =
-            $this->entityManager
-                ->getRepository('NetgenEzSocialConnectBundle:OAuthEz')
-                ->findBy(
-                    array(
-                        'resourceUserId' => $resourceUserId,
-                        'resourceName' => $resourceOwnerName,
-                    )
-                );
-
-        if (!is_array($results) || empty($results)) {
-            return false;
-        }
-
-        return true;
+        return $results[0];
     }
 
     /**

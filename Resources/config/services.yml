@@ -30,3 +30,11 @@ services:
     netgen.social_connect.controller.connect:
         class: Netgen\Bundle\EzSocialConnectBundle\Controller\ConnectController
         parent: ezpublish.controller.base
+
+    netgen.social_connect.twig_extension:
+        class: Netgen\Bundle\EzSocialConnectBundle\Twig\SocialConnectExtension
+        public: false
+        arguments:
+            - @netgen.social_connect.helper
+        tags:
+            - { name: twig.extension }

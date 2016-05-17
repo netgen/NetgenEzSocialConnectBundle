@@ -1,6 +1,12 @@
-<div class="social-connect">{{ "connect_with"|trans( {}, 'social_connect' ) }}:</div>
 
-{% for owner in hwi_oauth_resource_owners() %}
-    <a href="{{ path( 'netgen_social_connect_ez', { resourceName: owner } ) }}">Connect {{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
-    <a href="{{ path( 'netgen_social_disconnect_ez', { resourceName: owner } ) }}">Disconnect {{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
-{% endfor %}
+{% if app.user %}
+<div class="social-connect">{{ "connect_with"|trans( {}, 'social_connect' ) }}:</div>
+    {% for owner in hwi_oauth_resource_owners() %}
+        {% if is_user_linked(app.user, owner) %}
+            <a href="{{ path( 'netgen_social_disconnect_ez', { resourceName: owner } ) }}">Disconnect {{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
+        {% else %}
+            <a href="{{ path( 'netgen_social_connect_ez', { resourceName: owner } ) }}">Connect {{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
+        {% endif %}
+    {% endfor %}
+{% endif %}
+

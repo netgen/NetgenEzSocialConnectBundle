@@ -177,7 +177,7 @@ class ConnectController extends Controller
 
                 $loginHelper = $this->get('netgen.social_connect.helper');
 
-                if (!$loginHelper->resourceUserIsLinked($resourceOwnerName, $resourceUserId))
+                if (empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName)))
                 {
                     $loginHelper->addToTable(
                         $loginHelper->loadEzUserById($apiUser->id),
