@@ -74,8 +74,11 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
 
             if ($this->mergeAccountsFlag && $securityUser instanceof SecurityUserInterface) {
                 $userContentObject = $securityUser->getAPIUser();
+            } else if (($securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername())) instanceof SecurityUserInterface) {
+                // There was previously a linked user that got unlinked in the meantime, use that one
+                $userContentObject = $securityUser->getAPIUser();
             } else {
-              $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+                $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
             }
 
             $this->loginHelper->addToTable($userContentObject, $OAuthEzUser);
@@ -197,6 +200,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     protected function getFirstUserByEmail($email)
     {
         $users = $this->repository->getUserService()->loadUsersByEmail($email);
+
         $user = reset($users);
 
         if ($user instanceof User) {
