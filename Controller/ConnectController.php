@@ -16,7 +16,7 @@ class ConnectController extends Controller
 {
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param $resourceName
+     * @param string                                    $resourceName
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException
