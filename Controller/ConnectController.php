@@ -28,6 +28,7 @@ class ConnectController extends Controller
         }
 
         $targetPathParameter = $this->container->getParameter('hwi_oauth.target_path_parameter');
+
         $targetPath = $request->query->get($targetPathParameter, '/');
         $userContentId = $this->getUser()->getAPIUser()->id;
         $loginHelper = $this->get('netgen.social_connect.helper');
@@ -81,19 +82,21 @@ class ConnectController extends Controller
             throw new UserAlreadyConnected( $resource_name );
         }
 
-        $request->getSession()->set( 'social_connect_ez_user_id', $userContentId);
-        $request->getSession()->set( 'social_connect_resource_owner', $resourceName);
+        $targetPath = $request->query->get($this->container->getParameter('hwi_oauth.target_path_parameter'), '/');
+
+        $redirectUrl = $this->generateUrl('netgen_finish_connecting', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $request->getSession()->set('social_connect_ez_user_id', $userContentId);
+        $request->getSession()->set('social_connect_resource_owner', $resourceName);
+
+        // Handle targetPath in session to prevent issues with GET parameters in Facebook redirect uri
+        $request->getSession()->set('social_connect_redirect_url', $redirectUrl);
+        $request->getSession()->set('social_connect_target_path', $targetPath);
 
         /** @var \HWI\Bundle\OAuthBundle\Security\OAuthUtils $OAuthUtils */
         $OAuthUtils = $this->container->get('hwi_oauth.security.oauth_utils');
 
-        return $this->redirect(
-            $OAuthUtils->getAuthorizationUrl(
-                $request,
-                $resourceName,
-                $this->generateUrl('netgen_finish_connecting', array(), UrlGeneratorInterface::ABSOLUTE_URL)
-            )
-        );
+        return $this->redirect($OAuthUtils->getAuthorizationUrl($request, $resourceName, $redirectUrl));
     }
 
     /**
@@ -139,9 +142,16 @@ class ConnectController extends Controller
      */
     public function finishConnecting(Request $request)
     {
-        $targetPath = $request->query->get($this->container->getParameter('hwi_oauth.target_path_parameter'), '/');
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
+
+        if (!$session->has('social_connect_target_path') || (!$session->has('social_connect_redirect_uri'))) {
+            $session->getFlashBag()->add('notice', 'You have failed to connect to your social account!');
+
+            return $this->redirect('/');
+        }
+
+        $targetPath = $session->get('social_connect_target_path');
 
         // Delete any previous flashes to prevent clutter in case the endpoint isn't consuming them
         $session->getFlashBag()->clear();
@@ -157,10 +167,12 @@ class ConnectController extends Controller
         {
             $session->getFlashBag()->add('notice', $message);
 
+            $session->remove('social_connect_redirect_url');
+            $session->remove('social_connect_target_path');
+
             return $this->redirect($targetPath);
         }
 
-        // Remove the resourceOwnerName if we've retrieved it successfully
         $session->remove('social_connect_resource_owner');
 
         $apiUser = $this->getUser()->getAPIUser();
@@ -170,10 +182,9 @@ class ConnectController extends Controller
             $session->remove('social_connect_ez_user_id');
 
             // The redirect URL points to the endpoint that requests the access token
-            $redirectUrl = $this->generateUrl('netgen_finish_connecting', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+            $redirectUrl = $session->get('social_connect_redirect_url');
 
             $token = $resourceOwner->getAccessToken($request, $redirectUrl);
-
             $userInformation = $resourceOwner->getUserInformation($token);
 
             if ($userInformation instanceof PathUserResponse)
@@ -197,8 +208,10 @@ class ConnectController extends Controller
                 }
             }
         }
-
         $session->getFlashBag()->add('notice', $message);
+
+        $session->remove('social_connect_redirect_url');
+        $session->remove('social_connect_target_path');
 
         return $this->redirect($targetPath);
     }
