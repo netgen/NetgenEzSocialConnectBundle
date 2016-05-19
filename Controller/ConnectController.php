@@ -82,16 +82,15 @@ class ConnectController extends Controller
             throw new UserAlreadyConnected( $resource_name );
         }
 
-        $targetPath = $request->query->get($this->container->getParameter('hwi_oauth.target_path_parameter'), '/');
-
         $redirectUrl = $this->generateUrl('netgen_finish_connecting', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $request->getSession()->set('social_connect_ez_user_id', $userContentId);
-        $request->getSession()->set('social_connect_resource_owner', $resourceName);
+        $session = $request->getSession();
+        $session->set('social_connect_ez_user_id', $userContentId);
+        $session->set('social_connect_resource_owner', $resourceName);
 
         // Handle targetPath in session to prevent issues with GET parameters in Facebook redirect uri
-        $request->getSession()->set('social_connect_redirect_url', $redirectUrl);
-        $request->getSession()->set('social_connect_target_path', $targetPath);
+        $session->set('social_connect_redirect_url', $redirectUrl);
+        $session->set('social_connect_target_path', $request->server->get('HTTP_REFERER', '/'));
 
         /** @var \HWI\Bundle\OAuthBundle\Security\OAuthUtils $OAuthUtils */
         $OAuthUtils = $this->container->get('hwi_oauth.security.oauth_utils');
@@ -145,7 +144,7 @@ class ConnectController extends Controller
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
 
-        if (!$session->has('social_connect_target_path') || (!$session->has('social_connect_redirect_uri'))) {
+        if (!$session->has('social_connect_target_path') || (!$session->has('social_connect_redirect_url'))) {
             $session->getFlashBag()->add('notice', 'You have failed to connect to your social account!');
 
             return $this->redirect('/');
