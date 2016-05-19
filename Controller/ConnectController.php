@@ -143,9 +143,10 @@ class ConnectController extends Controller
     {
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
+        $flashBag = $session->getFlashBag();
 
         if (!$session->has('social_connect_target_path') || (!$session->has('social_connect_redirect_url'))) {
-            $session->getFlashBag()->add('notice', 'You have failed to connect to your social account!');
+            $flashBag->add('notice', 'You have failed to connect to your social account!');
 
             return $this->redirect('/');
         }
@@ -153,7 +154,7 @@ class ConnectController extends Controller
         $targetPath = $session->get('social_connect_target_path');
 
         // Delete any previous flashes to prevent clutter in case the endpoint isn't consuming them
-        $session->getFlashBag()->clear();
+        //$session->getFlashBag()->clear();
 
         $resourceOwnerName = $session->get('social_connect_resource_owner');
         $message = sprintf('You have failed to connect to your %s account!', ucfirst($resourceOwnerName));
@@ -164,7 +165,7 @@ class ConnectController extends Controller
         }
         catch (\RuntimeException $e)
         {
-            $session->getFlashBag()->add('notice', $message);
+            $flashBag->add('notice', $message);
 
             $session->remove('social_connect_redirect_url');
             $session->remove('social_connect_target_path');
@@ -207,7 +208,7 @@ class ConnectController extends Controller
                 }
             }
         }
-        $session->getFlashBag()->add('notice', $message);
+        $flashBag->add('notice', $message);
 
         $session->remove('social_connect_redirect_url');
         $session->remove('social_connect_target_path');
