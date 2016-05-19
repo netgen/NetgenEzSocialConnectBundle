@@ -5,6 +5,16 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Entity;
 class OAuthEz
 {
     /**
+     * @const bool
+     */
+    const IS_DISCONNECTABLE = true;
+
+    /**
+     * @const bool
+     */
+    const NOT_DISCONNECTABLE = false;
+
+    /**
      * @var int
      */
     private $ezUserId;
@@ -25,7 +35,7 @@ class OAuthEz
     private $isDisconnectable;
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isIsDisconnectable()
     {
@@ -33,7 +43,7 @@ class OAuthEz
     }
 
     /**
-     * @param boolean $isDisconnectable
+     * @param bool $isDisconnectable
      */
     public function setIsDisconnectable($isDisconnectable)
     {

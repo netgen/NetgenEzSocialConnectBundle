@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
+use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 
 class ConnectController extends Controller
 {
@@ -193,7 +194,7 @@ class ConnectController extends Controller
                     $loginHelper->addToTable(
                         $loginHelper->loadEzUserById($apiUser->id),
                         $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId),
-                        true
+                        OAuthEz::IS_DISCONNECTABLE
                     );
                     $message = sprintf('You have connected to your %s account!', ucfirst($resourceOwnerName));
                 }
