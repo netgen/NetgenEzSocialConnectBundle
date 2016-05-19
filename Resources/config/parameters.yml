@@ -8,9 +8,9 @@ parameters:
     netgen_social_connect.default.google.id:        'CHANGEME'
     netgen_social_connect.default.google.secret:    'CHANGEME'
 
-    netgen_social_connect.default.first_name:       'first_name'
-    netgen_social_connect.default.last_name:        'last_name'
-    netgen_social_connect.default.profile_image:    'image'
+    netgen_social_connect.default.first_name:       ~
+    netgen_social_connect.default.last_name:        ~
+    netgen_social_connect.default.profile_image:    ~
 
     netgen_social_connect.default.oauth.user_group:
         facebook: 11
