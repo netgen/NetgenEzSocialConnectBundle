@@ -23,7 +23,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     /**
      * @var bool
      */
-    protected $mergeAccountsFlag;
+    protected $mergeAccounts;
 
     /**
      * eZUserProvider constructor.
@@ -41,11 +41,11 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     /**
      * Injected setter
      *
-     * @param bool $flag
+     * @param bool $mergeAccounts
      */
-    public function setMergeAccountsFlag($flag = false)
+    public function setMergeAccounts($mergeAccounts = false)
     {
-        $this->mergeAccountsFlag = $flag;
+        $this->mergeAccounts = $mergeAccounts;
     }
 
     /**

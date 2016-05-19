@@ -94,7 +94,7 @@ Otherwise, multiple eZ users will be created, each linked to one social account.
 netgen__social_connect:
     system:
         default:
-            merge_social_accounts: true
+            merge_accounts: true
             user_content_class_identifier: user
             fields:
 	        first_name: 'first_name'

@@ -40,7 +40,7 @@ class Configuration extends SiteaccessAwareConfiguration implements Configuratio
                 ->defaultValue('user')
                 ->isRequired()
             ->end()
-            ->scalarNode('merge_social_accounts')
+            ->scalarNode('merge_accounts')
                 ->defaultValue(false)
             ->end()
 

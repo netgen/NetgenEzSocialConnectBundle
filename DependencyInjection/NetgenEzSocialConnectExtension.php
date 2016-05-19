@@ -33,7 +33,7 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
             function ($scopeSettings, $currentScope, ContextualizerInterface $contextualizer)
             {
                 $contextualizer->setContextualParameter('user_content_type_identifier', $currentScope, $scopeSettings['user_content_type_identifier']);
-                $contextualizer->setContextualParameter('merge_social_accounts', $currentScope, $scopeSettings['merge_social_accounts']);
+                $contextualizer->setContextualParameter('merge_accounts', $currentScope, $scopeSettings['merge_accounts']);
                 $contextualizer->setContextualParameter('first_name', $currentScope, $scopeSettings['field_identifiers']['first_name']);
                 $contextualizer->setContextualParameter('last_name', $currentScope, $scopeSettings['field_identifiers']['last_name']);
                 $contextualizer->setContextualParameter('profile_image', $currentScope, $scopeSettings['field_identifiers']['profile_image']);
