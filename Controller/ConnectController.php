@@ -27,9 +27,6 @@ class ConnectController extends Controller
             throw new AccessDeniedHttpException(sprintf("Cannot disconnect from '%s'. Please log in first.", $resourceName));
         }
 
-        $targetPathParameter = $this->container->getParameter('hwi_oauth.target_path_parameter');
-
-        $targetPath = $request->query->get($targetPathParameter, '/');
         $userContentId = $this->getUser()->getAPIUser()->id;
         $loginHelper = $this->get('netgen.social_connect.helper');
         $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName);
@@ -46,9 +43,7 @@ class ConnectController extends Controller
         $session = $request->getSession();
         $session->getFlashBag()->add('notice', 'You have successfully disconnected user from Facebook account!');
 
-        return $this->redirect(
-            $targetPath
-        );
+        return $this->redirect($request->server->get('HTTP_REFERER', '/'));
     }
 
     /**
