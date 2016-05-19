@@ -67,23 +67,8 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         // Intermediary user entity generated from the response, not stored in the database
         $OAuthEzUser = $this->generateOAuthEzUser($response);
 
-        // If there is no link, look for an eZ user and connect them
-        if (!$OAuthEzUserEntity instanceof OAuthEz) {
-
-            $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
-
-            if ($this->mergeAccountsFlag && $securityUser instanceof SecurityUserInterface) {
-                $userContentObject = $securityUser->getAPIUser();
-            } else {
-              $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
-            }
-
-            $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
-
-            $securityUser = $this->getFirstUserByEmail($userContentObject->email);
-
         // If a link was found, update profile data for the user
-        } else {
+        if ($OAuthEzUserEntity instanceof OAuthEz) {
             try {
                 $userContentObject = $this->loginHelper->loadEzUserById($OAuthEzUserEntity->getEzUserId());
 
@@ -101,16 +86,30 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
                     $this->loginHelper->updateUserFields($userContentObject, array('email' => $OAuthEzUser->getEmail()));
                 }
 
+                return $this->loadUserByAPIUser($userContentObject);
+
             } catch (NotFoundException $e) {
                 // Something went wrong - data is in the table, but the user does not exist
                 // Remove faulty data and fall back to creating a new user
                 $this->loginHelper->removeFromTable($OAuthEzUserEntity);
             }
-
+        }
+        // If there is no link, look for an eZ user and connect them
+        if ($this->mergeAccountsFlag) {
             $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
+
+            if (!$securityUser instanceof SecurityUserInterface) {
+                $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
+            }
+            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, false);
+
+            return $securityUser;
         }
 
-        return $securityUser;
+        $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+        $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
+
+        return $this->loadUserByAPIUser($userContentObject);
     }
 
     /**
