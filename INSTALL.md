@@ -72,32 +72,25 @@ hwi_oauth:
             scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
 ```
 
-# Configure which resource owners can use siteaccess-specific parameters
-If the useConfigResolver option is not set, the resource owner will use the default parameters.
-```
-# ezpublish/config/config.yml
-
-netgen_social_connect:
-    resource_owners:
-        facebook: { useConfigResolver: true }
-        twitter: { useConfigResolver: true }            
-```            
-
-# Define user content object settings for social registration
-If these parameters are not set, the fields in question will not be mapped to the OAuth resource owner's response.
-
-If the parameter 'merge_social_accounts' is set to true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user.
-Otherwise, multiple eZ users will be created, each linked to one social account. A new eZ user with a dummy email will always be created for users not disclosing their email.
+# Configure bundle-specific parameters
 
 ```
 # ezpublish/config/config.yml
 netgen__social_connect:
+    # if the useConfigResolver option is not set, the resource owner will use the default parameters
+    resource_owners:
+        facebook: { useConfigResolver: true }
+        twitter: { useConfigResolver: true }
     system:
         default:
+            # if true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user
+            # multiple eZ users will be created otherwise, each linked to one social account
+             # a new eZ user with a dummy email will always be created for users not disclosing their email
             merge_accounts: true
             user_content_class_identifier: user
+            # if these are not set, the fields in question will not be mapped to the OAuth resource owner's response
             fields:
-	        first_name: 'first_name'
+	            first_name: 'first_name'
                 last_name: 'last_name'
                 profile_image: 'image'
         administration_group:
@@ -145,9 +138,10 @@ security:
 # Set up the parameters
 Set the id and key for each of the networks you wish to use.
 Also, define the user group in which the new users should be created.
-```
-# ezpublish/config/parameters.yml
 
+Override these entries from the bundle's parameters.yml in '(app|ezpublish)/config/parameters.yml'.
+
+```
 parameters:
     netgen_social_connect.default.facebook.id: <facebook_client_id>
     netgen_social_connect.default.facebook.secret: <facebook_secret>
@@ -157,6 +151,7 @@ parameters:
     netgen_social_connect.default.linkedin.secret: <linkedin_secret>
     netgen_social_connect.default.google.id: <google_client_id>
     netgen_social_connect.default.google.secret: <google_secret>
+    
     netgen_social_connect.default.oauth.user_group:
         facebook: 11
         twitter: 11
