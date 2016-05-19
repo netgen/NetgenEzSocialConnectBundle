@@ -55,7 +55,7 @@ class OAuthEz
      *
      * @param $ezUserId
      *
-     * @return OAuthEz
+     * @return \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
     public function setEzUserId($ezUserId)
     {
@@ -79,7 +79,7 @@ class OAuthEz
      *
      * @param int $userOriginalId
      *
-     * @return OAuthEz
+     * @return \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
     public function setResourceUserId($userOriginalId)
     {
@@ -103,7 +103,7 @@ class OAuthEz
      *
      * @param string $resourceName
      *
-     * @return OAuthEz
+     * @return \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
     public function setResourceName($resourceName)
     {
