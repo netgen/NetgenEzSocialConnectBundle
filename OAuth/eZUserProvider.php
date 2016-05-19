@@ -72,15 +72,29 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
 
             $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
 
-            if ($this->mergeAccountsFlag && $securityUser instanceof SecurityUserInterface) {
-                $userContentObject = $securityUser->getAPIUser();
+            if ($securityUser instanceof SecurityUserInterface) {
+                if ($this->mergeAccountsFlag) {
+                    $userContentObject = $securityUser->getAPIUser();
+                    $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
+                    $securityUser = $this->getFirstUserByEmail($userContentObject->email);
+                } else {
+                    // We already have our security user
+                }
             } else {
-              $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+                // Attempt to fetch user by login if no email was found
+                $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
+
+                if ($securityUser instanceof SecurityUserInterface) {
+                    $userContentObject = $securityUser->getAPIUser();
+                    $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
+                    $securityUser = $this->getFirstUserByEmail($userContentObject->email);
+                } else {
+                    // Finally, if neither a login nor an email is found, create an user
+                    $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+                    $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
+                    $securityUser = $this->getFirstUserByEmail($userContentObject->email);
+                }
             }
-
-            $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
-
-            $securityUser = $this->getFirstUserByEmail($userContentObject->email);
 
         // If a link was found, update profile data for the user
         } else {
@@ -106,10 +120,9 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
                 // Remove faulty data and fall back to creating a new user
                 $this->loginHelper->removeFromTable($OAuthEzUserEntity);
             }
-
             $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
         }
-
+        
         return $securityUser;
     }
 
