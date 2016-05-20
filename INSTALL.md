@@ -94,7 +94,8 @@ netgen__social_connect:
                 last_name: 'last_name'
                 profile_image: 'image'
         administration_group:
-	    user_content_class_identifier: enhanced_user
+            user_content_class_identifier: enhanced_user
+            merge_accounts: false
             fields:
                 first_name: 'intro'
                 last_name: ~            # do not import social data to this field
