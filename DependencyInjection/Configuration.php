@@ -38,10 +38,9 @@ class Configuration extends SiteaccessAwareConfiguration implements Configuratio
         $systemNode
             ->scalarNode('user_content_type_identifier')
                 ->defaultValue('user')
-                ->isRequired()
             ->end()
             ->scalarNode('merge_accounts')
-                ->isRequired()
+                ->defaultValue(false)
             ->end()
 
             ->arrayNode('field_identifiers')
