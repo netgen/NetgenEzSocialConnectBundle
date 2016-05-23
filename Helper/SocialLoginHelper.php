@@ -65,7 +65,7 @@ class SocialLoginHelper
      *
      * @param $firstName
      */
-    public function setFirstName($firstName){
+    public function setFirstName($firstName = null){
         $this->firstName = $firstName;
     }
 
@@ -74,7 +74,7 @@ class SocialLoginHelper
      *
      * @param $lastName
      */
-    public function setLastName($lastName){
+    public function setLastName($lastName = null){
         $this->lastName = $lastName;
     }
 
@@ -83,7 +83,7 @@ class SocialLoginHelper
      *
      * @param $imageField
      */
-    public function setProfileImage($imageField){
+    public function setProfileImage($imageField = null){
         $this->imageField = $imageField;
     }
 

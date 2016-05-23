@@ -28,7 +28,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     /**
      * eZUserProvider constructor.
      *
-     * @param \eZ\Publish\API\Repository\Repository $repository
+     * @param \eZ\Publish\API\Repository\Repository                         $repository
      * @param \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper $loginHelper
      */
     public function __construct(Repository $repository, SocialLoginHelper $loginHelper)
@@ -101,7 +101,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
             if (!$securityUser instanceof SecurityUserInterface) {
                 $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
             }
-            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, OAuthEz::NOT_DISCONNECTABLE);
+            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, OAuthEz::IS_DISCONNECTABLE);
 
             return $securityUser;
         }
