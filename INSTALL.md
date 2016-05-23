@@ -90,13 +90,13 @@ netgen_social_connect:
             user_content_class_identifier: user
             # if these are not set, the fields in question will not be mapped to the OAuth resource owner's response
             # these parameters are fetched using configResolver->getParameter('first_name', 'netgen_social_connect')            
-            # fetching only the 'fields' array is not supported_
+            # fetching only the 'fields' array is not supported
             fields:
 	        first_name: 'first_name'
                 last_name: 'last_name'
                 profile_image: 'image'
             # these parameters are fetched using configResolver->getParameter('oauth_user_group.facebook', 'netgen_social_connect')
-            # fetching only the 'oauth_user_group' array is not supported_
+            # fetching only the 'oauth_user_group' array is not supported
             oauth_user_group:
                 facebook: 11
                 linkedin: 11
