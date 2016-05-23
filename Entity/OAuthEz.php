@@ -7,7 +7,7 @@ class OAuthEz
     /**
      * @const bool
      */
-    const IS_DISCONNECTABLE = true;
+    const DISCONNECTABLE = true;
 
     /**
      * @const bool
@@ -32,22 +32,22 @@ class OAuthEz
     /**
      * @var boolean
      */
-    private $isDisconnectable;
+    private $disconnectable;
 
     /**
      * @return bool
      */
-    public function isIsDisconnectable()
+    public function isDisconnectable()
     {
-        return $this->isDisconnectable;
+        return $this->disconnectable;
     }
 
     /**
-     * @param bool $isDisconnectable
+     * @param bool $disconnectable
      */
-    public function setIsDisconnectable($isDisconnectable)
+    public function setDisconnectable($disconnectable)
     {
-        $this->isDisconnectable = $isDisconnectable;
+        $this->disconnectable = $disconnectable;
     }
 
     /**

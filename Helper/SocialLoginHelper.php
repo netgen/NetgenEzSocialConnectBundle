@@ -168,16 +168,16 @@ class SocialLoginHelper
      *
      * @param \eZ\Publish\API\Repository\Values\User\User            $user
      * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $authEzUser
-     * @param bool                                                   $isDisconnectable
+     * @param bool                                                   $disconnectable
      */
-    public function addToTable(User $user, OAuthEzUser $authEzUser, $isDisconnectable = false)
+    public function addToTable(User $user, OAuthEzUser $authEzUser, $disconnectable = false)
     {
         $OAuthEzEntity = new OAuthEz();
         $OAuthEzEntity
             ->setEzUserId($user->id)
             ->setResourceUserId($authEzUser->getOriginalId())
             ->setResourceName($authEzUser->getResourceOwnerName())
-            ->setIsDisconnectable($isDisconnectable);
+            ->setDisconnectable($disconnectable);
 
         $this->entityManager->persist($OAuthEzEntity);
         $this->entityManager->flush();

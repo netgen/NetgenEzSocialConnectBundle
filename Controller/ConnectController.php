@@ -35,7 +35,7 @@ class ConnectController extends Controller
         if (empty($OAuthEz)) {
             throw new NotFoundException('connected user', $userContentId.'/'.$resourceName);
         }
-        if (!$OAuthEz->isIsDisconnectable()) {
+        if (!$OAuthEz->isDisconnectable()) {
             throw new \InvalidArgumentException(sprintf("Cannot disconnect from '%s' as it is the main social login.", $resourceName));
         }
 
@@ -185,7 +185,7 @@ class ConnectController extends Controller
 
             if ($userInformation instanceof PathUserResponse)
             {
-                $resourceUserId = $userInformation->getResponse()['id'];
+                $resourceUserId = $userInformation->getUsername();
 
                 $loginHelper = $this->get('netgen.social_connect.helper');
 
@@ -194,7 +194,7 @@ class ConnectController extends Controller
                     $loginHelper->addToTable(
                         $loginHelper->loadEzUserById($apiUser->id),
                         $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId),
-                        OAuthEz::IS_DISCONNECTABLE
+                        OAuthEz::DISCONNECTABLE
                     );
                     $message = sprintf('You have connected to your %s account!', ucfirst($resourceOwnerName));
                 }

@@ -2,6 +2,7 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\Twig;
 
+use eZ\Publish\Core\MVC\Symfony\Security\User;
 use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
@@ -43,20 +44,16 @@ class SocialConnectExtension extends \Twig_Extension
     /**
      * Checks whether the current user is linked to a given resource owner
      *
-     * @param \eZ\Publish\Core\MVC\Symfony\Security\UserInterface $user
+     * @param int    $userId
      * @param string $resourceOwnerName
      *
      * @return bool
-     *
-     * @throws \InvalidArgumentException
      */
-    public function isConnectedToOwner(UserInterface $user, $resourceOwnerName)
+    public function isConnectedToOwner($userId, $resourceOwnerName)
     {
-        if ($user instanceof UserInterface){
-            return !empty($this->socialLoginHelper->loadFromTableByEzId($user->getAPIUser()->id, $resourceOwnerName));
-        }
+        $user = $this->socialLoginHelper->loadFromTableByEzId($userId, $resourceOwnerName);
 
-        throw new \InvalidArgumentException('User must implement \eZ\Publish\Core\MVC\Symfony\Security\UserInterface');
+        return $user instanceof OAuthEz;
     }
 
     /**
@@ -65,19 +62,17 @@ class SocialConnectExtension extends \Twig_Extension
      * If an eZ user was initially created using a social login,
      * this can be used to prevent that table entry from being deleted or the 'disconnect' button being shown.
      *
-     * @param UserInterface $user
-     * @param string $resourceOwnerName
+     * @param int  $userId
+     * @param bool $resourceOwnerName
      *
      * @return bool
      */
-    public function isDisconnectable(UserInterface $user, $resourceOwnerName)
+    public function isDisconnectable($userId, $resourceOwnerName)
     {
-        if ($user instanceof UserInterface){
-            $ezUser = $this->socialLoginHelper->loadFromTableByEzId($user->getAPIUser()->id, $resourceOwnerName);
+        $ezUser =$this->socialLoginHelper->loadFromTableByEzId($userId, $resourceOwnerName);
 
-            if ($ezUser instanceof OAuthEz) {
-                return $ezUser->isIsDisconnectable();
-            }
+        if ($ezUser instanceof OAuthEz) {
+            return $ezUser->isDisconnectable();
         }
 
         return false;
