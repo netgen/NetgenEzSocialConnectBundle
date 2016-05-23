@@ -3,10 +3,8 @@
 namespace Netgen\Bundle\EzSocialConnectBundle\Twig;
 
 use eZ\Publish\Core\MVC\Symfony\Security\User;
-use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
-use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 
 /**
  * A Twig extension to allow checking whether the current user is connected to a given social resource owner.
@@ -69,7 +67,7 @@ class SocialConnectExtension extends \Twig_Extension
      */
     public function isDisconnectable($userId, $resourceOwnerName)
     {
-        $ezUser =$this->socialLoginHelper->loadFromTableByEzId($userId, $resourceOwnerName);
+        $ezUser = $this->socialLoginHelper->loadFromTableByEzId($userId, $resourceOwnerName);
 
         if ($ezUser instanceof OAuthEz) {
             return $ezUser->isDisconnectable();
