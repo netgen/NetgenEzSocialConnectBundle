@@ -1,8 +1,9 @@
 {% if app.user %}
+    {% set userId = app.user.getApiUser().id %}
 <div class="social-connect">{{ "connect_with"|trans( {}, 'social_connect' ) }}:</div>
     {% for owner in hwi_oauth_resource_owners() %}
-        {% if is_user_connected(app.user.getApiUser().id, owner) %}
-            {% if is_user_disconnectable(app.user.getApiUser().id, owner) %}
+        {% if is_user_connected(userId, owner) %}
+            {% if is_user_disconnectable(userId, owner) %}
                 <a href="{{ path( 'netgen_social_disconnect_ez', { resourceName: owner } ) }}">Disconnect {{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
             {% endif %}
         {% else %}
