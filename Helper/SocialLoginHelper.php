@@ -305,13 +305,13 @@ class SocialLoginHelper
 
         $userCreateStruct->enabled = true;
 
-        if (!$this->configResolver->hasParameter('oauth.user_group', 'netgen_social_connect')) {
-            throw new MissingConfigurationException('oauth.user_group');
+        if (!$this->configResolver->hasParameter('oauth_user_group', 'netgen_social_connect')) {
+            throw new MissingConfigurationException('oauth_user_group');
         }
-        $userGroupIds = $this->configResolver->getParameter('oauth.user_group', 'netgen_social_connect');
+        $userGroupIds = $this->configResolver->getParameter('oauth_user_group', 'netgen_social_connect');
 
         if (empty($userGroupIds[ $oauthUser->getResourceOwnerName() ])) {
-            throw new MissingConfigurationException('oauth.user_group.'.$oauthUser->getResourceOwnerName());
+            throw new MissingConfigurationException('oauth_user_group.'.$oauthUser->getResourceOwnerName());
         }
 
         $userGroupId = $userGroupIds[$oauthUser->getResourceOwnerName()];

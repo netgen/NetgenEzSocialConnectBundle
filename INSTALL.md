@@ -76,7 +76,7 @@ hwi_oauth:
 
 ```
 # ezpublish/config/config.yml
-netgen__social_connect:
+netgen_social_connect:
     # if the useConfigResolver option is not set, the resource owner will use the default parameters
     resource_owners:
         facebook: { useConfigResolver: true }
@@ -85,14 +85,23 @@ netgen__social_connect:
         default:
             # if true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user
             # multiple eZ users will be created otherwise, each linked to one social account
-             # a new eZ user with a dummy email will always be created for users not disclosing their email
+            # a new eZ user with a dummy email will always be created for users not disclosing their email
             merge_accounts: true
             user_content_class_identifier: user
             # if these are not set, the fields in question will not be mapped to the OAuth resource owner's response
+            # these parameters are fetched using configResolver->getParameter('first_name', 'netgen_social_connect')            
+            # fetching only the 'fields' array is not supported_
             fields:
-	            first_name: 'first_name'
+	        first_name: 'first_name'
                 last_name: 'last_name'
                 profile_image: 'image'
+            # these parameters are fetched using configResolver->getParameter('oauth_user_group.facebook', 'netgen_social_connect')
+            # fetching only the 'oauth_user_group' array is not supported_
+            oauth_user_group:
+                facebook: 11
+                linkedin: 11
+                google:   11
+                twitter:  11                
         administration_group:
             user_content_class_identifier: enhanced_user
             merge_accounts: false
@@ -151,13 +160,7 @@ parameters:
     netgen_social_connect.default.linkedin.id: <linkedin_client_id>
     netgen_social_connect.default.linkedin.secret: <linkedin_secret>
     netgen_social_connect.default.google.id: <google_client_id>
-    netgen_social_connect.default.google.secret: <google_secret>
-    
-    netgen_social_connect.default.oauth.user_group:
-        facebook: 11
-        twitter: 11
-        linkedin: 11
-        google: 11
+    netgen_social_connect.default.google.secret: <google_secret> 
 ```
 
 # Include the template

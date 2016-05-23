@@ -50,6 +50,14 @@ class Configuration extends SiteaccessAwareConfiguration implements Configuratio
                     ->scalarNode('profile_image')->end()
                 ->end()
             ->end()
+            ->arrayNode('oauth_user_group')
+                ->children()
+                    ->scalarNode('facebook')->end()
+                    ->scalarNode('google')->end()
+                    ->scalarNode('linkedin')->end()
+                    ->scalarNode('twitter')->end()
+                ->end()
+            ->end()
         ;
 
         return $treeBuilder;

@@ -35,20 +35,18 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
                 $contextualizer->setContextualParameter('user_content_type_identifier', $currentScope, $scopeSettings['user_content_type_identifier']);
                 $contextualizer->setContextualParameter('merge_accounts', $currentScope, $scopeSettings['merge_accounts']);
 
-                $fieldIdentifiers = $scopeSettings['field_identifiers'];
-                if (!empty($fieldIdentifiers['first_name'])) {
-                    $contextualizer->setContextualParameter('first_name', $currentScope, $fieldIdentifiers['first_name']);
+                if (array_key_exists('field_identifiers', $scopeSettings)) {
+                    foreach ($scopeSettings['field_identifiers'] as $fieldIdentifierName => $fieldIdentifierValue) {
+                        $contextualizer->setContextualParameter($fieldIdentifierName, $currentScope, $fieldIdentifierValue);
+                    }
                 }
-                if (!empty($fieldIdentifiers['last_name'])) {
-                    $contextualizer->setContextualParameter('last_name', $currentScope, $fieldIdentifiers['last_name']);
-                }
-                if (!empty($fieldIdentifiers['profile_image'])) {
-                    $contextualizer->setContextualParameter('profile_image', $currentScope, $fieldIdentifiers['profile_image']);
+                if (array_key_exists('oauth_user_group', $scopeSettings)) {
+                    foreach ($scopeSettings['oauth_user_group'] as $userGroupName => $userGroupId) {
+                        $contextualizer->setContextualParameter('oauth_user_group.' . $userGroupName, $currentScope, $userGroupId);
+                    }
                 }
             }
         );
-
-        $processor->mapConfigArray('field_identifiers', $config);
     }
 
     /**
