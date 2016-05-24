@@ -95,15 +95,17 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
             }
         }
         // If there is no link, look for an eZ user and connect them
-        if ($this->mergeAccountsFlag) {
+        if ($this->mergeAccounts) {
             $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
 
             if (!$securityUser instanceof SecurityUserInterface) {
                 $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
             }
-            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
+            if ($securityUser instanceof SecurityUserInterface) {
+                $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
 
-            return $securityUser;
+                return $securityUser;
+            }
         }
 
         $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
