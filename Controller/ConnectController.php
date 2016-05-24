@@ -51,8 +51,6 @@ class ConnectController extends Controller
      */
     public function disconnectUser(Request $request, $resource_name)
     {
-        $targetPathParameter = $this->container->getParameter('hwi_oauth.target_path_parameter');
-        $targetPath = $request->query->get($targetPathParameter, '/');
         $userContentId = $this->getUser()->getAPIUser()->id;
         $loginHelper = $this->get('netgen.social_connect.helper');
         $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resource_name);
@@ -63,9 +61,7 @@ class ConnectController extends Controller
         }
 
         $loginHelper->removeFromTable($OAuthEz);
-        $session = $request->getSession();
-        $session->getFlashBag()->add('notice', 'You have successfully disconnected user from Facebook account!');
 
-        return $this->redirect($targetPath);
+        return $this->redirect($request->server->get('HTTP_REFERER', '/'));
     }
 }
