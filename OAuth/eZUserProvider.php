@@ -101,13 +101,13 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
             if (!$securityUser instanceof SecurityUserInterface) {
                 $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
             }
-            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, OAuthEz::DISCONNECTABLE);
+            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
 
             return $securityUser;
         }
 
         $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
-        $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, OAuthEz::NOT_DISCONNECTABLE);
+        $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
 
         return $this->loadUserByAPIUser($userContentObject);
     }

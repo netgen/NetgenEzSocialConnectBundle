@@ -194,7 +194,7 @@ class ConnectController extends Controller
                     $loginHelper->addToTable(
                         $loginHelper->loadEzUserById($apiUser->id),
                         $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId),
-                        OAuthEz::DISCONNECTABLE
+                        true
                     );
                     $message = sprintf('You have connected to your %s account!', ucfirst($resourceOwnerName));
                 }

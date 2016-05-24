@@ -5,16 +5,6 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Entity;
 class OAuthEz
 {
     /**
-     * @const bool
-     */
-    const DISCONNECTABLE = true;
-
-    /**
-     * @const bool
-     */
-    const NOT_DISCONNECTABLE = false;
-
-    /**
      * @var int
      */
     private $ezUserId;
