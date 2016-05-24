@@ -99,12 +99,18 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
             $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
 
             if (!$securityUser instanceof SecurityUserInterface) {
-                $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
-            }
-            if ($securityUser instanceof SecurityUserInterface) {
-                $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
+                try {
+                    $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
 
-                return $securityUser;
+                    if ($securityUser instanceof SecurityUserInterface) {
+                        $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
+
+                        return $securityUser;
+                    }
+
+                } catch (\Symfony\Component\Security\Core\Exception\UsernameNotFoundException $e) {
+                    // Do nothing, we will create a new user
+                }
             }
         }
 
