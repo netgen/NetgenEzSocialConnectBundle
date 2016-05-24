@@ -87,25 +87,23 @@ netgen_social_connect:
             # multiple eZ users will be created otherwise, each linked to one social account
             # a new eZ user with a dummy email will always be created for users not disclosing their email
             merge_accounts: true
-            user_content_class_identifier: user
+            user_content_type_identifier: user
             # if these are not set, the fields in question will not be mapped to the OAuth resource owner's response
             # these parameters are fetched using configResolver->getParameter('first_name', 'netgen_social_connect')            
-            # fetching only the 'fields' array is not supported
-            fields:
+            field_identifiers:
 	        first_name: 'first_name'
                 last_name: 'last_name'
                 profile_image: 'image'
             # these parameters are fetched using configResolver->getParameter('oauth_user_group.facebook', 'netgen_social_connect')
-            # fetching only the 'oauth_user_group' array is not supported
             oauth_user_group:
                 facebook: 11
                 linkedin: 11
                 google:   11
                 twitter:  11                
         administration_group:
-            user_content_class_identifier: enhanced_user
+            user_content_type_identifier: enhanced_user
             merge_accounts: false
-            fields:
+            field_identifiers:
                 first_name: 'intro'
                 last_name: ~            # do not import social data to this field
                 profile_image: 'picture'
