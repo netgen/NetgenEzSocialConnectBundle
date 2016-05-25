@@ -149,9 +149,6 @@ class ConnectController extends Controller
 
         $targetPath = $session->get('social_connect_target_path');
 
-        // Delete any previous flashes to prevent clutter in case the endpoint isn't consuming them
-        //$session->getFlashBag()->clear();
-
         $resourceOwnerName = $session->get('social_connect_resource_owner');
         $message = sprintf('You have failed to connect to your %s account!', ucfirst($resourceOwnerName));
 
