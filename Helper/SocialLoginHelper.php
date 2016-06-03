@@ -209,6 +209,23 @@ class SocialLoginHelper
         $this->entityManager->flush();
     }
 
+
+    /**
+     * Loads from table by eZ user id and resource name.
+     *
+     * @param string $ezUserId
+     * @param string $resourceOwnerName
+     *
+     * @return null|\Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
+     */
+    public function loadFromTableByEzId($ezUserId, $resourceOwnerName, $onlyDisconnectable = false)
+    {
+        return $this->loadFromTableByCriteria(array(
+            'ezUserId' => $ezUserId,
+            'resourceName' => $resourceOwnerName,
+        ), $onlyDisconnectable);
+    }
+
     /**
      * Loads from table by resource user id and resource name.
      *
@@ -217,47 +234,32 @@ class SocialLoginHelper
      *
      * @return null|\Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
      */
-    public function loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName)
+    public function loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName, $onlyDisconnectable = false)
     {
-        $results =
-            $this->entityManager
-                ->getRepository('NetgenEzSocialConnectBundle:OAuthEz')
-                ->findBy(
-                    array(
-                        'resourceUserId' => $resourceUserId,
-                        'resourceName' => $resourceOwnerName,
-                    ),
-                    array(
-                        'ezUserId' => 'DESC', //get last inserted
-                    )
-                );
-
-        if (!is_array($results) || empty($results)) {
-            return null;
-        }
-
-        return $results[0];
+        return $this->loadFromTableByCriteria(array(
+            'resourceUserId' => $resourceUserId,
+            'resourceName' => $resourceOwnerName,
+        ), $onlyDisconnectable);
     }
 
     /**
-     * Loads from table by ez user id and resource name.
+     * Loads from table by criteria.
      *
-     * @param string $ezUserId
-     * @param string $resourceOwnerName
+     * @param array     $criteria
+     * @param bool      $onlyDisconnectable
      *
      * @return null|\Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
      */
-    public function loadFromTableByEzId($ezUserId, $resourceOwnerName)
+    protected function loadFromTableByCriteria(array $criteria, $onlyDisconnectable = false)
     {
-        $results =
-            $this->entityManager
-                ->getRepository('NetgenEzSocialConnectBundle:OAuthEz')
-                ->findBy(
-                    array(
-                        'ezUserId' => $ezUserId,
-                        'resourceName' => $resourceOwnerName,
-                    )
-                );
+        if ($onlyDisconnectable) {
+            $criteria['disconnectable'] = true;
+        }
+
+        $results = $this->entityManager->getRepository('NetgenEzSocialConnectBundle:OAuthEz')->findBy(
+            $criteria,
+            array('ezUserId' => 'DESC')     // Get last inserted item.
+        );
 
         if (!is_array($results) || empty($results)) {
             return null;

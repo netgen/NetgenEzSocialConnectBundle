@@ -28,7 +28,6 @@ class ConnectController extends Controller
      *
      * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
      * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException
-     * @throws \InvalidArgumentException
      */
     public function disconnectUser(Request $request, $resourceName)
     {
@@ -40,14 +39,10 @@ class ConnectController extends Controller
 
         $userContentId = $user->getAPIUser()->id;
         $loginHelper = $this->get('netgen.social_connect.helper');
-        $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName);
+        $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName, true);
 
         if (empty($OAuthEz)) {
-            throw new NotFoundException('connected user', $userContentId.'/'.$resourceName);
-        }
-
-        if (!$OAuthEz->isDisconnectable()) {
-            throw new \InvalidArgumentException("Cannot disconnect from '{$resourceName}' as it is the main social login.");
+            throw new NotFoundException('Disconnectable user', $userContentId.'/'.$resourceName);
         }
 
         $loginHelper->removeFromTable($OAuthEz);
