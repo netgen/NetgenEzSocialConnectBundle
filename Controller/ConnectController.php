@@ -11,24 +11,34 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
-use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 
 class ConnectController extends Controller
 {
     /**
+     * Removes the link between the currently logged-in user and the resource owner.
+     * On success, it adds a flashbag notice and redirects to HTTP_REFERER.
+     *
+     * Disconnecting from the primary social account is not allowed - if a user account was created
+     * specifically from a social connect event, that account is tied to its resource provider.
+     *
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @param string                                    $resourceName
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
      * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException
+     * @throws \InvalidArgumentException
      */
     public function disconnectUser(Request $request, $resourceName)
     {
-        if (!$this->getUser() instanceof UserInterface) {
+        $user = $this->getUser();
+
+        if (!$user instanceof UserInterface) {
             throw new AccessDeniedHttpException(sprintf("Cannot disconnect from '%s'. Please log in first.", $resourceName));
         }
 
-        $userContentId = $this->getUser()->getAPIUser()->id;
+        $userContentId = $user->getAPIUser()->id;
         $loginHelper = $this->get('netgen.social_connect.helper');
         $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName);
 
@@ -48,14 +58,17 @@ class ConnectController extends Controller
     }
 
     /**
-     * Sets the ez user id into session variable,
-     * and starts the connection to the social network.
+     * Sets the ez user id into session variable, and starts the connection to the social network.
+     * This will redirect to the finishConnecting route which will have its request populated with OAuth data.
+     *
+     * Stores the initial HTTP_REFERER so the finishConnecting route can return to it when done.
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param string $resourceName
+     * @param string                                    $resourceName
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     *
+
+     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
      * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnectedException
      */
     public function connectUser(Request $request, $resourceName)
@@ -84,7 +97,7 @@ class ConnectController extends Controller
         $session->set('social_connect_ez_user_id', $userContentId);
         $session->set('social_connect_resource_owner', $resourceName);
 
-        // Handle targetPath in session to prevent issues with GET parameters in Facebook redirect uri
+        // Handle targetPath in session to prevent issues with GET parameters in Facebook redirect uri.
         $session->set('social_connect_redirect_url', $redirectUrl);
         $session->set('social_connect_target_path', $request->server->get('HTTP_REFERER', '/'));
 
@@ -95,7 +108,7 @@ class ConnectController extends Controller
     }
 
     /**
-     * Get a resource owner by name.
+     * Get a resource owner object by name.
      *
      * @param string $name
      *
@@ -126,10 +139,10 @@ class ConnectController extends Controller
     }
 
     /**
-     * Given a request with an authorization code, fetches a token, retrieves a user resource id
-     * Then, a link is saved between the logged-in user and the resource owner
+     * Given a request with an authorization code, fetches a token, retrieves a user resource id.
+     * Then, a link is saved between the logged-in user and the resource owner.
      *
-     * On failure or success, redirect to the target path with a flash notice
+     * On failure or success, redirect to the target path with a flash notice.
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
@@ -174,7 +187,7 @@ class ConnectController extends Controller
         {
             $session->remove('social_connect_ez_user_id');
 
-            // The redirect URL points to the endpoint that requests the access token
+            // The redirect URL points to the endpoint that requests the access token.
             $redirectUrl = $session->get('social_connect_redirect_url');
 
             $token = $resourceOwner->getAccessToken($request, $redirectUrl);
@@ -210,7 +223,7 @@ class ConnectController extends Controller
     }
 
     /**
-     * Wrapper for intermediary OAuthEzUser object for addToTable call
+     * Wrapper for intermediary OAuthEzUser object for addToTable call.
      *
      * @param string $username
      * @param string $resourceOwnerName
