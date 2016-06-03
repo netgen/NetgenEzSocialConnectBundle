@@ -16,7 +16,7 @@ class ConnectController extends Controller
 {
     /**
      * Removes the link between the currently logged-in user and the resource owner.
-     * On success, it adds a flashbag notice and redirects to HTTP_REFERER.
+     * On success, it adds a flashbag notice and redirects to referer.
      *
      * Disconnecting from the primary social account is not allowed - if a user account was created
      * specifically from a social connect event, that account is tied to its resource provider.
@@ -50,14 +50,14 @@ class ConnectController extends Controller
         $session = $request->getSession();
         $session->getFlashBag()->add('notice', 'You have successfully disconnected user from Facebook account!');
 
-        return $this->redirect($request->server->get('HTTP_REFERER', '/'));
+        return $this->redirect($request->headers->get('referer', '/'));
     }
 
     /**
      * Sets the ez user id into session variable, and starts the connection to the social network.
      * This will redirect to the finishConnecting route which will have its request populated with OAuth data.
      *
-     * Stores the initial HTTP_REFERER so the finishConnecting route can return to it when done.
+     * Stores the initial referer so the finishConnecting route can return to it when done.
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @param string                                    $resourceName
@@ -95,7 +95,7 @@ class ConnectController extends Controller
 
         // Handle targetPath in session to prevent issues with GET parameters in Facebook redirect uri.
         $session->set('social_connect_redirect_url', $redirectUrl);
-        $session->set('social_connect_target_path', $request->server->get('HTTP_REFERER', '/'));
+        $session->set('social_connect_target_path', $request->headers->get('referer', '/'));
 
         /** @var \HWI\Bundle\OAuthBundle\Security\OAuthUtils $OAuthUtils */
         $OAuthUtils = $this->container->get('hwi_oauth.security.oauth_utils');
