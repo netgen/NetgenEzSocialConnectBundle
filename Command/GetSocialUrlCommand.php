@@ -2,8 +2,6 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\Command;
 
-use Netgen\Bundle\EzSocialConnectBundle\Exception\ResourceOwnerNotSupportedException;
-use Netgen\Bundle\EzSocialConnectBundle\Exception\UserNotConnectedException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,6 +10,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class GetSocialUrlCommand extends ContainerAwareCommand
 {
+    /**
+     * Configures the current command.
+     */
     protected function configure()
     {
         $this
@@ -43,15 +44,7 @@ class GetSocialUrlCommand extends ContainerAwareCommand
 
         $loginHelper = $this->getContainer()->get('netgen.social_connect.helper');
 
-        try {
-            $profileUrls = $loginHelper->getProfileUrlsByEzUserId($userId, $resourceName);
-        } catch (ResourceOwnerNotSupportedException $e) {
-            $output->writeln("<error>Resource owner '{$resourceName}' is not supported!</error>");
-            return;
-        } catch (UserNotConnectedException $e) {
-            $output->writeln("<error>User with id '{$userId}' is not connected to '{$resourceName}'!</error>");
-            return;
-        }
+        $profileUrls = $loginHelper->getProfileUrlsByEzUserId($userId, $resourceName);
 
         if (!empty($profileUrls)) {
             foreach ($profileUrls as $resourceName => $profileUrl) {
