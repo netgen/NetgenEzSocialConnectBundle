@@ -2,6 +2,8 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\Command;
 
+use Netgen\Bundle\EzSocialConnectBundle\Exception\ResourceOwnerNotSupportedException;
+use Netgen\Bundle\EzSocialConnectBundle\Exception\UserNotConnectedException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -13,8 +15,8 @@ class GetSocialUrlCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('netgen:get:social-url')
-            ->setDescription('Command takes ezuser id and returns urls to their social profiles.')
+            ->setName('netgen:social:geturl')
+            ->setDescription('This command takes an eZ userId and prints the urls to their social profiles to the console.')
             ->addArgument(
                 'user_id',
                 InputArgument::REQUIRED,
@@ -24,68 +26,38 @@ class GetSocialUrlCommand extends ContainerAwareCommand
                 'resource',
                 '-r',
                 InputOption::VALUE_OPTIONAL,
-                'If set, only profile from the defined social network will be returned'
+                'If set, only the profile from the social network defined will be returned'
             )
         ;
     }
+
+    /**
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $userId = $input->getArgument('user_id');
+        $resourceName = $input->getOption('resource');
+
         $loginHelper = $this->getContainer()->get('netgen.social_connect.helper');
-        
-        $baseUrl = array(
-            'facebook' => 'https://www.facebook.com/app_scoped_user_id/',
-            'twitter' => 'https://twitter.com/intent/user?user_id=',
-            'google' => 'https://plus.google.com/',
-        );
 
-        if ($resourceName = $input->getOption('resource')) {
-            if (!array_key_exists($resourceName, $baseUrl)) {
-                $output->writeln("<error>Resource owner '{$resourceName}' is not supported!</error>");
+        try {
+            $profileUrls = $loginHelper->getProfileUrlsByEzUserId($userId, $resourceName);
+        } catch (ResourceOwnerNotSupportedException $e) {
+            $output->writeln("<error>Resource owner '{$resourceName}' is not supported!</error>");
+            return;
+        } catch (UserNotConnectedException $e) {
+            $output->writeln("<error>User with id '{$userId}' is not connected to '{$resourceName}'!</error>");
+            return;
+        }
 
-                return;
+        if (!empty($profileUrls)) {
+            foreach ($profileUrls as $resourceName => $profileUrl) {
+                $output->writeln("<info>{$resourceName}</info>: {$profileUrl}".PHP_EOL);
             }
-
-            $OAuthEz = $loginHelper->loadFromTableByEzId($userId, $resourceName);
-
-            if (empty($OAuthEz)) {
-                $output->writeln("<error>User with id '{$userId}' is not connected to '{$resourceName}'!</error>");
-
-                return;
-            }
-
-            $externalId = $OAuthEz->getResourceUserId();
-            switch ($resourceName) {
-                case 'facebook':
-                    $profileUrl = $baseUrl['facebook'].$externalId;
-                    break;
-                case 'twitter':
-                    $profileUrl = $baseUrl['twitter'].$externalId;
-                    break;
-                case 'google':
-                    $profileUrl = $baseUrl['google'].$externalId;
-                    break;
-                default:
-                    $output->writeln("<error>Resource owner '{$resourceName}' is not supported!</error>");
-
-                    return;
-            }
-
-            $output->writeln("{$resourceName}: {$profileUrl}");
         } else {
-            $output->writeln('');
-            foreach ($baseUrl as $resourceName => $resourceBaseUrl) {
-                $OAuthEz = $loginHelper->loadFromTableByEzId($userId, $resourceName);
-
-                if (empty($OAuthEz)) {
-                    continue;
-                }
-
-                $externalId = $OAuthEz->getResourceUserId();
-                $profileUrl = $resourceBaseUrl.$externalId;
-                $output->writeln("{$resourceName}: {$profileUrl}");
-            }
-            $output->writeln('');
+            $output->writeln("<error>User with id '{$userId}' is not connected to any resource owner!</error>");
         }
     }
 }

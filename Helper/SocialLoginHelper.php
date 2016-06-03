@@ -7,6 +7,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\API\Repository\Values\User\User;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException;
+use Netgen\Bundle\EzSocialConnectBundle\Exception\ResourceOwnerNotSupportedException;
+use Netgen\Bundle\EzSocialConnectBundle\Exception\UserNotConnectedException;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -364,5 +366,58 @@ class SocialLoginHelper
     public function loadEzUserById($userId)
     {
         return $this->repository->getUserService()->loadUser($userId);
+    }
+
+    /**
+     * Fetches an array ['resourceOwner' => 'userProfileUrl'].
+     * If the resourceName parameter is omitted, returns all userProfileUrls for registered resource owners.
+     *
+     * @param int           $userId
+     * @param string|null   $resourceName
+     *
+     * @return array
+     *
+     * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\ResourceOwnerNotSupportedException
+     * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\UserNotConnectedException
+     */
+    public function getProfileUrlsByEzUserId($userId, $resourceName = null)
+    {
+        $profileUrls = array();
+
+        if (!$this->configResolver->hasParameter('profile_urls', 'netgen_social_connect')) {
+            throw new MissingConfigurationException('profile_urls');
+        }
+
+        $baseUrls = $this->configResolver->getParameter('profile_urls', 'netgen_social_connect');
+
+        if ($resourceName) {
+            if (!array_key_exists($resourceName, $baseUrls)) {
+                throw new ResourceOwnerNotSupportedException($resourceName);
+            }
+
+            $OAuthEz = $this->loadFromTableByEzId($userId, $resourceName);
+
+            if (empty($OAuthEz)) {
+                throw new UserNotConnectedException($resourceName);
+            }
+
+            $externalId = $OAuthEz->getResourceUserId();
+
+            $profileUrls[$resourceName] = $baseUrl[$resourceName].$externalId;
+
+        } else {
+            foreach ($baseUrls as $resourceName => $resourceBaseUrl) {
+                $OAuthEz = $this->loadFromTableByEzId($userId, $resourceName);
+
+                if (empty($OAuthEz)) {
+                    continue;
+                }
+
+                $externalId = $OAuthEz->getResourceUserId();
+                $profileUrls[$resourceName] = $resourceBaseUrl.$externalId;
+            }
+        }
+
+        return $profileUrls;
     }
 }
