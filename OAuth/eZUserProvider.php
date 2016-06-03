@@ -94,30 +94,33 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
                 $this->loginHelper->removeFromTable($OAuthEzUserEntity);
             }
         }
-        // If there is no link, look for an eZ user and connect them
-        if ($this->mergeAccounts) {
-            $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
 
-            if (!$securityUser instanceof SecurityUserInterface) {
-                try {
-                    $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
+        if (!$this->mergeAccounts) {
+            $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+            $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
 
-                    if ($securityUser instanceof SecurityUserInterface) {
-                        $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
+            return $this->loadUserByAPIUser($userContentObject);
+        }
+        
+        $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
 
-                        return $securityUser;
-                    }
+        if ($securityUser instanceof SecurityUserInterface) {
+            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
 
-                } catch (\Symfony\Component\Security\Core\Exception\UsernameNotFoundException $e) {
-                    // Do nothing, we will create a new user
-                }
-            }
+            return $securityUser;
         }
 
-        $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
-        $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
+        try {
+            $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
+            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
 
-        return $this->loadUserByAPIUser($userContentObject);
+            return $securityUser;
+        } catch (\Symfony\Component\Security\Core\Exception\UsernameNotFoundException $e) {
+            $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+            $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
+
+            return $this->loadUserByAPIUser($userContentObject);
+        }
     }
 
     /**
