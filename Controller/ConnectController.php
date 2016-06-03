@@ -35,7 +35,7 @@ class ConnectController extends Controller
         $user = $this->getUser();
 
         if (!$user instanceof UserInterface) {
-            throw new AccessDeniedHttpException(sprintf("Cannot disconnect from '%s'. Please log in first.", $resourceName));
+            throw new AccessDeniedHttpException("Cannot disconnect from '{$resourceName}'. Please log in first.");
         }
 
         $userContentId = $user->getAPIUser()->id;
@@ -45,8 +45,9 @@ class ConnectController extends Controller
         if (empty($OAuthEz)) {
             throw new NotFoundException('connected user', $userContentId.'/'.$resourceName);
         }
+
         if (!$OAuthEz->isDisconnectable()) {
-            throw new \InvalidArgumentException(sprintf("Cannot disconnect from '%s' as it is the main social login.", $resourceName));
+            throw new \InvalidArgumentException("Cannot disconnect from '{$resourceName}' as it is the main social login.");
         }
 
         $loginHelper->removeFromTable($OAuthEz);
