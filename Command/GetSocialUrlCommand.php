@@ -16,7 +16,8 @@ class GetSocialUrlCommand extends ContainerAwareCommand
     {
         $this
             ->setName('netgen:social:geturl')
-            ->setDescription('This command takes an eZ userId and prints the urls to their social profiles to the console.')
+            ->setDescription('This command takes an eZ userId and prints the urls to their social profiles to the console.'.PHP_EOL.
+                             'Only the Facebook, Google and Twitter resource owners are supported at the moment.')
             ->addArgument(
                 'user_id',
                 InputArgument::REQUIRED,

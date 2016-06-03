@@ -41,6 +41,9 @@ class SocialLoginHelper
     /** @var  string */
     protected $imageField;
 
+    /** @var  array */
+    protected $baseUrls;
+
     /**
      * @param \eZ\Publish\API\Repository\Repository        $repository
      * @param \Doctrine\ORM\EntityManagerInterface         $entityManager
@@ -87,6 +90,16 @@ class SocialLoginHelper
      */
     public function setProfileImage($imageField = null){
         $this->imageField = $imageField;
+    }
+
+    /**
+     * Injected setter
+     *
+     * @param $baseUrls
+     */
+    public function setBaseUrls($baseUrls = null)
+    {
+        $this->baseUrls = $baseUrls;
     }
 
     /**
@@ -384,14 +397,8 @@ class SocialLoginHelper
     {
         $profileUrls = array();
 
-        if (!$this->configResolver->hasParameter('profile_urls', 'netgen_social_connect')) {
-            throw new MissingConfigurationException('profile_urls');
-        }
-
-        $baseUrls = $this->configResolver->getParameter('profile_urls', 'netgen_social_connect');
-
         if ($resourceName) {
-            if (!array_key_exists($resourceName, $baseUrls)) {
+            if (!array_key_exists($resourceName, $this->baseUrls)) {
                 throw new ResourceOwnerNotSupportedException($resourceName);
             }
 
@@ -403,10 +410,10 @@ class SocialLoginHelper
 
             $externalId = $OAuthEz->getResourceUserId();
 
-            $profileUrls[$resourceName] = $baseUrl[$resourceName].$externalId;
+            $profileUrls[$resourceName] = $this->baseUrls[$resourceName].$externalId;
 
         } else {
-            foreach ($baseUrls as $resourceName => $resourceBaseUrl) {
+            foreach ($this->baseUrls as $resourceName => $resourceBaseUrl) {
                 $OAuthEz = $this->loadFromTableByEzId($userId, $resourceName);
 
                 if (empty($OAuthEz)) {
