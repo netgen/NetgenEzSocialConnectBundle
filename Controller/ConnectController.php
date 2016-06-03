@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
+use Symfony\Component\Translation\Translator;
 
 class ConnectController extends Controller
 {
@@ -48,7 +49,12 @@ class ConnectController extends Controller
         $loginHelper->removeFromTable($OAuthEz);
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
-        $session->getFlashBag()->add('notice', 'You have successfully disconnected user from Facebook account!');
+
+        $translator = $this->get('translator');
+        $message = $translator->trans(
+            'disconnect.owner.success', array('ownerName' => ucfirst($resourceName)), 'social_connect'
+        );
+        $session->getFlashBag()->add('notice', $message);
 
         return $this->redirect($request->headers->get('referer', '/'));
     }
@@ -146,12 +152,14 @@ class ConnectController extends Controller
      */
     public function finishConnecting(Request $request)
     {
+        /** @var Translator $translator */
+        $translator = $this->get('translator');
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
         $flashBag = $session->getFlashBag();
 
         if (!$session->has('social_connect_target_path') || (!$session->has('social_connect_redirect_url'))) {
-            $flashBag->add('notice', 'You have failed to connect to your social account!');
+            $flashBag->add('notice', $translator->trans('connect.generic.failed', array(), 'social_connect'));
 
             return $this->redirect('/');
         }
@@ -159,7 +167,7 @@ class ConnectController extends Controller
         $targetPath = $session->get('social_connect_target_path');
 
         $resourceOwnerName = $session->get('social_connect_resource_owner');
-        $message = sprintf('You have failed to connect to your %s account!', ucfirst($resourceOwnerName));
+        $message = $translator->trans('connect.owner.failed', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect');
 
         try
         {
@@ -202,11 +210,15 @@ class ConnectController extends Controller
                         $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId),
                         true
                     );
-                    $message = sprintf('You have connected to your %s account!', ucfirst($resourceOwnerName));
+                    $message = $translator->trans(
+                        'connect.generic.success', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
+                    );
                 }
                 else
                 {
-                    $message = sprintf('This %s account is already connected to another user!', ucfirst($resourceOwnerName));
+                    $message = $translator->trans(
+                        'connect.owner.already_connected', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
+                    );
                 }
             }
         }
