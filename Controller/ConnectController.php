@@ -27,8 +27,8 @@ class ConnectController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
-     * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException
+     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException if the user is not logged in.
+     * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException if the social link is flagged as non-removable.
      */
     public function disconnectUser(Request $request, $resourceName)
     {
@@ -70,8 +70,8 @@ class ConnectController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
 
-     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
-     * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnectedException
+     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException if the user is not logged in.
+     * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnectedException if the user already has a link to that resource owner.
      */
     public function connectUser(Request $request, $resourceName)
     {

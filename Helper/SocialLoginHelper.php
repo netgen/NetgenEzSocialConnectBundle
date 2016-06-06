@@ -293,7 +293,7 @@ class SocialLoginHelper
 
         $loginId = $oauthUser->getOriginalId();
         $username = $oauthUser->getUsername();
-        $password = md5($loginId.$username);
+        $password = password_hash(str_shuffle($loginId.microtime().$username), PASSWORD_DEFAULT);
         $firstName = $oauthUser->getFirstName();
         $lastName = $oauthUser->getLastName();
         $imageLink = $oauthUser->getImagelink();
@@ -306,33 +306,22 @@ class SocialLoginHelper
             $language = $languages[0];
         }
 
-        $userCreateStruct = $userService->newUserCreateStruct(
-            $username,
-            $oauthUser->getEmail(),
-            $password,
-            $language,
-            $contentType
-        );
+        $userCreateStruct = $userService->newUserCreateStruct($username, $oauthUser->getEmail(), $password, $language, $contentType);
 
-        if (!empty($firstName)) {
-            if (!empty($this->firstNameIdentifier)) {
-                $userCreateStruct->setField($this->firstNameIdentifier, $firstName);
-            }
+        if (!empty($firstName) && !empty($this->firstNameIdentifier)) {
+            $userCreateStruct->setField($this->firstNameIdentifier, $firstName);
         }
-        if (!empty($lastName)) {
-            if (!empty($this->lastNameIdentifier)) {
-                $userCreateStruct->setField($this->lastNameIdentifier, $lastName);
-            }
+
+        if (!empty($lastName) && !empty($this->lastNameIdentifier)) {
+            $userCreateStruct->setField($this->lastNameIdentifier, $lastName);
         }
 
         $imageFileName = null;
 
-        $imageFieldIdentifier = $this->imageFieldIdentifier;
-
-        if (!empty($imageLink) && !empty($imageFieldIdentifier)) {
+        if (!empty($imageLink) && !empty($this->imageFieldIdentifier)) {
             try {
                 $imageFileName = $this->downloadExternalImage($imageLink);
-                $userCreateStruct->setField($imageFieldIdentifier, $imageFileName);
+                $userCreateStruct->setField($this->imageFieldIdentifier, $imageFileName);
             } catch (\Symfony\Component\Filesystem\Exception\IOException $e) {
                 $this->logger->error("Problem while saving image {$imageLink}: ".$e->getMessage());
             }
@@ -343,6 +332,7 @@ class SocialLoginHelper
         if (!$this->configResolver->hasParameter('oauth_user_group.'.$oauthUser->getResourceOwnerName(), 'netgen_social_connect')) {
             throw new MissingConfigurationException('oauth_user_group'.$oauthUser->getResourceOwnerName());
         }
+
         $userGroupId = $this->configResolver->getParameter('oauth_user_group.'.$oauthUser->getResourceOwnerName(), 'netgen_social_connect');
 
         $newUser = $this->repository->sudo(
