@@ -162,6 +162,7 @@ class ConnectController extends Controller
         }
 
         $targetPath = $session->get('social_connect_target_path');
+        $session->remove('social_connect_target_path');
 
         $resourceOwnerName = $session->get('social_connect_resource_owner');
         $message = $translator->trans('connect.owner.failed', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect');
@@ -171,8 +172,6 @@ class ConnectController extends Controller
         } catch (\RuntimeException $e) {
             $flashBag->add('notice', $message);
 
-            $session->remove('social_connect_target_path');
-
             return $this->redirect($targetPath);
         }
 
@@ -180,38 +179,45 @@ class ConnectController extends Controller
 
         $apiUser = $this->getUser()->getAPIUser();
 
-        if ($session->has('social_connect_ez_user_id') && $apiUser->id == $session->get('social_connect_ez_user_id')) {
-            $session->remove('social_connect_ez_user_id');
+        if (!($session->has('social_connect_ez_user_id') && $apiUser->id == $session->get('social_connect_ez_user_id'))) {
 
-            $token = $resourceOwner->getAccessToken($request, $this->getRedirectUrl());
-            $userInformation = $resourceOwner->getUserInformation($token);
+            $flashBag->add('notice', $message);
 
-            if (!$userInformation instanceof PathUserResponse) {
-                $message = $translator->trans(
-                    'connect.owner.already_connected', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
-                );
-            } else {
-                $resourceUserId = $userInformation->getUsername();
-
-                $loginHelper = $this->get('netgen.social_connect.helper');
-
-                if (empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName)))
-                {
-                    $loginHelper->addToTable(
-                        $loginHelper->loadEzUserById($apiUser->id),
-                        $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId),
-                        true
-                    );
-                    $message = $translator->trans(
-                        'connect.generic.success', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
-                    );
-                }
-            }
+            return $this->redirect($targetPath);
         }
 
-        $flashBag->add('notice', $message);
+        $session->remove('social_connect_ez_user_id');
 
-        $session->remove('social_connect_target_path');
+        $token = $resourceOwner->getAccessToken($request, $this->getRedirectUrl());
+        $userInformation = $resourceOwner->getUserInformation($token);
+
+        if (!$userInformation instanceof PathUserResponse) {
+            $message = $translator->trans(
+                'connect.owner.already_connected', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
+            );
+
+            $flashBag->add('notice', $message);
+
+            return $this->redirect($targetPath);
+        }
+
+        $resourceUserId = $userInformation->getUsername();
+
+        $loginHelper = $this->get('netgen.social_connect.helper');
+
+        if (!empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName))) {
+            $flashBag->add('notice', $message);
+
+            return $this->redirect($targetPath);
+        }
+
+        $loginHelper->addToTable(
+            $loginHelper->loadEzUserById($apiUser->id),
+            $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId),
+            true
+        );
+
+        $flashBag->add('notice', $message);
 
         return $this->redirect($targetPath);
     }
