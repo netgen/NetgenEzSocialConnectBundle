@@ -111,35 +111,27 @@ class SocialLoginHelper
      *
      * @throws \Symfony\Component\Filesystem\Exception\IOException if failed to create local directory
      */
-    public function downloadExternalImage($imageLink)
+    protected function downloadExternalImage($imageLink)
     {
-        // download image from external link
         $data = file_get_contents($imageLink);
 
         preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName);
 
-        if (!empty($imageName[ 0 ])) {
+        if (!empty($imageName[0])) {
             $storageDir = '/tmp/';
             if (!is_dir($storageDir)) {
                 if (!mkdir($storageDir)) {
                     throw new IOException('Failed to create dir', 0, null, $storageDir);
                 }
             }
-            $imageFileName = $storageDir.basename($imageName[ 0 ]);
+            $imageFileName = $storageDir.basename($imageName[0]);
         }
-        if (!empty($imageFileName) && file_put_contents($imageFileName, $data)) {
-            if ($this->logger !== null) {
-                $this->logger->notice("Local image created: {$imageFileName}.");
-            }
+        if (!empty($imageFileName) && file_put_contents($imageFileName, $data) !== false) {
 
             return $imageFileName;
-        } else {
-            if ($this->logger !== null) {
-                $this->logger->error("Problem while saving image {$imageLink}.");
-            }
-
-            return;
         }
+
+        throw new IOException('Failed to create image.', 0, null, $imageLink);
     }
 
     /**
@@ -147,22 +139,35 @@ class SocialLoginHelper
      *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      * @param string                                      $imageLink External link
+     * @param string|null                                 $language
+     *
+     * @return bool
      */
-    public function addProfileImage(User $user, $imageLink)
+    public function addProfileImage(User $user, $imageLink, $language = null)
     {
         $imageFieldIdentifier = $this->imageField;
         if (empty($imageFieldIdentifier)) {
-            return;
+            return false;
         }
 
-        if (!$this->fieldHelper->isFieldEmpty($user->content, $imageFieldIdentifier)) {
-            return;
+        if (!$this->fieldHelper->isFieldEmpty($user->content, $imageFieldIdentifier, $language)) {
+            return false;
         }
 
-        $imageFileName = $this->downloadExternalImage($imageLink);
+        try {
+            $imageFileName = $this->downloadExternalImage($imageLink);
+        } catch (\Symfony\Component\Filesystem\Exception\IOException $e) {
+            $this->logger->error("Problem while saving image {$imageLink}: ".$e->getMessage());
 
-        $language = $this->configResolver->getParameter('languages');
-        $language = $language[0];
+            return false;
+        }
+
+        $this->logger->notice("Local image created: {$imageFileName}.");
+
+        if (!$language) {
+            $language = $this->configResolver->getParameter('languages');
+            $language = $language[0];
+        }
 
         $this->repository->sudo(
             function (Repository $repository) use ($user, $language, $imageFileName, $imageFieldIdentifier) {
@@ -176,10 +181,15 @@ class SocialLoginHelper
                 $contentService->publishVersion($userDraft->versionInfo);
             }
         );
+
+        return true;
     }
 
     /**
      * Adds entry to the table.
+     *
+     * If disconnectable is true, this link can be deleted.
+     * Otherwise, it is assumed to be the main social login which created the eZ user initially.
      *
      * @param \eZ\Publish\API\Repository\Values\User\User            $user
      * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $authEzUser
@@ -296,7 +306,7 @@ class SocialLoginHelper
             $username,
             $oauthUser->getEmail(),
             $password,
-            $languages[ 0 ],
+            $languages[0],
             $contentType
         );
 
@@ -316,8 +326,12 @@ class SocialLoginHelper
         $imageFieldIdentifier = $this->imageFieldIdentifier;
 
         if (!empty($imageLink) && !empty($imageFieldIdentifier)) {
-            $imageFileName = $this->downloadExternalImage($imageLink);
-            $userCreateStruct->setField($imageFieldIdentifier, $imageFileName);
+            try {
+                $imageFileName = $this->downloadExternalImage($imageLink);
+                $userCreateStruct->setField($imageFieldIdentifier, $imageFileName);
+            } catch (\Symfony\Component\Filesystem\Exception\IOException $e) {
+                $this->logger->error("Problem while saving image {$imageLink}: ".$e->getMessage());
+            }
         }
 
         $userCreateStruct->enabled = true;
