@@ -165,6 +165,8 @@ class ConnectController extends Controller
         $session->remove('social_connect_target_path');
 
         $resourceOwnerName = $session->get('social_connect_resource_owner');
+        $session->remove('social_connect_resource_owner');
+
         $message = $translator->trans('connect.owner.failed', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect');
 
         try {
@@ -175,7 +177,6 @@ class ConnectController extends Controller
             return $this->redirect($targetPath);
         }
 
-        $session->remove('social_connect_resource_owner');
 
         $apiUser = $this->getUser()->getAPIUser();
 

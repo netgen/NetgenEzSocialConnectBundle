@@ -1,4 +1,4 @@
-connect_with:                       'Connect with your social network'
+connect_with:                    'Connect with your social network'
 connect.generic.failed:          'Something went wrong, we were not able to connect to your account.'
 connect.owner.failed:            'Something went wrong, we were not able to connect to your %ownerName% account.'
 connect.owner.success:           'You have connected to your %ownerName% account!'
