@@ -7,22 +7,22 @@ class OAuthEz
     /**
      * @var int
      */
-    private $ezUserId;
+    protected $ezUserId;
 
     /**
      * @var string
      */
-    private $resourceUserId;
+    protected $resourceUserId;
 
     /**
      * @var string
      */
-    private $resourceName;
+    protected $resourceName;
 
     /**
      * @var boolean
      */
-    private $disconnectable;
+    protected $disconnectable;
 
     /**
      * @return bool
