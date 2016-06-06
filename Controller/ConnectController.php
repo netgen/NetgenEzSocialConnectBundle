@@ -93,20 +93,17 @@ class ConnectController extends Controller
             throw new UserAlreadyConnected( $resource_name );
         }
 
-        $redirectUrl = $this->generateUrl('netgen_finish_connecting', array(), UrlGeneratorInterface::ABSOLUTE_URL);
-
         $session = $request->getSession();
         $session->set('social_connect_ez_user_id', $userContentId);
         $session->set('social_connect_resource_owner', $resourceName);
 
         // Handle targetPath in session to prevent issues with GET parameters in Facebook redirect uri.
-        $session->set('social_connect_redirect_url', $redirectUrl);
         $session->set('social_connect_target_path', $request->headers->get('referer', '/'));
 
         /** @var \HWI\Bundle\OAuthBundle\Security\OAuthUtils $OAuthUtils */
         $OAuthUtils = $this->container->get('hwi_oauth.security.oauth_utils');
 
-        return $this->redirect($OAuthUtils->getAuthorizationUrl($request, $resourceName, $redirectUrl));
+        return $this->redirect($OAuthUtils->getAuthorizationUrl($request, $resourceName, $this->getRedirectUrl()));
     }
 
     /**
@@ -158,7 +155,7 @@ class ConnectController extends Controller
         $session = $request->getSession();
         $flashBag = $session->getFlashBag();
 
-        if (!$session->has('social_connect_target_path') || (!$session->has('social_connect_redirect_url'))) {
+        if (!$session->has('social_connect_target_path')) {
             $flashBag->add('notice', $translator->trans('connect.generic.failed', array(), 'social_connect'));
 
             return $this->redirect('/');
@@ -169,15 +166,11 @@ class ConnectController extends Controller
         $resourceOwnerName = $session->get('social_connect_resource_owner');
         $message = $translator->trans('connect.owner.failed', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect');
 
-        try
-        {
+        try {
             $resourceOwner = $this->getResourceOwnerByName($resourceOwnerName);
-        }
-        catch (\RuntimeException $e)
-        {
+        } catch (\RuntimeException $e) {
             $flashBag->add('notice', $message);
 
-            $session->remove('social_connect_redirect_url');
             $session->remove('social_connect_target_path');
 
             return $this->redirect($targetPath);
@@ -187,18 +180,17 @@ class ConnectController extends Controller
 
         $apiUser = $this->getUser()->getAPIUser();
 
-        if ($session->has('social_connect_ez_user_id') && $apiUser->id == $session->get('social_connect_ez_user_id'))
-        {
+        if ($session->has('social_connect_ez_user_id') && $apiUser->id == $session->get('social_connect_ez_user_id')) {
             $session->remove('social_connect_ez_user_id');
 
-            // The redirect URL points to the endpoint that requests the access token.
-            $redirectUrl = $session->get('social_connect_redirect_url');
-
-            $token = $resourceOwner->getAccessToken($request, $redirectUrl);
+            $token = $resourceOwner->getAccessToken($request, $this->getRedirectUrl());
             $userInformation = $resourceOwner->getUserInformation($token);
 
-            if ($userInformation instanceof PathUserResponse)
-            {
+            if (!$userInformation instanceof PathUserResponse) {
+                $message = $translator->trans(
+                    'connect.owner.already_connected', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
+                );
+            } else {
                 $resourceUserId = $userInformation->getUsername();
 
                 $loginHelper = $this->get('netgen.social_connect.helper');
@@ -214,17 +206,11 @@ class ConnectController extends Controller
                         'connect.generic.success', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
                     );
                 }
-                else
-                {
-                    $message = $translator->trans(
-                        'connect.owner.already_connected', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
-                    );
-                }
             }
         }
+
         $flashBag->add('notice', $message);
 
-        $session->remove('social_connect_redirect_url');
         $session->remove('social_connect_target_path');
 
         return $this->redirect($targetPath);
@@ -245,5 +231,15 @@ class ConnectController extends Controller
         $OAuthEz->setResourceOwnerName($resourceOwnerName);
 
         return $OAuthEz;
+    }
+
+    /**
+     * Fetches the redirect URL for the OAuth response consumer.
+     *
+     * @return string
+     */
+    protected function getRedirectUrl()
+    {
+        return $this->generateUrl('netgen_finish_connecting', array(), UrlGeneratorInterface::ABSOLUTE_URL);
     }
 }
