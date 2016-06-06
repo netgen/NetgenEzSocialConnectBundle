@@ -284,8 +284,8 @@ class SocialLoginHelper
         $loginId = $oauthUser->getOriginalId();
         $username = $oauthUser->getUsername();
         $password = md5($loginId.$username);
-        $first_name = $oauthUser->getFirstName();
-        $last_name = $oauthUser->getLastName();
+        $firstName = $oauthUser->getFirstName();
+        $lastName = $oauthUser->getLastName();
         $imageLink = $oauthUser->getImagelink();
 
         $contentTypeIdentifier = $this->configResolver->getParameter('user_content_type_identifier', 'netgen_social_connect');
@@ -300,14 +300,14 @@ class SocialLoginHelper
             $contentType
         );
 
-        if (!empty($first_name)) {
+        if (!empty($firstName)) {
             if (!empty($this->firstNameIdentifier)) {
-                $userCreateStruct->setField($this->firstNameIdentifier, $first_name);
+                $userCreateStruct->setField($this->firstNameIdentifier, $firstName);
             }
         }
-        if (!empty($last_name)) {
+        if (!empty($lastName)) {
             if (!empty($this->lastNameIdentifier)) {
-                $userCreateStruct->setField($this->lastNameIdentifier, $last_name);
+                $userCreateStruct->setField($this->lastNameIdentifier, $lastName);
             }
         }
 
