@@ -33,13 +33,13 @@ class SocialLoginHelper
     protected $fieldHelper;
 
     /** @var  string */
-    protected $firstName;
+    protected $firstNameIdentifier;
 
     /** @var  string */
-    protected $lastName;
+    protected $lastNameIdentifier;
 
     /** @var  string */
-    protected $imageField;
+    protected $imageFieldIdentifier;
 
     /** @var  array */
     protected $baseUrls;
@@ -68,28 +68,28 @@ class SocialLoginHelper
     /**
      * Injected setter
      *
-     * @param $firstName
+     * @param $firstNameIdentifier
      */
-    public function setFirstName($firstName = null){
-        $this->firstName = $firstName;
+    public function setFirstNameIdentifier($firstNameIdentifier = null){
+        $this->firstNameIdentifier = $firstNameIdentifier;
     }
 
     /**
      * Injected setter
      *
-     * @param $lastName
+     * @param $lastNameIdentifier
      */
-    public function setLastName($lastName = null){
-        $this->lastName = $lastName;
+    public function setLastNameIdentifier($lastNameIdentifier = null){
+        $this->lastNameIdentifier = $lastNameIdentifier;
     }
 
     /**
      * Injected setter
      *
-     * @param $imageField
+     * @param $imageFieldIdentifier
      */
-    public function setProfileImage($imageField = null){
-        $this->imageField = $imageField;
+    public function setProfileImageIdentifier($imageFieldIdentifier = null){
+        $this->imageFieldIdentifier = $imageFieldIdentifier;
     }
 
     /**
@@ -301,19 +301,19 @@ class SocialLoginHelper
         );
 
         if (!empty($first_name)) {
-            if (!empty($this->firstName)) {
-                $userCreateStruct->setField($this->firstName, $first_name);
+            if (!empty($this->firstNameIdentifier)) {
+                $userCreateStruct->setField($this->firstNameIdentifier, $first_name);
             }
         }
         if (!empty($last_name)) {
-            if (!empty($this->lastName)) {
-                $userCreateStruct->setField($this->lastName, $last_name);
+            if (!empty($this->lastNameIdentifier)) {
+                $userCreateStruct->setField($this->lastNameIdentifier, $last_name);
             }
         }
 
         $imageFileName = null;
 
-        $imageFieldIdentifier = $this->imageField;
+        $imageFieldIdentifier = $this->imageFieldIdentifier;
 
         if (!empty($imageLink) && !empty($imageFieldIdentifier)) {
             $imageFileName = $this->downloadExternalImage($imageLink);
