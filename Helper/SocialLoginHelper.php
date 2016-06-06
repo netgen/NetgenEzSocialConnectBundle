@@ -266,7 +266,7 @@ class SocialLoginHelper
             $criteria['disconnectable'] = true;
         }
 
-        $results = $this->entityManager->getRepository('NetgenEzSocialConnectBundle:OAuthEz')->findBy(
+        $results = $this->entityManager->getRepository('NetgenEzSocialConnectBundle:OAuthEz')->findOneBy(
             $criteria,
             array('ezUserId' => 'DESC')     // Get last inserted item.
         );
@@ -287,7 +287,7 @@ class SocialLoginHelper
      *
      * @throws \Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException if user group parameter is not set up
      */
-    public function createEzUser(OAuthEzUser $oauthUser)
+    public function createEzUser(OAuthEzUser $oauthUser, $language = null)
     {
         $userService = $this->repository->getUserService();
 
@@ -300,13 +300,17 @@ class SocialLoginHelper
 
         $contentTypeIdentifier = $this->configResolver->getParameter('user_content_type_identifier', 'netgen_social_connect');
         $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
-        $languages = $this->configResolver->getParameter('languages');
+
+        if (!$language) {
+            $languages = $this->configResolver->getParameter('languages');
+            $language = $languages[0];
+        }
 
         $userCreateStruct = $userService->newUserCreateStruct(
             $username,
             $oauthUser->getEmail(),
             $password,
-            $languages[0],
+            $language,
             $contentType
         );
 
