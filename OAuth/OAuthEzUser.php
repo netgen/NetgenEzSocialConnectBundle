@@ -2,9 +2,7 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
-use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthUser;
-
-class OAuthEzUser extends OAuthUser
+class OAuthEzUser
 {
     /** @var  string */
     protected $originalId;
@@ -25,7 +23,7 @@ class OAuthEzUser extends OAuthUser
      */
     public function __construct($username, $id)
     {
-        parent::__construct($username);
+        $this->username = $username;
         $this->originalId = $id;
     }
 
