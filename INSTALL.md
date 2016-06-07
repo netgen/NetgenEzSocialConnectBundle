@@ -78,7 +78,7 @@ hwi_oauth:
 # ezpublish/config/config.yml
 netgen_social_connect:
 
-    # if the useConfigResolver option is not set, the resource owner will use the default parameters
+    # if the useConfigResolver option is not set, the resource owner will use the [default parameters](Resources/config/parameters.yml)
 
     resource_owners:
         facebook: { useConfigResolver: true }
