@@ -28,7 +28,7 @@ class ConnectController extends Controller
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      *
      * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException if the user is not logged in.
-     * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException if the social link is flagged as non-removable.
+     * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException if the social link is flagged as non-removable or doesn't exist.
      */
     public function disconnectUser(Request $request, $resourceName)
     {
@@ -136,14 +136,21 @@ class ConnectController extends Controller
      */
     public function finishConnecting(Request $request)
     {
-        /** @var Translator $translator */
-        $translator = $this->get('translator');
-        /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
+        $resourceOwnerName = $session->get('social_connect_resource_owner');
+        $session->remove('social_connect_resource_owner');
+
+        $user = $this->getUser();
+
+        if (!$user instanceof UserInterface) {
+            throw new AccessDeniedHttpException("Cannot connect to '{$resourceOwnerName}'. Please log in first.");
+        }
+
+        /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $flashBag = $session->getFlashBag();
 
         if (!$session->has('social_connect_target_path')) {
-            $flashBag->add('notice', $translator->trans('connect.generic.failed', array(), 'social_connect'));
+            $flashBag->add('notice', $this->get('translator')->trans('connect.generic.failed', array(), 'social_connect'));
 
             return $this->redirect('/');
         }
@@ -151,10 +158,7 @@ class ConnectController extends Controller
         $targetPath = $session->get('social_connect_target_path');
         $session->remove('social_connect_target_path');
 
-        $resourceOwnerName = $session->get('social_connect_resource_owner');
-        $session->remove('social_connect_resource_owner');
-
-        $message = $translator->trans('connect.owner.failed', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect');
+        $message = $this->get('translator')->trans('connect.owner.failed', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect');
 
         try {
             $resourceOwner = $this->getResourceOwnerByName($resourceOwnerName);
@@ -162,12 +166,6 @@ class ConnectController extends Controller
             $flashBag->add('notice', $message);
 
             return $this->redirect($targetPath);
-        }
-
-        $user = $this->getUser();
-
-        if (!$user instanceof UserInterface) {
-            throw new AccessDeniedHttpException("Cannot connect to '{$resourceOwnerName}'. Please log in first.");
         }
 
         $apiUser = $user->getAPIUser();
@@ -195,7 +193,7 @@ class ConnectController extends Controller
         $loginHelper = $this->get('netgen.social_connect.helper');
 
         if (!empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName))) {
-            $message = $translator->trans(
+            $message = $this->get('translator')->trans(
                 'connect.owner.already_connected', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect'
             );
 
@@ -204,7 +202,7 @@ class ConnectController extends Controller
             return $this->redirect($targetPath);
         }
 
-        $message = $translator->trans(
+        $message = $this->get('translator')->trans(
             'connect.owner.success', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect'
         );
 
