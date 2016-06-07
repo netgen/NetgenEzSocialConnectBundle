@@ -185,10 +185,6 @@ class ConnectController extends Controller
         $userInformation = $resourceOwner->getUserInformation($token);
 
         if (!$userInformation instanceof PathUserResponse) {
-            $message = $translator->trans(
-                'connect.owner.already_connected', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
-            );
-
             $flashBag->add('notice', $message);
 
             return $this->redirect($targetPath);
@@ -199,10 +195,18 @@ class ConnectController extends Controller
         $loginHelper = $this->get('netgen.social_connect.helper');
 
         if (!empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName))) {
+            $message = $translator->trans(
+                'connect.owner.already_connected', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
+            );
+
             $flashBag->add('notice', $message);
 
             return $this->redirect($targetPath);
         }
+
+        $message = $translator->trans(
+            'connect.owner.success', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
+        );
 
         $loginHelper->addToTable(
             $loginHelper->loadEzUserById($apiUser->id),
