@@ -40,9 +40,13 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
                         $contextualizer->setContextualParameter($fieldIdentifierName, $currentScope, $fieldIdentifierValue);
                     }
                 }
-                if (array_key_exists('oauth_user_group', $scopeSettings)) {
-                    foreach ($scopeSettings['oauth_user_group'] as $userGroupName => $userGroupId) {
-                        $contextualizer->setContextualParameter('oauth_user_group.' . $userGroupName, $currentScope, $userGroupId);
+                if (array_key_exists('resource_owners', $scopeSettings)) {
+                    foreach ($scopeSettings['resource_owners'] as $resourceOwnerName => $resourceOwnerData) {
+                        foreach(array('id', 'secret', 'user_group') as $dataName) {
+                            if (!empty($resourceOwnerData[$dataName])) {
+                                $contextualizer->setContextualParameter("$resourceOwnerName.$dataName", $currentScope, $resourceOwnerData[$dataName]);
+                            }
+                        }
                     }
                 }
             }

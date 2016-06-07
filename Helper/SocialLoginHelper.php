@@ -329,11 +329,13 @@ class SocialLoginHelper
 
         $userCreateStruct->enabled = true;
 
-        if (!$this->configResolver->hasParameter('oauth_user_group.'.$oauthUser->getResourceOwnerName(), 'netgen_social_connect')) {
-            throw new MissingConfigurationException('oauth_user_group'.$oauthUser->getResourceOwnerName());
+        $userGroupParameter = $oauthUser->getResourceOwnerName().'.user_group';
+
+        if (!$this->configResolver->hasParameter($userGroupParameter, 'netgen_social_connect')) {
+            throw new MissingConfigurationException($userGroupParameter);
         }
 
-        $userGroupId = $this->configResolver->getParameter('oauth_user_group.'.$oauthUser->getResourceOwnerName(), 'netgen_social_connect');
+        $userGroupId = $this->configResolver->getParameter($userGroupParameter, 'netgen_social_connect');
 
         $newUser = $this->repository->sudo(
             function (Repository $repository) use ($userCreateStruct, $userGroupId) {

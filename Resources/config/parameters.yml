@@ -1,23 +1,23 @@
 parameters:
-    netgen_social_connect.default.facebook.id:      'CHANGEME'
-    netgen_social_connect.default.facebook.secret:  'CHANGEME'
-    netgen_social_connect.default.twitter.id:       'CHANGEME'
-    netgen_social_connect.default.twitter.secret:   'CHANGEME'
-    netgen_social_connect.default.linkedin.id:      'CHANGEME'
-    netgen_social_connect.default.linkedin.secret:  'CHANGEME'
-    netgen_social_connect.default.google.id:        'CHANGEME'
-    netgen_social_connect.default.google.secret:    'CHANGEME'
-
-    netgen_social_connect.default.first_name:       ~
-    netgen_social_connect.default.last_name:        ~
-    netgen_social_connect.default.profile_image:    ~
+    netgen_social_connect.default.facebook.id:        'CHANGEME'
+    netgen_social_connect.default.facebook.secret:    'CHANGEME'
+    netgen_social_connect.default.facebook.user_group: 11
+    netgen_social_connect.default.twitter.id:         'CHANGEME'
+    netgen_social_connect.default.twitter.secret:     'CHANGEME'
+    netgen_social_connect.default.twitter.user_group:  11
+    netgen_social_connect.default.linkedin.id:        'CHANGEME'
+    netgen_social_connect.default.linkedin.secret:    'CHANGEME'
+    netgen_social_connect.default.linkedin.user_group: 11
+    netgen_social_connect.default.google.id:          'CHANGEME'
+    netgen_social_connect.default.google.secret:      'CHANGEME'
+    netgen_social_connect.default.google.user_group:   11
+    netgen_social_connect.default.first_name:          ~
+    netgen_social_connect.default.last_name:           ~
+    netgen_social_connect.default.profile_image:       ~
 
     netgen_social_connect.base_urls:
         facebook: https://www.facebook.com/app_scoped_user_id/
         twitter:  https://twitter.com/intent/user?user_id=
         google:   https://plus.google.com/
 
-    netgen_social_connect.default.oauth_user_group.facebook:  11
-    netgen_social_connect.default.oauth_user_group.twitter:   11
-    netgen_social_connect.default.oauth_user_group.linkedin:  11
-    netgen_social_connect.default.oauth_user_group.google:    11
+

@@ -100,14 +100,26 @@ netgen_social_connect:
                   first_name: 'first_name'
                   last_name: 'last_name'
                   profile_image: 'image'
-
-            # these parameters are fetched using configResolver->getParameter('oauth_user_group.facebook', 'netgen_social_connect')
-
-            oauth_user_group:
-                facebook: 11
-                linkedin: 11
-                google:   11
-                twitter:  11                
+                  
+            # the following lines set app ids and secrets per siteaccess
+                  
+            resource_owners:
+                facebook:
+                    id:         <CHANGEME>
+                    secret:     <CHANGEME>
+                    user_group: 11
+                linkedin:
+                    id:         <CHANGEME>
+                    secret:     <CHANGEME>
+                    user_group: 11
+                twitter:
+                    id:         <CHANGEME>
+                    secret:     <CHANGEME>
+                    user_group: 11
+                google:
+                    id:         <CHANGEME>
+                    secret:     <CHANGEME>
+                    user_group: 11
         administration_group:
             user_content_type_identifier: enhanced_user
             merge_accounts: false
