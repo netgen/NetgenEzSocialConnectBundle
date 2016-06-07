@@ -164,24 +164,6 @@ security:
             logout: ~
 ```
 
-# Set up the parameters
-Set the id and key for each of the networks you wish to use.
-Also, define the user group in which the new users should be created.
-
-Override these entries from the bundle's parameters.yml in '(app|ezpublish)/config/parameters.yml'.
-
-```
-parameters:
-    netgen_social_connect.default.facebook.id: <facebook_client_id>
-    netgen_social_connect.default.facebook.secret: <facebook_secret>
-    netgen_social_connect.default.twitter.id: <twitter_client_id>
-    netgen_social_connect.default.twitter.secret: <twitter secret>
-    netgen_social_connect.default.linkedin.id: <linkedin_client_id>
-    netgen_social_connect.default.linkedin.secret: <linkedin_secret>
-    netgen_social_connect.default.google.id: <google_client_id>
-    netgen_social_connect.default.google.secret: <google_secret>
-```
-
 # Include the template
 The last step is to include the template with social buttons in your login template.
 You can, of course, use your own template, based on this one.
