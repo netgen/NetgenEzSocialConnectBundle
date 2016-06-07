@@ -52,7 +52,7 @@ class ConnectController extends Controller
 
         $translator = $this->get('translator');
         $message = $translator->trans(
-            'disconnect.owner.success', array('ownerName' => ucfirst($resourceName)), 'social_connect'
+            'disconnect.owner.success', array('%ownerName%' => ucfirst($resourceName)), 'social_connect'
         );
         $session->getFlashBag()->add('notice', $message);
 
@@ -154,7 +154,7 @@ class ConnectController extends Controller
         $resourceOwnerName = $session->get('social_connect_resource_owner');
         $session->remove('social_connect_resource_owner');
 
-        $message = $translator->trans('connect.owner.failed', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect');
+        $message = $translator->trans('connect.owner.failed', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect');
 
         try {
             $resourceOwner = $this->getResourceOwnerByName($resourceOwnerName);
@@ -196,7 +196,7 @@ class ConnectController extends Controller
 
         if (!empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName))) {
             $message = $translator->trans(
-                'connect.owner.already_connected', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
+                'connect.owner.already_connected', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect'
             );
 
             $flashBag->add('notice', $message);
@@ -205,7 +205,7 @@ class ConnectController extends Controller
         }
 
         $message = $translator->trans(
-            'connect.owner.success', array('ownerName' => ucfirst($resourceOwnerName)), 'social_connect'
+            'connect.owner.success', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect'
         );
 
         $loginHelper->addToTable(
