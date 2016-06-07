@@ -177,8 +177,13 @@ class ConnectController extends Controller
             return $this->redirect($targetPath);
         }
 
+        $user = $this->getUser();
 
-        $apiUser = $this->getUser()->getAPIUser();
+        if (!$user instanceof UserInterface) {
+            throw new AccessDeniedHttpException("Cannot connect to '{$resourceOwnerName}'. Please log in first.");
+        }
+
+        $apiUser = $user->getAPIUser();
 
         if (!($session->has('social_connect_ez_user_id') && $apiUser->id == $session->get('social_connect_ez_user_id'))) {
 
