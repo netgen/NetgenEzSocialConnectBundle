@@ -74,12 +74,12 @@ hwi_oauth:
 
 # Configure bundle-specific parameters
 
+If the useConfigResolver option is not set, the resource owner will use the [default parameters](Resources/config/parameters.yml).
+
+
 ```
 # ezpublish/config/config.yml
 netgen_social_connect:
-
-    # if the useConfigResolver option is not set, the resource owner will use the [default parameters](Resources/config/parameters.yml)
-
     resource_owners:
         facebook: { useConfigResolver: true }
         twitter: { useConfigResolver: true }
