@@ -28,7 +28,7 @@ class ConnectController extends Controller
 
         if (!$user instanceof UserInterface)
         {
-            throw new AccessDeniedHttpException("Cannot disconnect from '{$resource_name}'. Please log in first.");
+            throw new AccessDeniedHttpException("Cannot connect to '{$resource_name}'. Please log in first.");
         }
 
         $userContentId = $user->getAPIUser()->id;
