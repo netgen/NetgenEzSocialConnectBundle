@@ -50,8 +50,7 @@ class ConnectController extends Controller
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
 
-        $translator = $this->get('translator');
-        $message = $translator->trans(
+        $message = $this->get('translator')->trans(
             'disconnect.owner.success', array('%ownerName%' => ucfirst($resourceName)), 'social_connect'
         );
         $session->getFlashBag()->add('notice', $message);
@@ -148,9 +147,10 @@ class ConnectController extends Controller
 
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $flashBag = $session->getFlashBag();
+        $translator = $this->get('translator');
 
         if (!$session->has('social_connect_target_path')) {
-            $flashBag->add('notice', $this->get('translator')->trans('connect.generic.failed', array(), 'social_connect'));
+            $flashBag->add('notice', $translator->trans('connect.generic.failed', array(), 'social_connect'));
 
             return $this->redirect('/');
         }
@@ -158,7 +158,7 @@ class ConnectController extends Controller
         $targetPath = $session->get('social_connect_target_path');
         $session->remove('social_connect_target_path');
 
-        $message = $this->get('translator')->trans('connect.owner.failed', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect');
+        $message = $translator->trans('connect.owner.failed', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect');
 
         try {
             $resourceOwner = $this->getResourceOwnerByName($resourceOwnerName);
@@ -193,7 +193,7 @@ class ConnectController extends Controller
         $loginHelper = $this->get('netgen.social_connect.helper');
 
         if (!empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName))) {
-            $message = $this->get('translator')->trans(
+            $message = $translator->trans(
                 'connect.owner.already_connected', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect'
             );
 
@@ -202,7 +202,7 @@ class ConnectController extends Controller
             return $this->redirect($targetPath);
         }
 
-        $message = $this->get('translator')->trans(
+        $message = $translator->trans(
             'connect.owner.success', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect'
         );
 
