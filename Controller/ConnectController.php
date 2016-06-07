@@ -117,21 +117,10 @@ class ConnectController extends Controller
      */
     protected function getResourceOwnerByName($name)
     {
-        $user = $this->getUser();
+        $ownerMap = $this->container->get('hwi_oauth.resource_ownermap.'.$this->container->getParameter('hwi_oauth.firewall_name'));
 
-        if (!$user instanceof UserInterface)
-        {
-            throw new AccessDeniedHttpException("Cannot disconnect from '{$resource_name}'. Please log in first.");
-        }
-
-        $userContentId = $user->getAPIUser()->id;
-
-        $loginHelper = $this->get('netgen.social_connect.helper');
-        $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resource_name);
-
-        if (empty($OAuthEz))
-        {
-            throw new NotFoundException('connected user', $userContentId.'/'.$resource_name);
+        if (null === $resourceOwner = $ownerMap->getResourceOwnerByName($name)) {
+            throw new \RuntimeException(sprintf("No resource owner with name '%s'.", $name));
         }
 
         return $resourceOwner;
