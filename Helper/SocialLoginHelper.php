@@ -145,7 +145,7 @@ class SocialLoginHelper
      */
     public function addProfileImage(User $user, $imageLink, $language = null)
     {
-        $imageFieldIdentifier = $this->imageField;
+        $imageFieldIdentifier = $this->imageFieldIdentifier;
         if (empty($imageFieldIdentifier)) {
             return false;
         }
@@ -266,16 +266,10 @@ class SocialLoginHelper
             $criteria['disconnectable'] = true;
         }
 
-        $results = $this->entityManager->getRepository('NetgenEzSocialConnectBundle:OAuthEz')->findOneBy(
+        return $this->entityManager->getRepository('NetgenEzSocialConnectBundle:OAuthEz')->findOneBy(
             $criteria,
             array('ezUserId' => 'DESC')     // Get last inserted item.
         );
-
-        if (!is_array($results) || empty($results)) {
-            return null;
-        }
-
-        return $results[0];
     }
 
     /**
