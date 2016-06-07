@@ -77,20 +77,18 @@ class ConnectController extends Controller
     {
         $user = $this->getUser();
 
-        if (!$user instanceof UserInterface)
-        {
-            throw new AccessDeniedHttpException("Cannot connect to '{$resource_name}'. Please log in first.");
+        if (!$user instanceof UserInterface) {
+            throw new AccessDeniedHttpException("Cannot connect to '{$resourceName}'. Please log in first.");
         }
 
         $userContentId = $user->getAPIUser()->id;
 
-        $loginHelper = $this->get( 'netgen.social_connect.helper' );
+        $loginHelper = $this->get('netgen.social_connect.helper');
 
-        $OAuthEz = $loginHelper->loadFromTableByEzId( $userContentId, $resource_name );
+        $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName);
 
-        if ( !empty( $OAuthEz ) )
-        {
-            throw new UserAlreadyConnected( $resource_name );
+        if (!empty($OAuthEz)) {
+            throw new UserAlreadyConnectedException($resourceName);
         }
 
         $session = $request->getSession();
