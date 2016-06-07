@@ -28,7 +28,7 @@ class ConnectController extends Controller
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      *
      * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException if the user is not logged in.
-     * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException if the social link is flagged as non-removable or doesn't exist.
+     * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException if a social link with the given parameters was not found.
      */
     public function disconnectUser(Request $request, $resourceName)
     {
