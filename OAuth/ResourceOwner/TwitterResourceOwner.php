@@ -21,8 +21,8 @@ class TwitterResourceOwner extends BaseTwitterResourceOwner
 
         if ($this->configResolver->hasParameter('twitter.id', 'netgen_social_connect') &&
             $this->configResolver->hasParameter('twitter.secret', 'netgen_social_connect')) {
-            $this->options[ 'client_id' ] = $this->configResolver->getParameter('twitter.id', 'netgen_social_connect');
-            $this->options[ 'client_secret' ] = $this->configResolver->getParameter('twitter.secret', 'netgen_social_connect');
+            $this->options['client_id'] = $this->configResolver->getParameter('twitter.id', 'netgen_social_connect');
+            $this->options['client_secret'] = $this->configResolver->getParameter('twitter.secret', 'netgen_social_connect');
         }
     }
 }

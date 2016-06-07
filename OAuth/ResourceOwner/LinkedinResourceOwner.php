@@ -19,10 +19,10 @@ class LinkedinResourceOwner extends BaseLinkedinResourceOwner
     {
         $this->configResolver = $configResolver;
 
-        if ($this->configResolver->hasParameter('twitter.id', 'netgen_social_connect') &&
-            $this->configResolver->hasParameter('twitter.secret', 'netgen_social_connect')) {
-            $this->options[ 'client_id' ] = $this->configResolver->getParameter('twitter.id', 'netgen_social_connect');
-            $this->options[ 'client_secret' ] = $this->configResolver->getParameter('twitter.secret', 'netgen_social_connect');
+        if ($this->configResolver->hasParameter('linkedin.id', 'netgen_social_connect') &&
+            $this->configResolver->hasParameter('linkedin.secret', 'netgen_social_connect')) {
+            $this->options['client_id'] = $this->configResolver->getParameter('linkedin.id', 'netgen_social_connect');
+            $this->options['client_secret'] = $this->configResolver->getParameter('linkedin.secret', 'netgen_social_connect');
         }
     }
 }

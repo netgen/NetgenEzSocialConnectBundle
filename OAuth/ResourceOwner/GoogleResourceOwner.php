@@ -21,8 +21,8 @@ class GoogleResourceOwner extends BaseGoogleResourceOwner
 
         if ($this->configResolver->hasParameter('google.id', 'netgen_social_connect') &&
             $this->configResolver->hasParameter('google.secret', 'netgen_social_connect')) {
-            $this->options[ 'client_id' ] = $this->configResolver->getParameter('google.id', 'netgen_social_connect');
-            $this->options[ 'client_secret' ] = $this->configResolver->getParameter('google.secret', 'netgen_social_connect');
+            $this->options['client_id'] = $this->configResolver->getParameter('google.id', 'netgen_social_connect');
+            $this->options['client_secret'] = $this->configResolver->getParameter('google.secret', 'netgen_social_connect');
         }
     }
 }
