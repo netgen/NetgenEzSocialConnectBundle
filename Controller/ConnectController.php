@@ -6,6 +6,8 @@ use eZ\Bundle\EzPublishCoreBundle\Controller;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnected;
 use Symfony\Component\HttpFoundation\Request;
 use eZ\Publish\Core\Base\Exceptions\NotFoundException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
 
 class ConnectController extends Controller
 {
@@ -22,7 +24,14 @@ class ConnectController extends Controller
      */
     public function connectUser( Request $request, $resource_name )
     {
-        $userContentId = $this->getUser()->getAPIUser()->id;
+        $user = $this->getUser();
+
+        if (!$user instanceof UserInterface)
+        {
+            throw new AccessDeniedHttpException("Cannot disconnect from '{$resource_name}'. Please log in first.");
+        }
+
+        $userContentId = $user->getAPIUser()->id;
 
         $loginHelper = $this->get( 'netgen.social_connect.helper' );
 
@@ -51,12 +60,20 @@ class ConnectController extends Controller
      */
     public function disconnectUser(Request $request, $resource_name)
     {
-        $userContentId = $this->getUser()->getAPIUser()->id;
+        $user = $this->getUser();
+
+        if (!$user instanceof UserInterface)
+        {
+            throw new AccessDeniedHttpException("Cannot disconnect from '{$resource_name}'. Please log in first.");
+        }
+
+        $userContentId = $user->getAPIUser()->id;
+
         $loginHelper = $this->get('netgen.social_connect.helper');
         $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resource_name);
 
-        if (empty($OAuthEz)) {
-
+        if (empty($OAuthEz))
+        {
             throw new NotFoundException('connected user', $userContentId.'/'.$resource_name);
         }
 
