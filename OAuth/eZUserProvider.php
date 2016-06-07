@@ -77,12 +77,10 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
                     $this->loginHelper->addProfileImage($userContentObject, $imageLink);
                 }
 
-                // If the email is 'localhost.local', we did not fetch it remotely from the OAuth resource provider
-                if (
-                    $OAuthEzUser->getEmail() !== $userContentObject->email &&
-                    0 !== strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol')
-                )
-                {
+                // Check whether an email was returned by the OAuth provider. If not, a dummy 'localhost.local' will be found.
+                // Dummy emails usually the result of missing resource owner app permissions for email sharing.
+                if ($OAuthEzUser->getEmail() !== $userContentObject->email &&
+                    0 !== strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol')) {
                     $this->loginHelper->updateUserFields($userContentObject, array('email' => $OAuthEzUser->getEmail()));
                 }
 
@@ -101,7 +99,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
 
             return $this->loadUserByAPIUser($userContentObject);
         }
-        
+
         $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
 
         if ($securityUser instanceof SecurityUserInterface) {
@@ -143,11 +141,10 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         $OAuthEzUser->setFirstName($username['firstName']);
         $OAuthEzUser->setLastName($username['lastName']);
 
-        if (null === $response->getEmail()) {
-            $email = md5('socialbundle'.$response->getResourceOwner()->getName().$userId).'@localhost.local';
-        } else {
-            $email = $response->getEmail();
-        }
+
+        $email = !empty($response->getEmail()) ? $response->getEmail()
+            :md5('socialbundle'.$response->getResourceOwner()->getName().$userId).'@localhost.local';
+
         $OAuthEzUser->setEmail($email);
 
         $OAuthEzUser->setResourceOwnerName($response->getResourceOwner()->getName());

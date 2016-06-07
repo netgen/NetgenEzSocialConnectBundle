@@ -77,7 +77,9 @@ hwi_oauth:
 ```
 # ezpublish/config/config.yml
 netgen_social_connect:
+
     # if the useConfigResolver option is not set, the resource owner will use the default parameters
+
     resource_owners:
         facebook: { useConfigResolver: true }
         twitter: { useConfigResolver: true }
@@ -86,15 +88,21 @@ netgen_social_connect:
             # if true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user
             # multiple eZ users will be created otherwise, each linked to one social account
             # a new eZ user with a dummy email will always be created for users not disclosing their email
+
             merge_accounts: true
+
             user_content_type_identifier: user
+
             # if these are not set, the fields in question will not be mapped to the OAuth resource owner's response
-            # these parameters are fetched using configResolver->getParameter('first_name', 'netgen_social_connect')            
+            # these parameters are fetched using configResolver->getParameter('first_name', 'netgen_social_connect')
+
             field_identifiers:
-	        first_name: 'first_name'
-                last_name: 'last_name'
-                profile_image: 'image'
+                  first_name: 'first_name'
+                  last_name: 'last_name'
+                  profile_image: 'image'
+
             # these parameters are fetched using configResolver->getParameter('oauth_user_group.facebook', 'netgen_social_connect')
+
             oauth_user_group:
                 facebook: 11
                 linkedin: 11
@@ -103,6 +111,7 @@ netgen_social_connect:
         administration_group:
             user_content_type_identifier: enhanced_user
             merge_accounts: false
+
             field_identifiers:
                 first_name: 'intro'
                 last_name: ~            # do not import social data to this field
@@ -158,7 +167,7 @@ parameters:
     netgen_social_connect.default.linkedin.id: <linkedin_client_id>
     netgen_social_connect.default.linkedin.secret: <linkedin_secret>
     netgen_social_connect.default.google.id: <google_client_id>
-    netgen_social_connect.default.google.secret: <google_secret> 
+    netgen_social_connect.default.google.secret: <google_secret>
 ```
 
 # Include the template
@@ -173,5 +182,3 @@ If you would like your existing users to be able to connect their ez account to 
 ```
 {% include 'NetgenEzSocialConnectBundle:social:connect_user.html.twig' %}
 ```
-
-
