@@ -18,7 +18,7 @@ For installation instructions, see [INSTALL.md](https://github.com/netgen/Netgen
 * The bundle is based on HWIOAuthBundle 0.4, which supports Symfony >= 2.3, < 3.0. Symfony 3 is not supported yet.
 
 ## Copyright
-* Copyright (C) 2015 Netgen. All rights reserved.
+* Copyright (C) 2016 Netgen. All rights reserved.
 
 ## License
 * http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License v2
