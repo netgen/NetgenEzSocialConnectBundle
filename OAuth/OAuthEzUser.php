@@ -4,6 +4,8 @@ namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
 class OAuthEzUser
 {
+    /** @var  string  */
+    protected $username;
     /** @var  string */
     protected $originalId;
     /** @var  string */
@@ -121,5 +123,13 @@ class OAuthEzUser
     public function getImageLink()
     {
         return $this->imageLink;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
     }
 }
