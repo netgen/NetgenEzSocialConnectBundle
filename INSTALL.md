@@ -1,6 +1,6 @@
 # INSTALLATION INSTRUCTIONS
 
-As this bundle uses HWIOAuthBundle, installation follows pretty much the same procedure.
+This bundle uses HWIOAuthBundle, and the installation process is similar.
 
 # Add bundle to the project via composer
 ```
@@ -9,12 +9,7 @@ As this bundle uses HWIOAuthBundle, installation follows pretty much the same pr
     ...
 ```
 
-# Enable the bundle in the kernel
-# INSTALLATION INSTRUCTIONS
-
-As this bundle uses HWIOAuthBundle, installation is pretty much similar.
-
-# Add HWIOAuthBundle and NetgenEzSocialConnectBundle to the project via composer
+# Register HWIOAuthBundle and NetgenEzSocialConnectBundle in the kernel
 ```
 // ezpublish/EzPublishKernel.php
 
@@ -33,7 +28,7 @@ public function registerBundles()
 ```
 php ezpublish/console doctrine:schema:update --force
 ```
-This will add ngsocialconnect table to the database.
+This will add the ngsocialconnect table to the database.
 
 # Import the routing
 ```
@@ -77,16 +72,63 @@ hwi_oauth:
             scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
 ```
 
-# Configure which resource owners can use siteaccess specific parameters
-If useConfigResolver option is not set, resource owner will use default parameters.
+# Configure bundle-specific parameters
+
+If the useConfigResolver option is not set, the resource owner will use the [default parameters](Resources/config/parameters.yml).
+
+
 ```
 # ezpublish/config/config.yml
-
-netgen_ez_social_connect:
+netgen_social_connect:
     resource_owners:
         facebook: { useConfigResolver: true }
-        twitter: { useConfigResolver: true }            
-```            
+        twitter: { useConfigResolver: true }
+    system:
+        default:
+            # if true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user
+            # multiple eZ users will be created otherwise, each linked to one social account
+            # a new eZ user with a dummy email will always be created for users not disclosing their email
+
+            merge_accounts: true
+
+            user_content_type_identifier: user
+
+            # if these are not set, the fields in question will not be mapped to the OAuth resource owner's response
+            # these parameters are fetched using configResolver->getParameter('first_name', 'netgen_social_connect')
+
+            field_identifiers:
+                  first_name: 'first_name'
+                  last_name: 'last_name'
+                  profile_image: 'image'
+                  
+            # the following lines set app ids and secrets per siteaccess
+                  
+            resource_owners:
+                facebook:
+                    id:         <CHANGEME>
+                    secret:     <CHANGEME>
+                    user_group: 11
+                linkedin:
+                    id:         <CHANGEME>
+                    secret:     <CHANGEME>
+                    user_group: 11
+                twitter:
+                    id:         <CHANGEME>
+                    secret:     <CHANGEME>
+                    user_group: 11
+                google:
+                    id:         <CHANGEME>
+                    secret:     <CHANGEME>
+                    user_group: 11
+        administration_group:
+            user_content_type_identifier: enhanced_user
+            merge_accounts: false
+
+            field_identifiers:
+                first_name: 'intro'
+                last_name: ~            # do not import social data to this field
+                profile_image: 'picture'
+```
 
 # Configure the firewall
 ```
@@ -122,39 +164,15 @@ security:
             logout: ~
 ```
 
-# Set up the parameters
-Set the id and key for each of the networks you wish to use.
-Also, define the user group where the new users should be created.
-```
-# ezpublish/config/parameters.yml
-
-parameters:
-    netgen_social_connect.default.facebook.id: <facebook_client_id>
-    netgen_social_connect.default.facebook.secret: <facebook_secret>
-    netgen_social_connect.default.twitter.id: <twitter_client_id>
-    netgen_social_connect.default.twitter.secret: <twitter secret>
-    netgen_social_connect.default.linkedin.id: <linkedin_client_id>
-    netgen_social_connect.default.linkedin.secret: <linkedin_secret>
-    netgen_social_connect.default.google.id: <google_client_id>
-    netgen_social_connect.default.google.secret: <google_secret>
-    netgen_social_connect.default.oauth.user_group:
-        facebook: 11
-        twitter: 11
-        linkedin: 11
-        google: 11
-```
-
 # Include the template
-Last step is to include the template with social buttons in your login template.
-You can ofcourse use your own template, based on this one.
+The last step is to include the template with social buttons in your login template.
+You can, of course, use your own template, based on this one.
 ```
 {% include 'NetgenEzSocialConnectBundle:social:social_buttons.html.twig' %}
 ```
 
 # Connecting exiting users
-If you would like your existing users to be able to connect their ez account to the social network, so they would in future be able to log in with social network account, simply include another template on the profile page:
+If you would like your existing users to be able to connect their ez account to the social network, so they would be able to log in with social network account in the future, simply include another template on the profile page:
 ```
 {% include 'NetgenEzSocialConnectBundle:social:connect_user.html.twig' %}
 ```
-
-

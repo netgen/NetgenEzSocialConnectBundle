@@ -2,80 +2,214 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
+use eZ\Publish\API\Repository\Repository;
+use eZ\Publish\Core\MVC\Symfony\Security\User as SecurityUser;
+use Symfony\Component\Security\Core\User\UserInterface as SecurityUserInterface;
+use eZ\Publish\Core\Repository\Values\User\User;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
+use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
+use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
+use eZ\Publish\Core\MVC\Symfony\Security\User\Provider as BaseUserProvider;
+use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 
-
-class eZUserProvider implements OAuthAwareUserProviderInterface
+class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderInterface
 {
     /**
-     * Loads the user by a given UserResponseInterface object.
-     *
-     * @param UserResponseInterface $response
-     *
-     * @return OAuthEzUser
-     *
-     * @throws UsernameNotFoundException if the user is not found
+     * @var \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
      */
-    public function loadUserByOAuthUserResponse( UserResponseInterface $response )
+    protected $loginHelper;
+
+    /**
+     * @var bool
+     */
+    protected $mergeAccounts;
+
+    /**
+     * eZUserProvider constructor.
+     *
+     * @param \eZ\Publish\API\Repository\Repository                         $repository
+     * @param \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper $loginHelper
+     */
+    public function __construct(Repository $repository, SocialLoginHelper $loginHelper)
+    {
+        parent::__construct($repository);
+
+        $this->loginHelper = $loginHelper;
+    }
+
+    /**
+     * Injected setter
+     *
+     * @param bool $mergeAccounts
+     */
+    public function setMergeAccounts($mergeAccounts = false)
+    {
+        $this->mergeAccounts = $mergeAccounts;
+    }
+
+    /**
+     * Loads the user by a given UserResponseInterface object.
+     * If no eZ user is found with those credentials, a real eZ User content object is generated.
+     *
+     * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
+
+     * @return \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
+     *
+     * @throws \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+     */
+    public function loadUserByOAuthUserResponse(UserResponseInterface $response)
+    {
+        $OAuthEzUserEntity = $this->loginHelper->loadFromTableByResourceUserId(
+            $response->getUsername(), $response->getResourceOwner()->getName()
+        );
+
+        // Intermediary user entity generated from the response, not stored in the database
+        $OAuthEzUser = $this->generateOAuthEzUser($response);
+
+        // If a link was found, update profile data for the user
+        if ($OAuthEzUserEntity instanceof OAuthEz) {
+            try {
+                $userContentObject = $this->loginHelper->loadEzUserById($OAuthEzUserEntity->getEzUserId());
+
+                $imageLink = $OAuthEzUser->getImageLink();
+                if (!empty($imageLink)) {
+                    $this->loginHelper->addProfileImage($userContentObject, $imageLink);
+                }
+
+                // Check whether an email was returned by the OAuth provider. If not, a dummy 'localhost.local' will be found.
+                // Dummy emails usually the result of missing resource owner app permissions for email sharing.
+                if ($OAuthEzUser->getEmail() !== $userContentObject->email &&
+                    0 !== strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol')) {
+                    $this->loginHelper->updateUserFields($userContentObject, array('email' => $OAuthEzUser->getEmail()));
+                }
+
+                return $this->loadUserByAPIUser($userContentObject);
+
+            } catch (NotFoundException $e) {
+                // Something went wrong - data is in the table, but the user does not exist
+                // Remove faulty data and fall back to creating a new user
+                $this->loginHelper->removeFromTable($OAuthEzUserEntity);
+            }
+        }
+
+        if (!$this->mergeAccounts) {
+            $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+            $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
+
+            return $this->loadUserByAPIUser($userContentObject);
+        }
+
+        $securityUser = $this->getFirstUserByEmail($OAuthEzUser->getEmail());
+
+        if ($securityUser instanceof SecurityUserInterface) {
+            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
+
+            return $securityUser;
+        }
+
+        try {
+            $securityUser = $this->loadUserByUsername($OAuthEzUser->getUsername());
+            $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
+
+            return $securityUser;
+        } catch (\Symfony\Component\Security\Core\Exception\UsernameNotFoundException $e) {
+            $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
+            $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
+
+            return $this->loadUserByAPIUser($userContentObject);
+        }
+    }
+
+    /**
+     * Generates an OAuthEzUser object from the OAuth response.
+     *
+     * This is an intermediary object used to generate Ez Users if none exist with those OAuth credentials.
+     *
+     * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
+     *
+     * @return \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
+     */
+    protected function generateOAuthEzUser(UserResponseInterface $response)
     {
         $userId = $response->getUsername();
-        $login = $response->getNickname() . '-' . $userId; // unique login for ez
+        $uniqueLogin = $response->getNickname().'-'.$userId;
 
-        /** @var OAuthEzUser $user */
-        $user = new OAuthEzUser( $login , $userId );
+        $OAuthEzUser = new OAuthEzUser($uniqueLogin, $userId);
 
-        $real_name = $response->getRealName();
+        $username = $this->getRealName($response);
+        $OAuthEzUser->setFirstName($username['firstName']);
+        $OAuthEzUser->setLastName($username['lastName']);
 
-        if ( !empty($real_name) )
-        {
-            $real_name = explode(' ', $real_name );
-            if( count($real_name) >= 2 )
-            {
-                $user->setFirstName( array_shift( $real_name ) );
-                $user->setLastName( implode( ' ', $real_name ) );
-            }
-            else
-            {
-                $user->setFirstName( $real_name[ 0 ] );
-                $user->setLastName( $real_name[ 0 ] );
-            }
+
+        $email = !empty($response->getEmail()) ? $response->getEmail()
+            :md5('socialbundle'.$response->getResourceOwner()->getName().$userId).'@localhost.local';
+
+        $OAuthEzUser->setEmail($email);
+
+        $OAuthEzUser->setResourceOwnerName($response->getResourceOwner()->getName());
+
+        if ($response->getProfilePicture()) {
+            $OAuthEzUser->setImageLink($response->getProfilePicture());
         }
-        else
-        {
+
+        return $OAuthEzUser;
+    }
+
+    /**
+     * Generates a first and last name from the response.
+     *
+     * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
+     *
+     * @return array
+     */
+    protected function getRealName(UserResponseInterface $response)
+    {
+        $realName = $response->getRealName();
+
+        if (!empty($realName)) {
+            $realName = explode(' ', $realName);
+
+            if (count($realName) >= 2) {
+                $firstName = array_shift($realName);
+                $lastName = implode(' ', $realName);
+            } else {
+                $firstName = reset($realName);
+                $lastName = reset($realName);
+            }
+        } else {
             $userEmail = $response->getEmail();
-            if ( !empty( $userEmail ) )
-            {
-                $emailArray = explode( '@', $userEmail );
-                $user->setFirstName( $emailArray[ 0 ] );
-                $user->setLastName( $emailArray[ 0 ] );
+
+            if (!empty($userEmail)) {
+                $emailArray = explode('@', $userEmail);
+
+                $firstName = reset($emailArray);
+                $lastName = reset($emailArray);
+            } else {
+                $firstName = $response->getNickname();
+                $lastName = $response->getResourceOwner()->getName();
             }
-            else
-            {
-                $user->setFirstName( $response->getNickname() );
-                $user->setLastName( $response->getResourceOwner()->getName() );
-            }
         }
 
-        if ( !$response->getEmail() )
-        {
-            $email = md5( 'socialbundle' . $response->getResourceOwner()->getName() . $userId ) . '@localhost.local';
-            $user->setEmail( $email );
-        }
-        else
-        {
-            $user->setEmail( $response->getEmail() );
+        return array('firstName' => $firstName, 'lastName' => $lastName);
+    }
+
+    /**
+     * Converts a value object User to a Security user.
+     *
+     * @param string $email
+     *
+     * @return \eZ\Publish\Core\MVC\Symfony\Security\User|null
+     */
+    protected function getFirstUserByEmail($email)
+    {
+        $users = $this->repository->getUserService()->loadUsersByEmail($email);
+        $user = reset($users);
+
+        if ($user instanceof User) {
+            return new SecurityUser($user, array('ROLE_USER'));
         }
 
-        $user->setResourceOwnerName( $response->getResourceOwner()->getName() );
-
-        if ( $response->getProfilePicture() )
-        {
-            $user->setImageLink( $response->getProfilePicture() );
-        }
-
-        return $user;
+        return null;
     }
 }

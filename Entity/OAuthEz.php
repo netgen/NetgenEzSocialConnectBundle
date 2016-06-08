@@ -7,26 +7,47 @@ class OAuthEz
     /**
      * @var int
      */
-    private $ezUserId;
+    protected $ezUserId;
 
     /**
      * @var string
      */
-    private $resourceUserId;
+    protected $resourceUserId;
 
     /**
      * @var string
      */
-    private $resourceName;
+    protected $resourceName;
 
     /**
-     * Set user id from eZ
+     * @var boolean
+     */
+    protected $disconnectable;
+
+    /**
+     * @return bool
+     */
+    public function isDisconnectable()
+    {
+        return $this->disconnectable;
+    }
+
+    /**
+     * @param bool $disconnectable
+     */
+    public function setDisconnectable($disconnectable)
+    {
+        $this->disconnectable = $disconnectable;
+    }
+
+    /**
+     * Set user id from eZ.
      *
      * @param $ezUserId
      *
-     * @return OAuthEz
+     * @return \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
-    public function setEzUserId( $ezUserId )
+    public function setEzUserId($ezUserId)
     {
         $this->ezUserId = $ezUserId;
 
@@ -34,7 +55,7 @@ class OAuthEz
     }
 
     /**
-     * Get eZ Publish user ID
+     * Get eZ Publish user ID.
      *
      * @return int
      */
@@ -44,13 +65,13 @@ class OAuthEz
     }
 
     /**
-     * Set user ID from resource
+     * Set user ID from resource.
      *
      * @param int $userOriginalId
      *
-     * @return OAuthEz
+     * @return \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
-    public function setResourceUserId( $userOriginalId )
+    public function setResourceUserId($userOriginalId)
     {
         $this->resourceUserId = $userOriginalId;
 
@@ -58,7 +79,7 @@ class OAuthEz
     }
 
     /**
-     * Get user resource ID
+     * Get user resource ID.
      *
      * @return int
      */
@@ -68,13 +89,13 @@ class OAuthEz
     }
 
     /**
-     * Set resource name (eg. 'facebook')
+     * Set resource name (eg. 'facebook').
      *
      * @param string $resourceName
      *
-     * @return OAuthEz
+     * @return \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
-    public function setResourceName( $resourceName )
+    public function setResourceName($resourceName)
     {
         $this->resourceName = $resourceName;
 
@@ -82,7 +103,7 @@ class OAuthEz
     }
 
     /**
-     * Get resource name (eg. 'facebook')
+     * Get resource name (eg. 'facebook').
      *
      * @return string
      */

@@ -23,9 +23,13 @@ hwi_oauth_login:
     prefix:   /login
 
 netgen_social_connect_ez:
-    pattern: /ezconnect/{resource_name}
+    pattern: /ezconnect/{resourceName}
     defaults: { _controller: netgen.social_connect.controller.connect:connectUser }
 
 netgen_social_disconnect_ez:
-    pattern: /ezdisconnect/{resource_name}
+    pattern: /ezdisconnect/{resourceName}
     defaults: { _controller: netgen.social_connect.controller.connect:disconnectUser }
+
+netgen_finish_connecting:
+    pattern: /ezconnect_finish
+    defaults: { _controller: netgen.social_connect.controller.connect:finishConnecting }
