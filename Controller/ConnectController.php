@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\UserInterface;
-use Symfony\Component\Translation\Translator;
 
 class ConnectController extends Controller
 {
@@ -104,7 +103,7 @@ class ConnectController extends Controller
     }
 
     /**
-     * Get a resource owner object by name.
+     * Get a resource owner by name.
      *
      * @param string $name
      *
@@ -114,13 +113,19 @@ class ConnectController extends Controller
      */
     protected function getResourceOwnerByName($name)
     {
-        $ownerMap = $this->container->get('hwi_oauth.resource_ownermap.'.$this->container->getParameter('hwi_oauth.firewall_name'));
+        foreach ($this->container->getParameter('hwi_oauth.firewall_names') as $firewall) {
+            $id = 'hwi_oauth.resource_ownermap.'.$firewall;
+            if (!$this->container->has($id)) {
+                continue;
+            }
 
-        if (null === $resourceOwner = $ownerMap->getResourceOwnerByName($name)) {
-            throw new \RuntimeException(sprintf("No resource owner with name '%s'.", $name));
+            $ownerMap = $this->container->get($id);
+            if ($resourceOwner = $ownerMap->getResourceOwnerByName($name)) {
+                return $resourceOwner;
+            }
         }
 
-        return $resourceOwner;
+        throw new \RuntimeException(sprintf("No resource owner with name '%s'.", $name));
     }
 
     /**
