@@ -4,7 +4,6 @@ namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
 use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\Core\MVC\Symfony\Security\User as SecurityUser;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface as SecurityUserInterface;
 use eZ\Publish\Core\Repository\Values\User\User;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
@@ -29,6 +28,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     /**
      * eZUserProvider constructor.
      *
+     * @codeCoverageIgnore
      * @param \eZ\Publish\API\Repository\Repository                         $repository
      * @param \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper $loginHelper
      */
@@ -126,13 +126,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         $username = $this->getRealName($response);
         $OAuthEzUser->setFirstName($username['firstName']);
         $OAuthEzUser->setLastName($username['lastName']);
-
-
-        $email = !empty($response->getEmail()) ? $response->getEmail()
-            :md5('socialbundle'.$response->getResourceOwner()->getName().$userId).'@localhost.local';
-
-        $OAuthEzUser->setEmail($email);
-
+        $OAuthEzUser->setEmail($this->getEmail($response, $userId));
         $OAuthEzUser->setResourceOwnerName($response->getResourceOwner()->getName());
 
         if ($response->getProfilePicture()) {
@@ -140,6 +134,26 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         }
 
         return $OAuthEzUser;
+    }
+
+    /**
+     * Fetches the email from the response or generates a dummy email hash if the resource provider refused to,
+     * or could not share the email.
+     *
+     * @param \HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface $response
+     * @param $userId
+     *
+     * @return string
+     */
+    protected function getEmail(UserResponseInterface $response, $userId)
+    {
+        if (!empty($responseEmail)) {
+            $email = $responseEmail;
+        } else {
+            $email = md5('socialbundle'.$response->getResourceOwner()->getName().$userId).'@localhost.local';
+        }
+
+        return $email;
     }
 
     /**
