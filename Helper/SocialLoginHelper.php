@@ -242,7 +242,7 @@ class SocialLoginHelper
      * @param string $resourceUserId
      * @param string $resourceOwnerName
      *
-     * @return null|\Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
+     * @return null|\Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
     public function loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName, $onlyDisconnectable = false)
     {

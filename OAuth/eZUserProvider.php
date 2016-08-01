@@ -4,6 +4,7 @@ namespace Netgen\Bundle\EzSocialConnectBundle\OAuth;
 
 use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\Core\MVC\Symfony\Security\User as SecurityUser;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface as SecurityUserInterface;
 use eZ\Publish\Core\Repository\Values\User\User;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
@@ -41,6 +42,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
     /**
      * Injected setter
      *
+     * @codeCoverageIgnore
      * @param bool $mergeAccounts
      */
     public function setMergeAccounts($mergeAccounts = false)
@@ -67,33 +69,16 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         // Intermediary user entity generated from the response, not stored in the database
         $OAuthEzUser = $this->generateOAuthEzUser($response);
 
-        // If a link was found, update profile data for the user
         if ($OAuthEzUserEntity instanceof OAuthEz) {
-            try {
-                $userContentObject = $this->loginHelper->loadEzUserById($OAuthEzUserEntity->getEzUserId());
 
-                $imageLink = $OAuthEzUser->getImageLink();
-                if (!empty($imageLink)) {
-                    $this->loginHelper->addProfileImage($userContentObject, $imageLink);
-                }
+            $linkedUser = $this->getLinkedUser($OAuthEzUserEntity, $OAuthEzUser);
 
-                // Check whether an email was returned by the OAuth provider. If not, a dummy 'localhost.local' will be found.
-                // Dummy emails usually the result of missing resource owner app permissions for email sharing.
-                if ($OAuthEzUser->getEmail() !== $userContentObject->email &&
-                    0 !== strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol')) {
-                    $this->loginHelper->updateUserFields($userContentObject, array('email' => $OAuthEzUser->getEmail()));
-                }
-
-                return $this->loadUserByAPIUser($userContentObject);
-
-            } catch (NotFoundException $e) {
-                // Something went wrong - data is in the table, but the user does not exist
-                // Remove faulty data and fall back to creating a new user
-                $this->loginHelper->removeFromTable($OAuthEzUserEntity);
+            if ($linkedUser instanceof SecurityUserInterface) {
+                return $linkedUser;
             }
         }
 
-        if (!$this->mergeAccounts) {
+        if (!$this->getMergeAccounts()) {
             $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
             $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
 
@@ -113,6 +98,7 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
             $this->loginHelper->addToTable($securityUser->getAPIUser(), $OAuthEzUser, true);
 
             return $securityUser;
+
         } catch (\Symfony\Component\Security\Core\Exception\UsernameNotFoundException $e) {
             $userContentObject = $this->loginHelper->createEzUser($OAuthEzUser);
             $this->loginHelper->addToTable($userContentObject, $OAuthEzUser, false);
@@ -154,6 +140,42 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         }
 
         return $OAuthEzUser;
+    }
+
+    /**
+     * If a link was found, update profile data for the user.
+     *
+     * @param \Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz       $OAuthEzUserEntity
+     * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser    $OAuthEzUser
+     *
+     * @return \eZ\Publish\Core\MVC\Symfony\Security\User|null
+     */
+    protected function getLinkedUser(OAuthEz $OAuthEzUserEntity, OAuthEzUser $OAuthEzUser)
+    {
+        try {
+            $userContentObject = $this->loginHelper->loadEzUserById($OAuthEzUserEntity->getEzUserId());
+
+            $imageLink = $OAuthEzUser->getImageLink();
+            if (!empty($imageLink)) {
+                $this->loginHelper->addProfileImage($userContentObject, $imageLink);
+            }
+
+            // Check whether an email was returned by the OAuth provider. If not, a dummy 'localhost.local' will be found.
+            // Dummy emails usually the result of missing resource owner app permissions for email sharing.
+            if ($OAuthEzUser->getEmail() !== $userContentObject->email &&
+                0 !== strpos(strrev($OAuthEzUser->getEmail()), 'lacol.tsohlacol')) {
+                $this->loginHelper->updateUserFields($userContentObject, array('email' => $OAuthEzUser->getEmail()));
+            }
+
+            return $this->loadUserByAPIUser($userContentObject);
+
+        } catch (NotFoundException $e) {
+            // Something went wrong - data is in the table, but the user does not exist
+            // Remove faulty data and fall back to creating a new user
+            $this->loginHelper->removeFromTable($OAuthEzUserEntity);
+
+            return null;
+        }
     }
 
     /**
@@ -211,5 +233,16 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         }
 
         return null;
+    }
+
+    /**
+     * Returns the value of the mergeAccounts flag.
+     *
+     * @codeCoverageIgnore
+     * @return bool
+     */
+    protected function getMergeAccounts()
+    {
+        return $this->mergeAccounts;
     }
 }
