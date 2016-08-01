@@ -147,6 +147,8 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
      */
     protected function getEmail(UserResponseInterface $response, $userId)
     {
+        $responseEmail = $response->getEmail();
+
         if (!empty($responseEmail)) {
             $email = $responseEmail;
         } else {
@@ -210,7 +212,9 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
                 $firstName = array_shift($realName);
                 $lastName = implode(' ', $realName);
             } else {
+                // @codeCoverageIgnoreStart
                 $firstName = reset($realName);
+                // @codeCoverageIgnoreEnd
                 $lastName = reset($realName);
             }
         } else {
@@ -234,6 +238,8 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
      * Converts a value object User to a Security user.
      *
      * @param string $email
+     *
+     * @codeCoverageIgnore due to loadUsersByEmail being handled by the eZ user service
      *
      * @return \eZ\Publish\Core\MVC\Symfony\Security\User|null
      */
