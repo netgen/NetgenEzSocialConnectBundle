@@ -1,18 +1,31 @@
 <?php
 
+/*
+ * This file is part of the HWIOAuthBundle package.
+ *
+ * (c) Hardware.Info <opensource@hardware.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Netgen\Bundle\EzSocialConnectBundle\Tests\OAuth;
 
 use HWI\Bundle\OAuthBundle\OAuth\Response\PathUserResponse;
+use HWI\Bundle\OAuthBundle\Security\Core\Authentication\Provider\OAuthProvider;
+use HWI\Bundle\OAuthBundle\Security\Core\Authentication\Token\OAuthToken;
+use HWI\Bundle\OAuthBundle\Tests\Fixtures\OAuthAwareException;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
+use Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
+use ReflectionClass;
 
 class eZUserProviderTest extends \PHPUnit_Framework_TestCase
 {
-    public function testGetLinkedUser()
+    public function testGetUserIfAlreadyLinked()
     {
         $userStub = $this->getUserStub();
-        $userResponseMock = $this->getUserResponseMock();
+        $userResponseMock = $this->getUserResponseStub();
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
@@ -41,10 +54,10 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $eZUserProviderMock->loadUserByOAuthUserResponse($userResponseMock);
     }
 
-    public function testLinkedUserNotFound()
+    public function testGetUserIfLinkNotFound()
     {
         $userStub = $this->getUserStub();
-        $userResponseMock = $this->getUserResponseMock();
+        $userResponseMock = $this->getUserResponseStub();
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
@@ -94,9 +107,9 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $eZUserProviderMock->loadUserByOAuthUserResponse($userResponseMock);
     }
 
-    public function testNotLinkedUserMergeAccountsTrue()
+    public function testIfNotLinkedUserMergeAccountsTrue()
     {
-        $userResponseMock = $this->getUserResponseMock();
+        $userResponseMock = $this->getUserResponseStub();
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
@@ -162,7 +175,7 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
 
     public function testFirstUserByEmailNotFound()
     {
-        $userResponseMock = $this->getUserResponseMock();
+        $userResponseMock = $this->getUserResponseStub();
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
@@ -234,10 +247,10 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $eZUserProviderMock->loadUserByOAuthUserResponse($userResponseMock);
     }
 
-
     public function testUserByUsernameNotFoundFallbackToCreate()
     {
-        $userResponseMock = $this->getUserResponseMock();
+        $userResponseMock = $this->getUserResponseStub();
+
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
@@ -307,6 +320,125 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $eZUserProviderMock->loadUserByOAuthUserResponse($userResponseMock);
     }
 
+    public function testGenerateOAuthEzUser()
+    {
+        $resourceOwnerStub = $this->getMockForAbstractClass('\HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface');
+        $resourceOwnerStub->expects($this->any())->method('getName')->willReturn('facebook');
+
+        $userResponseStub = $this->getUserResponseStub(false);
+
+        $ezUserProviderMock = $this->getEzUserProviderMock()->disableOriginalConstructor()->getMock();
+
+        $class = new \ReflectionClass($ezUserProviderMock);
+        $method = $class->getMethod('generateOAuthEzUser');
+        $method->setAccessible(true);
+
+        $OAuthEzUser = $method->invokeArgs($ezUserProviderMock, array($userResponseStub));
+
+        $this->assertEquals($OAuthEzUser->getFirstName(), 'Seamus');
+        $this->assertEquals($OAuthEzUser->getLastName(), 'Finnegan');
+        $this->assertNotContains('@localhost.local', $OAuthEzUser->getEmail());
+        $this->assertContains('geordi@mail.com', $OAuthEzUser->getEmail());
+        $this->assertEquals($OAuthEzUser->getResourceOwnerName(), 'facebook');
+        $this->assertNull($OAuthEzUser->getImageLink());
+    }
+
+    public function testGenerateOAuthEzUserWithMissingEmail()
+    {
+        $resourceOwnerStub = $this->getMockForAbstractClass('\HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface');
+        $resourceOwnerStub->expects($this->any())->method('getName')->willReturn('facebook');
+
+        $userResponseStub = $this->getUserResponseStub(true);
+        $userResponseStub->expects($this->any())->method('getRealName')->willReturn('Seamus Finnegan');
+        $userResponseStub->expects($this->any())->method('getUsername')->willReturn('gdy');
+        $userResponseStub->expects($this->any())->method('getEmail')->willReturn('');
+        $userResponseStub->expects($this->any())->method('getOriginalId')->willReturn('123456');
+        $userResponseStub->expects($this->any())->method('getNickname')->willReturn('some_hash_from_oauth_owner');
+        $userResponseStub->expects($this->atLeastOnce())->method('getResourceOwner')->willReturn($resourceOwnerStub);
+        $userResponseStub->expects($this->any())->method('getProfilePicture')->willReturn(null);
+        $ezUserProviderMock = $this->getEzUserProviderMock()->disableOriginalConstructor()->getMock();
+
+        $class = new \ReflectionClass($ezUserProviderMock);
+        $method = $class->getMethod('generateOAuthEzUser');
+        $method->setAccessible(true);
+
+        $OAuthEzUser = $method->invokeArgs($ezUserProviderMock, array($userResponseStub));
+
+        $this->assertEquals($OAuthEzUser->getFirstName(), 'Seamus');
+        $this->assertEquals($OAuthEzUser->getLastName(), 'Finnegan');
+        $this->assertContains('@localhost.local', $OAuthEzUser->getEmail());
+        $this->assertEquals($OAuthEzUser->getResourceOwnerName(), 'facebook');
+        $this->assertNull($OAuthEzUser->getImageLink());
+    }
+
+    public function testGenerateOAuthEzUserWithProfilePicture()
+    {
+        $resourceOwnerStub = $this->getMockForAbstractClass('\HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface');
+        $resourceOwnerStub->expects($this->any())->method('getName')->willReturn('facebook');
+
+        $userResponseStub = $this->getUserResponseStub(true);
+        $userResponseStub->expects($this->any())->method('getRealName')->willReturn('Seamus Finnegan');
+        $userResponseStub->expects($this->any())->method('getUsername')->willReturn('gdy');
+        $userResponseStub->expects($this->any())->method('getEmail')->willReturn('');
+        $userResponseStub->expects($this->any())->method('getOriginalId')->willReturn('123456');
+        $userResponseStub->expects($this->any())->method('getNickname')->willReturn('some_hash_from_oauth_owner');
+        $userResponseStub->expects($this->atLeastOnce())->method('getResourceOwner')->willReturn($resourceOwnerStub);
+        $userResponseStub->expects($this->any())->method('getProfilePicture')->willReturn('http://someimagelink');
+        $ezUserProviderMock = $this->getEzUserProviderMock()->disableOriginalConstructor()->getMock();
+
+        $class = new \ReflectionClass($ezUserProviderMock);
+        $method = $class->getMethod('generateOAuthEzUser');
+        $method->setAccessible(true);
+
+        $OAuthEzUser = $method->invokeArgs($ezUserProviderMock, array($userResponseStub));
+
+        $this->assertEquals('http://someimagelink', $OAuthEzUser->getImageLink());
+    }
+
+    public function testGetRealNameIfNotExistsAndEmailNotExists()
+    {
+        $resourceOwnerStub = $this->getMockForAbstractClass('\HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface');
+        $resourceOwnerStub->expects($this->any())->method('getName')->willReturn('facebook');
+
+        $userResponseStub = $this->getUserResponseStub(true);
+        $userResponseStub->expects($this->once())->method('getRealName')->willReturn(null);
+        $userResponseStub->expects($this->once())->method('getEmail')->willReturn('');
+        $userResponseStub->expects($this->once())->method('getNickname')->willReturn('some_hash_from_oauth_owner');
+        $userResponseStub->expects($this->once())->method('getResourceOwner')->willReturn($resourceOwnerStub);
+        $ezUserProviderMock = $this->getEzUserProviderMock()->disableOriginalConstructor()->getMock();
+
+        $class = new \ReflectionClass($ezUserProviderMock);
+        $method = $class->getMethod('getRealName');
+        $method->setAccessible(true);
+
+        $realNameArray = $method->invokeArgs($ezUserProviderMock, array($userResponseStub));
+
+        $this->assertEquals('some_hash_from_oauth_owner', $realNameArray['firstName']);
+        $this->assertEquals('facebook', $realNameArray['lastName']);
+    }
+
+    public function testGetRealNameIfNotExistsAndEmailExists()
+    {
+        $resourceOwnerStub = $this->getMockForAbstractClass('\HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface');
+        $resourceOwnerStub->expects($this->any())->method('getName')->willReturn('facebook');
+
+        $userResponseStub = $this->getUserResponseStub(true);
+        $userResponseStub->expects($this->once())->method('getRealName')->willReturn(null);
+        $userResponseStub->expects($this->once())->method('getEmail')->willReturn('geordi@mail.com');
+        $userResponseStub->expects($this->never())->method('getNickname')->willReturn('some_hash_from_oauth_owner');
+        $userResponseStub->expects($this->never())->method('getResourceOwner')->willReturn($resourceOwnerStub);
+        $ezUserProviderMock = $this->getEzUserProviderMock()->disableOriginalConstructor()->getMock();
+
+        $class = new \ReflectionClass($ezUserProviderMock);
+        $method = $class->getMethod('getRealName');
+        $method->setAccessible(true);
+
+        $realNameArray = $method->invokeArgs($ezUserProviderMock, array($userResponseStub));
+
+        $this->assertEquals('geordi', $realNameArray['firstName']);
+        $this->assertEquals('geordi', $realNameArray['lastName']);
+    }
+
     protected function getEzUserProviderMock()
     {
         return $this->getMockBuilder('\Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider');
@@ -326,27 +458,32 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
 
     protected function getResourceOwnerMock()
     {
-        return $this->createMock('\HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface');
+        return $this->getMockBuilder('\HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface');
     }
 
-    protected function getUserResponseMock()
+    protected function getUserResponseStub($emptyStub = null)
     {
-        $pathUserResponse = new PathUserResponse();
+        $pathUserResponseMock = $this->getMockBuilder('\HWI\Bundle\OAuthBundle\OAuth\Response\PathUserResponse')
+            ->disableOriginalConstructor()
+            ->setMethods(array('getUsername', 'getResourceOwner', 'getRealName', 'getImageLink',
+                'getProfilePicture', 'getOriginalId', 'getEmail', 'getNickname'
+            ))
+            ->getMock();
 
-        $pathUserResponse->setPaths(array(
-            'identifier'     => 'Test',
-            'nickname'       => 'gdy',
-            'firstname'      => 'Geordi',
-            'lastname'       => 'laForge',
-            'realname'       => 'Seamus Finnegan',
-            'email'          => 'gordi@mail.com',
-            'profilepicture' => null,
-        ));
+        if (!$emptyStub) {
+            $resourceOwnerStub = $this->getMockForAbstractClass('\HWI\Bundle\OAuthBundle\OAuth\ResourceOwnerInterface');
+            $resourceOwnerStub->expects($this->any())->method('getName')->willReturn('facebook');
 
-        $pathUserResponse->setOAuthToken($this->getOAuthTokenMock());
-        $pathUserResponse->setResourceOwner($this->getResourceOwnerMock());
+            $pathUserResponseMock->expects($this->any())->method('getRealName')->willReturn('Seamus Finnegan');
+            $pathUserResponseMock->expects($this->any())->method('getUsername')->willReturn('gdy');
+            $pathUserResponseMock->expects($this->any())->method('getEmail')->willReturn('geordi@mail.com');
+            $pathUserResponseMock->expects($this->any())->method('getOriginalId')->willReturn('123456');
+            $pathUserResponseMock->expects($this->any())->method('getNickname')->willReturn('some_hash_from_oauth_owner');
+            $pathUserResponseMock->expects($this->atLeastOnce())->method('getResourceOwner')->willReturn($resourceOwnerStub);
+            $pathUserResponseMock->expects($this->any())->method('getProfilePicture')->willReturn(null);
+        }
 
-        return $pathUserResponse;
+        return $pathUserResponseMock;
     }
 
     protected function getUserCheckerMock()
