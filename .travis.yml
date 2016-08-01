@@ -29,6 +29,10 @@ script:
 notification:
   email: false
 
+# increase memory limit to 2G
+before_install:
+    - phpenv config-add travis.php.ini
+
 # reduce depth (history) of git checkout
 git:
   depth: 30
