@@ -30,6 +30,8 @@ class OAuthEzUser
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @param $id
      */
     public function setOriginalId($id)
@@ -38,6 +40,8 @@ class OAuthEzUser
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getOriginalId()
@@ -110,6 +114,8 @@ class OAuthEzUser
     }
 
     /**
+     * @codeCoverageIgnore
+     * 
      * @param $imageLink
      */
     public function setImageLink($imageLink)
