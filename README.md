@@ -1,4 +1,8 @@
 # NetgenEzSocialConnectBundle
+
+[![Build Status](https://img.shields.io/travis/alymdrictels/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://travis-ci.org/alymdrictels/NetgenEzSocialConnectBundle)
+[![Code Coverage](https://img.shields.io/codecov/c/github/alymdrictels/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://codecov.io/gh/alymdrictels/NetgenEzSocialConnectBundle)
+
 As the impact of social media grows, most sites like to provide login via social networks like Facebook and Twitter.
 This bundle makes use of [HWIOAuthBundle](https://github.com/hwi/HWIOAuthBundle) to provide the ability to log in to eZPublish-based sites via social networks.
 
