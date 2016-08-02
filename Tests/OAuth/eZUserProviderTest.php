@@ -11,12 +11,7 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\Tests\OAuth;
 
-use HWI\Bundle\OAuthBundle\OAuth\Response\PathUserResponse;
-use HWI\Bundle\OAuthBundle\Security\Core\Authentication\Provider\OAuthProvider;
-use HWI\Bundle\OAuthBundle\Security\Core\Authentication\Token\OAuthToken;
-use HWI\Bundle\OAuthBundle\Tests\Fixtures\OAuthAwareException;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
-use Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use ReflectionClass;
 
@@ -29,13 +24,14 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
-        $loginHelperMock = $this->getLoginHelperMock();
+        $userContentHelperMock = $this->getUserContentHelperMock();
+        $OAuthEzRepositoryMock = $this->getOAuthEzRepositoryMock();
 
-        $loginHelperMock->method('loadFromTableByResourceUserId')
+        $OAuthEzRepositoryMock->method('loadFromTableByResourceUserId')
             ->willReturn($OAuthEzEntity);
 
         $eZUserProviderMock = $this->getEzUserProviderMock()
-                ->setConstructorArgs(array($this->getAPIRepositoryMock(), $loginHelperMock))
+                ->setConstructorArgs(array($this->getAPIRepositoryMock(), $userContentHelperMock, $OAuthEzRepositoryMock))
                 ->setMethods(array('getLinkedUser', 'generateOAuthEzUser'))
             ->getMock();
 
@@ -61,23 +57,24 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
-        $loginHelperMock = $this->getLoginHelperMock();
+        $userContentHelperMock = $this->getUserContentHelperMock();
+        $OAuthEzRepositoryMock = $this->getOAuthEzRepositoryMock();
 
         $eZUserContentObject = $this->getEzUserMock();
 
-        $loginHelperMock->method('loadFromTableByResourceUserId')
+        $OAuthEzRepositoryMock->method('loadFromTableByResourceUserId')
             ->willReturn($OAuthEzEntity);
 
-        $loginHelperMock->method('createEzUser')
+        $userContentHelperMock->method('createEzUser')
             ->willReturn($eZUserContentObject);
 
-        $loginHelperMock
+        $OAuthEzRepositoryMock
             ->expects($this->once())
             ->method('addToTable')
             ->with($eZUserContentObject, $OAuthEzUser, false);
 
         $eZUserProviderMock = $this->getEzUserProviderMock()
-            ->setConstructorArgs(array($this->getAPIRepositoryMock(), $loginHelperMock))
+            ->setConstructorArgs(array($this->getAPIRepositoryMock(), $userContentHelperMock, $OAuthEzRepositoryMock))
             ->setMethods(array('getLinkedUser', 'generateOAuthEzUser', 'loadUserByAPIUser', 'getMergeAccounts'))
             ->getMock();
 
@@ -113,27 +110,28 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
-        $loginHelperMock = $this->getLoginHelperMock();
+        $userContentHelperMock = $this->getUserContentHelperMock();
+        $OAuthEzRepositoryMock = $this->getOAuthEzRepositoryMock();
 
         $eZUserContentObject = $this->getEzUserMock();
 
-        $loginHelperMock
+        $OAuthEzRepositoryMock
             ->expects($this->once())
             ->method('loadFromTableByResourceUserId')
             ->willReturn($OAuthEzEntity);
 
-        $loginHelperMock
+        $userContentHelperMock
             ->expects($this->never())
             ->method('createEzUser')
             ->willReturn($eZUserContentObject);
 
-        $loginHelperMock
+        $OAuthEzRepositoryMock
             ->expects($this->once())
             ->method('addToTable')
             ->with($eZUserContentObject, $OAuthEzUser, true);
 
         $eZUserProviderMock = $this->getEzUserProviderMock()
-            ->setConstructorArgs(array($this->getAPIRepositoryMock(), $loginHelperMock))
+            ->setConstructorArgs(array($this->getAPIRepositoryMock(), $userContentHelperMock, $OAuthEzRepositoryMock))
             ->setMethods(array('getLinkedUser', 'generateOAuthEzUser', 'loadUserByAPIUser', 'getMergeAccounts', 'getFirstUserByEmail'))
             ->getMock();
 
@@ -179,27 +177,28 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
-        $loginHelperMock = $this->getLoginHelperMock();
+        $userContentHelperMock = $this->getUserContentHelperMock();
+        $OAuthEzRepositoryMock = $this->getOAuthEzRepositoryMock();
 
         $eZUserContentObject = $this->getEzUserMock();
 
-        $loginHelperMock
+        $OAuthEzRepositoryMock
             ->expects($this->once())
             ->method('loadFromTableByResourceUserId')
             ->willReturn($OAuthEzEntity);
 
-        $loginHelperMock
+        $userContentHelperMock
             ->expects($this->never())
             ->method('createEzUser')
             ->willReturn($eZUserContentObject);
 
-        $loginHelperMock
+        $OAuthEzRepositoryMock
             ->expects($this->once())
             ->method('addToTable')
             ->with($eZUserContentObject, $OAuthEzUser, true);
 
         $eZUserProviderMock = $this->getEzUserProviderMock()
-            ->setConstructorArgs(array($this->getAPIRepositoryMock(), $loginHelperMock))
+            ->setConstructorArgs(array($this->getAPIRepositoryMock(), $userContentHelperMock, $OAuthEzRepositoryMock))
             ->setMethods(array(
                 'getLinkedUser', 'generateOAuthEzUser', 'loadUserByAPIUser',
                 'getMergeAccounts', 'getFirstUserByEmail', 'loadUserByUserName'
@@ -254,25 +253,26 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $OAuthEzEntity = $this->getOAuthEzEntity();
         $OAuthEzUser = $this->getOAuthEzUser();
 
-        $loginHelperMock = $this->getLoginHelperMock();
+        $userContentHelperMock = $this->getUserContentHelperMock();
+        $OAuthEzRepositoryMock = $this->getOAuthEzRepositoryMock();
 
         $eZUserContentObject = $this->getEzUserMock();
 
-        $loginHelperMock->method('loadFromTableByResourceUserId')
+        $OAuthEzRepositoryMock->method('loadFromTableByResourceUserId')
             ->willReturn($OAuthEzEntity);
 
-        $loginHelperMock
+        $userContentHelperMock
             ->expects($this->once())
             ->method('createEzUser')
             ->willReturn($eZUserContentObject);
 
-        $loginHelperMock
+        $OAuthEzRepositoryMock
             ->expects($this->once())
             ->method('addToTable')
             ->with($eZUserContentObject, $OAuthEzUser, false);
 
         $eZUserProviderMock = $this->getEzUserProviderMock()
-            ->setConstructorArgs(array($this->getAPIRepositoryMock(), $loginHelperMock))
+            ->setConstructorArgs(array($this->getAPIRepositoryMock(), $userContentHelperMock, $OAuthEzRepositoryMock))
             ->setMethods(array(
                 'getLinkedUser', 'generateOAuthEzUser', 'loadUserByAPIUser',
                 'getMergeAccounts', 'getFirstUserByEmail', 'loadUserByUserName'
@@ -511,11 +511,19 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         return $this->getMockBuilder('\eZ\Publish\API\Repository\Repository')->disableOriginalConstructor()->getMock();
     }
 
-    protected function getLoginHelperMock()
+    protected function getUserContentHelperMock()
     {
-        return $this->getMockBuilder('\Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper')
+        return $this->getMockBuilder('\Netgen\Bundle\EzSocialConnectBundle\Helper\UserContentHelper')
             ->disableOriginalConstructor()
-            ->setMethods(array('loadFromTableByResourceUserId', 'createEzUser', 'addToTable'))
+            ->setMethods(array('createEzUser'))
+            ->getMock();
+    }
+
+    protected function getOAuthEzRepositoryMock()
+    {
+        return $this->getMockBuilder('Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository')
+            ->disableOriginalConstructor()
+            ->setMethods(array('loadFromTableByResourceUserId', 'addToTable'))
             ->getMock();
     }
 

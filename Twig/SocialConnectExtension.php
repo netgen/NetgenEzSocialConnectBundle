@@ -2,9 +2,9 @@
 
 namespace Netgen\Bundle\EzSocialConnectBundle\Twig;
 
+use Doctrine\ORM\EntityRepository;
 use eZ\Publish\Core\MVC\Symfony\Security\User;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
-use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
 
 /**
  * A Twig extension to allow checking whether the current user is connected to a given social resource owner.
@@ -12,18 +12,18 @@ use Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper;
 class SocialConnectExtension extends \Twig_Extension
 {
     /**
-     * @var \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
+     * @var \Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository
      */
-    protected $socialLoginHelper;
+    protected $OAuthEzRepository;
 
     /**
      * SocialConnectExtension constructor.
      *
-     * @param \Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper $socialLoginHelper
+     * @param \Doctrine\ORM\EntityRepository $OAuthEzRepository
      */
-    public function __construct(SocialLoginHelper $socialLoginHelper)
+    public function __construct(EntityRepository $OAuthEzRepository)
     {
-        $this->socialLoginHelper = $socialLoginHelper;
+        $this->OAuthEzRepository = $OAuthEzRepository;
     }
 
     /**
@@ -49,7 +49,7 @@ class SocialConnectExtension extends \Twig_Extension
      */
     public function isConnectedToOwner($userId, $resourceOwnerName)
     {
-        $user = $this->socialLoginHelper->loadFromTableByEzId($userId, $resourceOwnerName);
+        $user = $this->OAuthEzRepository->loadFromTableByEzId($userId, $resourceOwnerName);
 
         return $user instanceof OAuthEz;
     }
@@ -67,7 +67,7 @@ class SocialConnectExtension extends \Twig_Extension
      */
     public function isDisconnectable($userId, $resourceOwnerName)
     {
-        $ezUser = $this->socialLoginHelper->loadFromTableByEzId($userId, $resourceOwnerName);
+        $ezUser = $this->OAuthEzRepository->loadFromTableByEzId($userId, $resourceOwnerName);
 
         if ($ezUser instanceof OAuthEz) {
             return $ezUser->isDisconnectable();
