@@ -20,6 +20,7 @@ services:
             - @ezpublish.api.repository
             - @ezpublish.config.resolver
             - @ezpublish.field_helper
+            - @=service('doctrine.orm.default_entity_manager').getRepository('NetgenEzSocialConnectBundle:OAuthEz')
             - @?logger
         calls:
             - [setFirstNameIdentifier,    ["$first_name;netgen_social_connect$"]]

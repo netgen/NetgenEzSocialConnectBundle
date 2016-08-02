@@ -12,6 +12,7 @@ use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Psr\Log\LoggerInterface;
 use eZ\Publish\Core\Helper\FieldHelper;
+use Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository;
 
 class UserContentHelper
 {
@@ -40,20 +41,23 @@ class UserContentHelper
     protected $baseUrls;
 
     /**
-     * @param \eZ\Publish\API\Repository\Repository        $repository
-     * @param \eZ\Publish\Core\MVC\ConfigResolverInterface $configResolver
-     * @param \eZ\Publish\Core\Helper\FieldHelper          $fieldHelper
-     * @param \Psr\Log\LoggerInterface                     $logger
+     * @param \eZ\Publish\API\Repository\Repository                                     $repository
+     * @param \eZ\Publish\Core\MVC\ConfigResolverInterface                              $configResolver
+     * @param \eZ\Publish\Core\Helper\FieldHelper                                       $fieldHelper
+     * @param \Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository  $OAuthEzRepository
+     * @param \Psr\Log\LoggerInterface                                                  $logger
      */
     public function __construct(
         Repository $repository,
         ConfigResolverInterface $configResolver,
         FieldHelper $fieldHelper,
+        OAuthEzRepository $OAuthEzRepository,
         LoggerInterface $logger = null
     ) {
         $this->repository = $repository;
         $this->configResolver = $configResolver;
         $this->fieldHelper = $fieldHelper;
+        $this->OAuthEzRepository = $OAuthEzRepository;
         $this->logger = $logger;
     }
 
@@ -150,7 +154,7 @@ class UserContentHelper
 
         try {
             $imageFileName = $this->downloadExternalImage($imageLink);
-        } catch (\Symfony\Component\Filesystem\Exception\IOException $e) {
+        } catch (IOException $e) {
             $this->logger->error("Problem while saving image {$imageLink}: ".$e->getMessage());
 
             return false;
@@ -184,7 +188,8 @@ class UserContentHelper
     /**
      * Creates ez user from OAuthEzUser entity.
      *
-     * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $oauthUser
+     * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser    $oauthUser
+     * @param string                                                    $language
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      */
@@ -276,7 +281,7 @@ class UserContentHelper
                 throw new ResourceOwnerNotSupportedException($resourceName);
             }
 
-            $OAuthEz = $this->loadFromTableByEzId($userId, $resourceName);
+            $OAuthEz = $this->OAuthEzRepository->loadFromTableByEzId($userId, $resourceName);
 
             if (empty($OAuthEz)) {
                 throw new UserNotConnectedException($resourceName);
@@ -288,7 +293,7 @@ class UserContentHelper
 
         } else {
             foreach ($this->baseUrls as $resourceName => $resourceBaseUrl) {
-                $OAuthEz = $this->loadFromTableByEzId($userId, $resourceName);
+                $OAuthEz = $this->OAuthEzRepository->loadFromTableByEzId($userId, $resourceName);
 
                 if (empty($OAuthEz)) {
                     continue;
@@ -317,7 +322,7 @@ class UserContentHelper
             try {
                 $imageFileName = $this->downloadExternalImage($imageLink);
                 $userCreateStruct->setField($this->imageFieldIdentifier, $imageFileName);
-            } catch (\Symfony\Component\Filesystem\Exception\IOException $e) {
+            } catch (IOException $e) {
                 $this->logger->error("Problem while saving image {$imageLink}: " . $e->getMessage());
             }
         }
@@ -328,7 +333,7 @@ class UserContentHelper
     /**
      * Fetches the UserGroupId from the YAML configuration.
      *
-     * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $oauthUser
+     * @param \Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser $oauthEzUser
      *
      * @return string
      *
