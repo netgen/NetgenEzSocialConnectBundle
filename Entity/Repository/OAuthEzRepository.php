@@ -4,6 +4,7 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Entity\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use eZ\Publish\API\Repository\Values\User\User;
+use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 
 class OAuthEzRepository extends EntityRepository
@@ -46,10 +47,11 @@ class OAuthEzRepository extends EntityRepository
     /**
      * Loads from table by eZ user id and resource name.
      *
-     * @param string $ezUserId
-     * @param string $resourceOwnerName
+     * @param string    $ezUserId
+     * @param string    $resourceOwnerName
+     * @param bool      $onlyDisconnectable
      *
-     * @return null|\Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
+     * @return null|\Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
     public function loadFromTableByEzId($ezUserId, $resourceOwnerName, $onlyDisconnectable = false)
     {
@@ -62,8 +64,9 @@ class OAuthEzRepository extends EntityRepository
     /**
      * Loads from table by resource user id and resource name.
      *
-     * @param string $resourceUserId
-     * @param string $resourceOwnerName
+     * @param string    $resourceUserId
+     * @param string    $resourceOwnerName
+     * @param bool      $onlyDisconnectable
      *
      * @return null|\Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
@@ -81,7 +84,7 @@ class OAuthEzRepository extends EntityRepository
      * @param array     $criteria
      * @param bool      $onlyDisconnectable
      *
-     * @return null|\Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser
+     * @return null|\Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
      */
     protected function loadFromTableByCriteria(array $criteria, $onlyDisconnectable = false)
     {
