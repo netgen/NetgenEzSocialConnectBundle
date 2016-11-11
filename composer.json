@@ -17,9 +17,6 @@
     "require-dev": {
         "phpunit/phpunit": "*"
     },
-    "require-dev": {
-        "phpunit/phpunit": "*"
-    },
     "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
     "autoload": {
         "psr-0": { "Netgen\\Bundle\\EzSocialConnectBundle": "" }
