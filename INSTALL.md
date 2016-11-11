@@ -5,7 +5,7 @@ This bundle uses HWIOAuthBundle, and the installation process is similar.
 # Add bundle to the project via composer
 ```
     ...
-    "netgen/ez-social-connect": "~0.2",
+    "netgen/ez-social-connect": "~0.9",
     ...
 ```
 
@@ -100,9 +100,9 @@ netgen_social_connect:
                   first_name: 'first_name'
                   last_name: 'last_name'
                   profile_image: 'image'
-                  
+
             # the following lines set app ids and secrets per siteaccess
-                  
+
             resource_owners:
                 facebook:
                     id:         <CHANGEME>
