@@ -166,14 +166,14 @@ class UserContentHelper
             $language = $this->getFirstConfiguredLanguage();
         }
 
-        $contentService = $this->repository->getContentService();
+        $contentService = $this->getRepository()->getContentService();
 
         $userDraft = $contentService->createContentDraft($user->content->versionInfo->contentInfo);
         $userUpdateStruct = $contentService->newContentUpdateStruct();
         $userUpdateStruct->initialLanguageCode = $language;
         $userUpdateStruct->setField($imageFieldIdentifier, $imageFileName);
 
-        $this->repository->sudo(
+        $this->getRepository()->sudo(
             function (Repository $repository) use ($userDraft, $userUpdateStruct) {
                 $contentService = $repository->getContentService();
                 $userDraft = $contentService->updateContent($userDraft->versionInfo, $userUpdateStruct);
@@ -196,7 +196,7 @@ class UserContentHelper
     public function createEzUser(OAuthEzUser $oauthUser, $language = null)
     {
         $contentTypeIdentifier = $this->configResolver->getParameter('user_content_type_identifier', 'netgen_social_connect');
-        $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
+        $contentType = $this->getRepository()->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
 
         if (!$language) {
             $language = $this->getFirstConfiguredLanguage();
@@ -206,7 +206,7 @@ class UserContentHelper
 
         $userGroupId = $this->getUserGroupId($oauthUser);
 
-        $newUser = $this->repository->sudo(
+        $newUser = $this->getRepository()->sudo(
             function (Repository $repository) use ($userCreateStruct, $userGroupId) {
                 $userService = $repository->getUserService();
                 $userGroup = $userService->loadUserGroup($userGroupId);
@@ -227,12 +227,12 @@ class UserContentHelper
     public function updateUserFields(User $user, array $fields)
     {
         try {
-            $userUpdateStruct = $this->repository->getUserService()->newUserUpdateStruct();
+            $userUpdateStruct = $this->getRepository()->getUserService()->newUserUpdateStruct();
             foreach ($fields as $name => $value) {
                 $userUpdateStruct->$name = $value;
             }
 
-            $this->repository->sudo(
+            $this->getRepository()->sudo(
                 function (Repository $repository) use ($user, $userUpdateStruct) {
                     return $repository->getUserService()->updateUser($user, $userUpdateStruct);
                 }
@@ -257,7 +257,7 @@ class UserContentHelper
      */
     public function loadEzUserById($userId)
     {
-        return $this->repository->getUserService()->loadUser($userId);
+        return $this->getRepository()->getUserService()->loadUser($userId);
     }
 
     /**
@@ -364,12 +364,12 @@ class UserContentHelper
     public function getUserCreateStruct(OAuthEzUser $oauthEzUser, $contentType, $language)
     {
         $username = $oauthEzUser->getUsername();
-        $password = password_hash(str_shuffle($oauthEzUser->getOriginalId().microtime().$username), PASSWORD_DEFAULT);
+        $password = $this->createPassword($oauthEzUser->getOriginalId(), $username);
         $firstName = $oauthEzUser->getFirstName();
         $lastName = $oauthEzUser->getLastName();
         $imageLink = $oauthEzUser->getImagelink();
 
-        $userCreateStruct = $this->repository->getUserService()->newUserCreateStruct(
+        $userCreateStruct = $this->getRepository()->getUserService()->newUserCreateStruct(
             $username, $oauthEzUser->getEmail(), $password, $language, $contentType
         );
 
@@ -388,6 +388,19 @@ class UserContentHelper
     }
 
     /**
+     *
+     * @param string $originalId
+     * @param string $username
+     *
+     * @return bool|false|string
+     */
+    public function createPassword($originalId, $username)
+    {
+        return password_hash(str_shuffle($originalId.microtime().$username), PASSWORD_DEFAULT);
+    }
+
+    /**
+     * @codeCoverageIgnore
      * @return string
      */
     public function getFirstConfiguredLanguage()
@@ -395,5 +408,14 @@ class UserContentHelper
         $languages = $this->configResolver->getParameter('languages');
 
         return reset($languages);
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return \eZ\Publish\API\Repository\Repository
+     */
+    protected function getRepository()
+    {
+        return $this->repository;
     }
 }

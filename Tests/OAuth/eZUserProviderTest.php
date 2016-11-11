@@ -170,7 +170,6 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
         $eZUserProviderMock->loadUserByOAuthUserResponse($userResponseMock);
     }
 
-
     public function testFirstUserByEmailNotFound()
     {
         $userResponseMock = $this->getUserResponseStub();
