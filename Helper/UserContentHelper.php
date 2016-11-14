@@ -3,8 +3,13 @@
 namespace Netgen\Bundle\EzSocialConnectBundle\Helper;
 
 use eZ\Publish\API\Repository\Repository;
+use eZ\Publish\API\Repository\Values\Content\Content;
+use eZ\Publish\API\Repository\Values\Content\Field;
+use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
+use eZ\Publish\API\Repository\Values\User\UserCreateStruct;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\API\Repository\Values\User\User;
+use eZ\Publish\Core\Repository\Values\ContentType\ContentType;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\ResourceOwnerNotSupportedException;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\UserNotConnectedException;
@@ -13,6 +18,7 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Psr\Log\LoggerInterface;
 use eZ\Publish\Core\Helper\FieldHelper;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class UserContentHelper
 {
@@ -115,6 +121,10 @@ class UserContentHelper
     {
         $data = file_get_contents($imageLink);
 
+        if (!$data) {
+            throw new IOException('Could not download image.');
+        }
+
         preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName);
 
         if (!empty($imageName[0])) {
@@ -146,7 +156,11 @@ class UserContentHelper
     public function addProfileImage(User $user, $imageLink, $language = null)
     {
         $imageFieldIdentifier = $this->imageFieldIdentifier;
-        if (empty($imageFieldIdentifier)
+
+        $imageFieldExists = $this->contentFieldExists($user->content, $imageFieldIdentifier);
+
+        if (!$imageFieldExists
+            || empty($imageFieldIdentifier)
             || !$this->fieldHelper->isFieldEmpty($user->content, $imageFieldIdentifier, $language)
         ) {
             return false;
@@ -184,6 +198,22 @@ class UserContentHelper
         return true;
     }
 
+    /**
+     * Before checking if a field is empty, we are interested in whether it exists at all.
+     *
+     * @param Content $content
+     * @param $fieldIdentifier
+     *
+     * @return bool
+     */
+    protected function contentFieldExists(Content $content, $fieldIdentifier)
+    {
+        return array_reduce($content->getFields(), function($accumulator, Field $field) use ($fieldIdentifier) {
+            if ($field->fieldDefIdentifier === $fieldIdentifier) $accumulator = true;
+
+            return $accumulator;
+        }, $initial = false);
+    }
 
     /**
      * Creates ez user from OAuthEzUser entity.
@@ -223,13 +253,21 @@ class UserContentHelper
      *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      * @param array                                       $fields
+     *
+     * @return void
      */
     public function updateUserFields(User $user, array $fields)
     {
         try {
             $userUpdateStruct = $this->getRepository()->getUserService()->newUserUpdateStruct();
+
             foreach ($fields as $name => $value) {
-                $userUpdateStruct->$name = $value;
+                if ($this->contentFieldExists($user, $name)) {
+                    $userUpdateStruct->$name = $value;
+                } else if ($this->logger instanceof LoggerInterface) {
+
+                    $this->logger->error("SocialConnect - User class has no field '{$name}'");
+                }
             }
 
             $this->getRepository()->sudo(
@@ -237,14 +275,28 @@ class UserContentHelper
                     return $repository->getUserService()->updateUser($user, $userUpdateStruct);
                 }
             );
-        } catch (\Exception $e) {
-            // fail silently - just create a log
-            if ($this->logger !== null) {
-                $fieldNames = array_keys($fields);
-                $fieldNamesString = implode(', ', $fieldNames);
 
-                $this->logger->error("SocialConnect - failed to update fields '{$fieldNamesString}' on user with id {$user->id}");
-            }
+        } catch (\eZ\Publish\API\Repository\Exceptions\UnauthorizedException $e) {
+            $message = 'User not allowed to update the user object.';
+
+        } catch (\eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException $e) {
+            $message = 'The field input is not valid.';
+
+        } catch (\eZ\Publish\API\Repository\Exceptions\ContentValidationException $e) {
+            $message = 'Required field is empty.';
+
+        } catch (\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException $e) {
+            $message = 'Field type does not accept this value.';
+
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        if (isset($e) && $this->logger instanceof LoggerInterface) {
+            $fieldNames = array_keys($fields);
+            $fieldNamesString = implode(', ', $fieldNames);
+
+            $this->logger->error("User Id {$user->id}, field {$fieldNamesString} failed to update: ".PHP_EOL.$message);
         }
     }
 
@@ -323,7 +375,7 @@ class UserContentHelper
                 $imageFileName = $this->downloadExternalImage($imageLink);
                 $userCreateStruct->setField($this->imageFieldIdentifier, $imageFileName);
             } catch (IOException $e) {
-                $this->logger->error("Problem while saving image {$imageLink}: " . $e->getMessage());
+                $this->logger->error("SocialConnect: Problem while saving image {$imageLink}: " . $e->getMessage());
             }
         }
 
@@ -361,7 +413,7 @@ class UserContentHelper
      *
      * @return \eZ\Publish\API\Repository\Values\User\UserCreateStruct
      */
-    public function getUserCreateStruct(OAuthEzUser $oauthEzUser, $contentType, $language)
+    public function getUserCreateStruct(OAuthEzUser $oauthEzUser, ContentType $contentType, $language)
     {
         $username = $oauthEzUser->getUsername();
         $password = $this->createPassword($oauthEzUser->getOriginalId(), $username);
@@ -373,18 +425,42 @@ class UserContentHelper
             $username, $oauthEzUser->getEmail(), $password, $language, $contentType
         );
 
-        if (!empty($firstName) && !empty($this->firstNameIdentifier)) {
-            $userCreateStruct->setField($this->firstNameIdentifier, $firstName);
-        }
+        $userCreateStruct = $this->addFieldIfExists($userCreateStruct, $contentType, $this->firstNameIdentifier, $firstName);
+        $userCreateStruct = $this->addFieldIfExists($userCreateStruct, $contentType, $this->lastNameIdentifier, $lastName);
 
-        if (!empty($lastName) && !empty($this->lastNameIdentifier)) {
-            $userCreateStruct->setField($this->lastNameIdentifier, $lastName);
+        if ($this->isImageFieldDefined()
+            && $contentType->getFieldDefinition($this->imageFieldIdentifier) instanceof FieldDefinition) {
+            $userCreateStruct = $this->getImageIfExists($userCreateStruct, $imageLink);
         }
-
-        $userCreateStruct = $this->getImageIfExists($userCreateStruct, $imageLink);
         $userCreateStruct->enabled = true;
 
         return $userCreateStruct;
+    }
+
+    /**
+     * @param \eZ\Publish\API\Repository\Values\User\UserCreateStruct $userCreateStruct
+     * @param string $fieldDefinitionIdentifier
+     * @param mixed $value
+     *
+     * @return \eZ\Publish\API\Repository\Values\User\UserCreateStruct
+     */
+    protected function addFieldIfExists(UserCreateStruct $userCreateStruct, ContentType $contentType, $fieldDefinitionIdentifier, $value)
+    {
+        $fieldDefinition = $contentType->getFieldDefinition($fieldDefinitionIdentifier);
+
+        if ($fieldDefinition instanceof FieldDefinition) {
+            if (!empty($value)) {
+                $userCreateStruct->setField($this->lastNameIdentifier, $lastName);
+            }
+
+            return $userCreateStruct;
+        }
+
+        if ($this->logger instanceof LoggerInterface) {
+            $this->logger->error("SocialConnect: Could not map  {$fieldDefinitionIdentifier} to user content. Field does not exist.");
+
+            throw new AuthenticationException();
+        }
     }
 
     /**
@@ -417,5 +493,14 @@ class UserContentHelper
     protected function getRepository()
     {
         return $this->repository;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return bool
+     */
+    public function isImageFieldDefined()
+    {
+        return !empty($this->imageFieldIdentifier);
     }
 }
