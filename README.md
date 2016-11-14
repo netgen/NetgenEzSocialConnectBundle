@@ -1,7 +1,10 @@
 # NetgenEzSocialConnectBundle
 
-[![Build Status](https://img.shields.io/travis/alymdrictels/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://travis-ci.org/alymdrictels/NetgenEzSocialConnectBundle.svg?branch=feature/tests)
-[![Code Coverage](https://img.shields.io/codecov/c/github/alymdrictels/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://codecov.io/gh/alymdrictels/NetgenEzSocialConnectBundle/branch/feature/tests)
+[![Build Status](https://img.shields.io/travis/netgen/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://travis-ci.org/netgen/NetgenEzSocialConnectBundle.svg)
+[![Code Coverage](https://img.shields.io/codecov/c/github/netgen/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://codecov.io/gh/netgen/NetgenEzSocialConnectBundle)
+[![Downloads](https://img.shields.io/packagist/dt/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect)
+[![Latest stable](https://img.shields.io/packagist/v/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect)
+[![License](https://img.shields.io/packagist/l/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect)
 
 As the impact of social media grows, most sites like to provide login via social networks like Facebook and Twitter.
 This bundle makes use of [HWIOAuthBundle](https://github.com/hwi/HWIOAuthBundle) to provide the ability to log in to eZPublish-based sites via social networks.
