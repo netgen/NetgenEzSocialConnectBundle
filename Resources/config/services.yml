@@ -10,6 +10,7 @@ services:
         parent: ezpublish.security.user_provider
         arguments:
             - @netgen.social_connect.helper.user_content
+            - @=service('doctrine.orm.default_entity_manager').getRepository('NetgenEzSocialConnectBundle:OAuthEz')
         calls:
             - [setMergeAccounts, ["$merge_accounts;netgen_social_connect$"]]
         lazy: true
