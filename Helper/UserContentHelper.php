@@ -169,12 +169,12 @@ class UserContentHelper
         try {
             $imageFileName = $this->downloadExternalImage($imageLink);
         } catch (IOException $e) {
-            $this->logger->error("Problem while saving image {$imageLink}: ".$e->getMessage());
+            $this->logger->error("SocialConnect: Problem while saving image {$imageLink}: ".$e->getMessage());
 
             return false;
         }
 
-        $this->logger->notice("Local image created: {$imageFileName}.");
+        $this->logger->notice("SocialConnect: Local image created: {$imageFileName}.");
 
         if (!$language) {
             $language = $this->getFirstConfiguredLanguage();
@@ -266,7 +266,7 @@ class UserContentHelper
                     $userUpdateStruct->$name = $value;
                 } else if ($this->logger instanceof LoggerInterface) {
 
-                    $this->logger->error("SocialConnect - User class has no field '{$name}'");
+                    $this->logger->error("SocialConnect: User class has no field '{$name}'");
                 }
             }
 
@@ -296,7 +296,7 @@ class UserContentHelper
             $fieldNames = array_keys($fields);
             $fieldNamesString = implode(', ', $fieldNames);
 
-            $this->logger->error("User Id {$user->id}, field {$fieldNamesString} failed to update: ".PHP_EOL.$message);
+            $this->logger->error("SocialConnect: User Id {$user->id}, field {$fieldNamesString} failed to update: ".PHP_EOL.$message);
         }
     }
 
