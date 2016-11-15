@@ -38,7 +38,7 @@ class ConnectController extends Controller
         }
 
         $userContentId = $user->getAPIUser()->id;
-        $loginHelper = $this->get('netgen.social_connect.helper');
+        $loginHelper = $this->get('netgen.social_connect.helper.user_content');
         $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName, true);
 
         if (empty($OAuthEz)) {
@@ -81,7 +81,7 @@ class ConnectController extends Controller
 
         $userContentId = $user->getAPIUser()->id;
 
-        $loginHelper = $this->get('netgen.social_connect.helper');
+        $loginHelper = $this->get('netgen.social_connect.helper.user_content');
 
         $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName);
 
@@ -195,7 +195,7 @@ class ConnectController extends Controller
 
         $resourceUserId = $userInformation->getUsername();
 
-        $loginHelper = $this->get('netgen.social_connect.helper');
+        $loginHelper = $this->get('netgen.social_connect.helper.user_content');
 
         if (!empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName))) {
             $message = $translator->trans(
