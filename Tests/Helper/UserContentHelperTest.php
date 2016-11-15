@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the HWIOAuthBundle package.
- *
- * (c) Hardware.Info <opensource@hardware.info>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Netgen\Bundle\EzSocialConnectBundle\Tests\OAuth;
 
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
@@ -18,9 +9,6 @@ class UserContentHelperTest extends \PHPUnit_Framework_TestCase
 {
     public function testGetUserCreateStruct()
     {
-        $OAuthEzEntity = $this->getOAuthEzEntity();
-        $OAuthEzUser = $this->getOAuthEzUser();
-
         $contentTypeMock = $this->getContentTypeMockBuilder()->getMockForAbstractClass();
 
         $userServiceMock = $this->getUserServiceMockBuilder()->disableOriginalConstructor();
@@ -43,7 +31,7 @@ class UserContentHelperTest extends \PHPUnit_Framework_TestCase
         $userContentHelperMock->expects($this->once())->method('createPassword')->willReturn('pa$$wordha$h');
         $userContentHelperMock->expects($this->once())->method('getImageIfExists')->willReturn($userCreateStructMock);
 
-        $userCreateStruct = $userContentHelperMock->getUserCreateStruct(
+        $userContentHelperMock->getUserCreateStruct(
             $this->getOAuthEzUser(), $contentTypeMock, 'eng-GB'
         );
     }
