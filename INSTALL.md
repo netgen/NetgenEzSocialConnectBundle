@@ -36,10 +36,11 @@ doctrine:
                 connection: default
                 mappings:
                     NetgenEzSocialConnectBundle:  ~
+
 # or automatically:
 doctrine:
     orm:
-        auto_mapping: true                              
+        auto_mapping: true
 ```
 
 # Update the database
