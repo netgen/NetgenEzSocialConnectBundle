@@ -201,8 +201,8 @@ class UserContentHelper
     /**
      * Before checking if a field is empty, we are interested in whether it exists at all.
      *
-     * @param Content $content
-     * @param $fieldIdentifier
+     * @param \eZ\Publish\API\Repository\Values\Content\Content $content
+     * @param string $fieldIdentifier
      *
      * @return bool
      */
