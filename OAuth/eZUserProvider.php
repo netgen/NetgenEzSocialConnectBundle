@@ -177,9 +177,12 @@ class eZUserProvider extends BaseUserProvider implements OAuthAwareUserProviderI
         try {
             $userContentObject = $this->userContentHelper->loadEzUserById($OAuthEzUserEntity->getEzUserId());
 
-            $imageLink = $OAuthEzUser->getImageLink();
-            if (!empty($imageLink)) {
-                $this->userContentHelper->addProfileImage($userContentObject, $imageLink);
+            // If the parameter 'profile_image' is not defined, skip this step.
+            if ($this->userContentHelper->isImageFieldDefined()) {
+                $imageLink = $OAuthEzUser->getImageLink();
+                if (!empty($imageLink)) {
+                    $this->userContentHelper->addProfileImage($userContentObject, $imageLink);
+                }
             }
 
             // Check whether an email was returned by the OAuth provider. If not, a dummy 'localhost.local' will be found.
