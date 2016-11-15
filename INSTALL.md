@@ -24,18 +24,20 @@ public function registerBundles()
 }
 ```
 
-# If doctrine ORM was not installed, map the entities
+# Be sure to add the Doctrine ORM mapping:
 ```
 # ezpublish/config/config.yml
 
-# either this
+# either manually
+doctrine:
     orm:
         entity_managers:
             default:
                 connection: default
                 mappings:
                     NetgenEzSocialConnectBundle:  ~
-# or this
+# or automatically:
+doctrine:
     orm:
         auto_mapping: true                              
 ```
