@@ -450,7 +450,7 @@ class UserContentHelper
 
         if ($fieldDefinition instanceof FieldDefinition) {
             if (!empty($value)) {
-                $userCreateStruct->setField($this->lastNameIdentifier, $lastName);
+                $userCreateStruct->setField($fieldDefinitionIdentifier, $value);
             }
 
             return $userCreateStruct;
