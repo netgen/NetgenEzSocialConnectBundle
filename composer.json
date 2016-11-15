@@ -11,7 +11,8 @@
     ],
     "require": {
         "ezsystems/ezpublish-kernel": "*",
-        "hwi/oauth-bundle": "~0.4.0"
+        "hwi/oauth-bundle": "~0.4.0",
+        "doctrine/orm": "~2.4"
     },
     "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
     "autoload": {
