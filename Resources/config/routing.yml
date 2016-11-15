@@ -1,17 +1,17 @@
 facebook_login:
-    pattern: /login/login_facebook
+    path: /login/login_facebook
     defaults: { _controller: ezpublish.security.controller:loginAction }
 
 google_login:
-    pattern: /login/login_google
+    path: /login/login_google
     defaults: { _controller: ezpublish.security.controller:loginAction }
 
 twitter_login:
-    pattern: /login/login_twitter
+    path: /login/login_twitter
     defaults: { _controller: ezpublish.security.controller:loginAction }
 
 linkedin_login:
-    pattern: /login/login_linkedin
+    path: /login/login_linkedin
     defaults: { _controller: ezpublish.security.controller:loginAction }
 
 hwi_oauth_redirect:
@@ -23,13 +23,13 @@ hwi_oauth_login:
     prefix:   /login
 
 netgen_social_connect_ez:
-    pattern: /ezconnect/{resourceName}
+    path: /ezconnect/{resourceName}
     defaults: { _controller: netgen.social_connect.controller.connect:connectUser }
 
 netgen_social_disconnect_ez:
-    pattern: /ezdisconnect/{resourceName}
+    path: /ezdisconnect/{resourceName}
     defaults: { _controller: netgen.social_connect.controller.connect:disconnectUser }
 
 netgen_finish_connecting:
-    pattern: /ezconnect_finish
+    path: /ezconnect_finish
     defaults: { _controller: netgen.social_connect.controller.connect:finishConnecting }
