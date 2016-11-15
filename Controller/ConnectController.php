@@ -5,6 +5,7 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Controller;
 use eZ\Bundle\EzPublishCoreBundle\Controller;
 use eZ\Publish\Core\Base\Exceptions\NotFoundException;
 use HWI\Bundle\OAuthBundle\OAuth\Response\PathUserResponse;
+use Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\UserAlreadyConnectedException;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,14 +39,15 @@ class ConnectController extends Controller
         }
 
         $userContentId = $user->getAPIUser()->id;
-        $loginHelper = $this->get('netgen.social_connect.helper.user_content');
-        $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName, true);
+        /** @var OAuthEzRepository $OAuthEzRepository */
+        $OAuthEzRepository = $this->get('netgen.social_connect.repository.oauthez');
+        $OAuthEz = $OAuthEzRepository->loadFromTableByEzId($userContentId, $resourceName, true);
 
         if (empty($OAuthEz)) {
             throw new NotFoundException('Disconnectable user', $userContentId.'/'.$resourceName);
         }
 
-        $loginHelper->removeFromTable($OAuthEz);
+        $OAuthEzRepository->removeFromTable($OAuthEz);
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $request->getSession();
 
@@ -81,9 +83,10 @@ class ConnectController extends Controller
 
         $userContentId = $user->getAPIUser()->id;
 
-        $loginHelper = $this->get('netgen.social_connect.helper.user_content');
+        /** @var OAuthEzRepository $OAuthEzRepository */
+        $OAuthEzRepository = $this->get('netgen.social_connect.repository.oauthez');
 
-        $OAuthEz = $loginHelper->loadFromTableByEzId($userContentId, $resourceName);
+        $OAuthEz = $OAuthEzRepository->loadFromTableByEzId($userContentId, $resourceName);
 
         if (!empty($OAuthEz)) {
             throw new UserAlreadyConnectedException($resourceName);
@@ -195,9 +198,11 @@ class ConnectController extends Controller
 
         $resourceUserId = $userInformation->getUsername();
 
-        $loginHelper = $this->get('netgen.social_connect.helper.user_content');
+        $userContentHelper = $this->get('netgen.social_connect.helper.user_content');
+        /** @var OAuthEzRepository $OAuthEzRepository */
+        $OAuthEzRepository = $this->get('netgen.social_connect.repository.oauthez');
 
-        if (!empty($loginHelper->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName))) {
+        if (!empty($OAuthEzRepository->loadFromTableByResourceUserId($resourceUserId, $resourceOwnerName))) {
             $message = $translator->trans(
                 'connect.owner.already_connected', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect'
             );
@@ -211,8 +216,8 @@ class ConnectController extends Controller
             'connect.owner.success', array('%ownerName%' => ucfirst($resourceOwnerName)), 'social_connect'
         );
 
-        $loginHelper->addToTable(
-            $loginHelper->loadEzUserById($apiUser->id),
+        $OAuthEzRepository->addToTable(
+            $userContentHelper->loadEzUserById($apiUser->id),
             $this->getOAuthEzUser($apiUser->login, $resourceOwner->getName(), $resourceUserId),
             true
         );
