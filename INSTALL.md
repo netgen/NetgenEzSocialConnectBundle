@@ -11,7 +11,7 @@ This bundle uses HWIOAuthBundle, and the installation process is similar.
 
 # Register HWIOAuthBundle and NetgenEzSocialConnectBundle in the kernel
 ```
-// ezpublish/EzPublishKernel.php
+# ezpublish/EzPublishKernel.php
 
 public function registerBundles()
 {
@@ -22,6 +22,22 @@ public function registerBundles()
         // ...
     );
 }
+```
+
+# If doctrine ORM was not installed, map the entities
+```
+# ezpublish/config/config.yml
+
+# either this
+    orm:
+        entity_managers:
+            default:
+                connection: default
+                mappings:
+                    NetgenEzSocialConnectBundle:  ~
+# or this
+    orm:
+        auto_mapping: true                              
 ```
 
 # Update the database
