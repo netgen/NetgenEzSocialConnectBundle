@@ -5,11 +5,11 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Helper;
 use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Field;
+use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\API\Repository\Values\User\UserCreateStruct;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\API\Repository\Values\User\User;
-use eZ\Publish\Core\Repository\Values\ContentType\ContentType;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\ResourceOwnerNotSupportedException;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\UserNotConnectedException;
@@ -425,8 +425,8 @@ class UserContentHelper
             $username, $oauthEzUser->getEmail(), $password, $language, $contentType
         );
 
-        $userCreateStruct = $this->addFieldIfExists($userCreateStruct, $contentType, $this->firstNameIdentifier, $firstName);
-        $userCreateStruct = $this->addFieldIfExists($userCreateStruct, $contentType, $this->lastNameIdentifier, $lastName);
+        $userCreateStruct = $this->addFieldIfExists($userCreateStruct, $contentType, $this->getFirstNameIdentifier(), $firstName);
+        $userCreateStruct = $this->addFieldIfExists($userCreateStruct, $contentType, $this->getLastNameIdentifier(), $lastName);
 
         if ($this->isImageFieldDefined()
             && $contentType->getFieldDefinition($this->imageFieldIdentifier) instanceof FieldDefinition) {
@@ -444,7 +444,7 @@ class UserContentHelper
      *
      * @return \eZ\Publish\API\Repository\Values\User\UserCreateStruct
      */
-    protected function addFieldIfExists(UserCreateStruct $userCreateStruct, ContentType $contentType, $fieldDefinitionIdentifier, $value)
+    public function addFieldIfExists(UserCreateStruct $userCreateStruct, ContentType $contentType, $fieldDefinitionIdentifier, $value)
     {
         $fieldDefinition = $contentType->getFieldDefinition($fieldDefinitionIdentifier);
 
@@ -493,6 +493,24 @@ class UserContentHelper
     protected function getRepository()
     {
         return $this->repository;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return string
+     */
+    public function getFirstNameIdentifier()
+    {
+        return $this->firstNameIdentifier;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return string
+     */
+    public function getLastNameIdentifier()
+    {
+        return $this->lastNameIdentifier;
     }
 
     /**
