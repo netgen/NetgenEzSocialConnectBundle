@@ -9,19 +9,20 @@ services:
         class: Netgen\Bundle\EzSocialConnectBundle\OAuth\eZUserProvider
         parent: ezpublish.security.user_provider
         arguments:
-            - @netgen.social_connect.helper
+            - "@netgen.social_connect.helper.user_content"
+            - "@netgen.social_connect.repository.oauthez"
         calls:
             - [setMergeAccounts, ["$merge_accounts;netgen_social_connect$"]]
         lazy: true
 
-    netgen.social_connect.helper:
-        class: Netgen\Bundle\EzSocialConnectBundle\Helper\SocialLoginHelper
+    netgen.social_connect.helper.user_content:
+        class: Netgen\Bundle\EzSocialConnectBundle\Helper\UserContentHelper
         arguments:
-            - @ezpublish.api.repository
-            - @doctrine.orm.entity_manager
-            - @ezpublish.config.resolver
-            - @ezpublish.field_helper
-            - @?logger
+            - "@ezpublish.api.repository"
+            - "@ezpublish.config.resolver"
+            - "@ezpublish.field_helper"
+            - "@netgen.social_connect.repository.oauthez"
+            - "@?logger"
         calls:
             - [setFirstNameIdentifier,    ["$first_name;netgen_social_connect$"]]
             - [setLastNameIdentifier,     ["$last_name;netgen_social_connect$"]]
@@ -37,6 +38,12 @@ services:
         class: Netgen\Bundle\EzSocialConnectBundle\Twig\SocialConnectExtension
         public: false
         arguments:
-            - @netgen.social_connect.helper
+            - "@netgen.social_connect.repository.oauthez"
         tags:
             - { name: twig.extension }
+
+    netgen.social_connect.repository.oauthez:
+        class: Doctrine\ORM\EntityRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz

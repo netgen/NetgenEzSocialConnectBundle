@@ -42,7 +42,7 @@ class GetSocialUrlCommand extends ContainerAwareCommand
         $userId = $input->getArgument('user_id');
         $resourceName = $input->getOption('resource');
 
-        $loginHelper = $this->getContainer()->get('netgen.social_connect.helper');
+        $loginHelper = $this->getContainer()->get('netgen.social_connect.helper.user_content');
 
         $profileUrls = $loginHelper->getProfileUrlsByEzUserId($userId, $resourceName);
 

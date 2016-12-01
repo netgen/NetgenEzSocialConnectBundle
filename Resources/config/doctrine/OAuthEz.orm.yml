@@ -1,6 +1,7 @@
 Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz:
     type: entity
     table: ngsocialconnect
+    repositoryClass: Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository
     id:
         ezUserId:
             type: integer

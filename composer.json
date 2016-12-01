@@ -14,6 +14,9 @@
         "hwi/oauth-bundle": "~0.4.0",
         "doctrine/orm": "~2.4"
     },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
     "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
     "autoload": {
         "psr-0": { "Netgen\\Bundle\\EzSocialConnectBundle": "" }

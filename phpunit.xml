@@ -1,0 +1,32 @@
+<phpunit bootstrap="vendor/autoload.php"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Netgen\Bundle\EzSocialConnectBundle\Tests">
+            <directory>Tests</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory>.</directory>
+            <exclude>
+                <directory>Controller</directory>
+                <directory>Command</directory>
+                <directory>DependencyInjection</directory>
+                <directory>Entity</directory>
+                <directory>OAuth/ResourceOwner</directory>
+                <directory>Exception</directory>
+                <directory>Resources</directory>
+                <directory>Tests</directory>
+                <directory>Twig</directory>
+                <directory>vendor</directory>
+                <file>NetgenEzSocialConnectBundle.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>
