@@ -1,0 +1,5 @@
+orm:
+    entity_managers:
+        default:
+            mappings:
+                NetgenEzSocialConnectBundle:  ~
