@@ -37,6 +37,54 @@ _netgen_ez_social_login:
 ```
 # ezpublish/config/config.yml
 
+
+```
+
+# Configure bundle-specific parameters - global id/secrets
+
+If we are using the same id/secrets for all siteaccesses), define the HWI id/secret parameters above as literals, and omit the netgen_social_connect id/secrets:
+
+
+```
+# ezpublish/config/config.yml
+
+hwi_oauth:
+    # name of the firewall in which this bundle is active, this setting MUST be set
+    firewall_name: ezpublish_front
+    resource_owners:
+        facebook:
+            type: facebook
+            client_id: "123456789"
+            client_secret: "123456789"
+
+# ezpublish/config/config.yml
+netgen_social_connect:
+    system:
+        default:
+            user_content_type_identifier: user
+
+            # if these are not set, the fields in question will not be mapped to the OAuth resource owner's response
+            # these parameters are fetched using configResolver->getParameter('first_name', 'netgen_social_connect')
+
+            field_identifiers:
+                  first_name: 'first_name'
+                  last_name: 'last_name'
+                  profile_image: 'image'
+
+            resource_owners:
+                facebook:
+                    user_group: 11
+
+```
+
+# Configure bundle-specific parameters - siteaccess-specific id/secrets
+
+Here's a sample configuration. Any values not present in other siteaccesses are taken from 'default'.
+Note the line "use_config_resolver: true":
+
+```
+# ezpublish/config/config.yml
+
 hwi_oauth:
     # name of the firewall in which this bundle is active, this setting MUST be set
     firewall_name: ezpublish_front
@@ -64,26 +112,12 @@ hwi_oauth:
             client_id: %netgen_social_connect.default.google.id%
             client_secret: %netgen_social_connect.default.google.secret%
             scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
-```
 
-# Configure bundle-specific parameters
-
-If the useConfigResolver option is not set, the resource owner will use the [default parameters](Resources/config/parameters.yml).
-
-
-```
-# ezpublish/config/config.yml
 netgen_social_connect:
     resource_owners:
-        facebook: { useConfigResolver: true }
-        twitter: { useConfigResolver: true }
+        facebook: { use_config_resolver_: true }
     system:
         default:
-            # if true, the eZUserProvider will ensure that social users with the same email are tied to the same eZ user
-            # multiple eZ users will be created otherwise, each linked to one social account
-            # a new eZ user with a dummy email will always be created for users not disclosing their email
-
-            merge_accounts: true
 
             user_content_type_identifier: user
 
@@ -99,29 +133,27 @@ netgen_social_connect:
 
             resource_owners:
                 facebook:
-                    id:         <CHANGEME>
-                    secret:     <CHANGEME>
-                    user_group: 11
-                linkedin:
-                    id:         <CHANGEME>
-                    secret:     <CHANGEME>
-                    user_group: 11
-                twitter:
-                    id:         <CHANGEME>
-                    secret:     <CHANGEME>
-                    user_group: 11
-                google:
-                    id:         <CHANGEME>
-                    secret:     <CHANGEME>
+                    id:         123456789
+                    secret:     123456789
                     user_group: 11
         administration_group:
-            user_content_type_identifier: enhanced_user
-            merge_accounts: false
+            user_content_type_identifier: user_admin
+
+            # if these are not set, the fields in question will not be mapped to the OAuth resource owner's response
+            # these parameters are fetched using configResolver->getParameter('first_name', 'netgen_social_connect')
 
             field_identifiers:
-                first_name: 'intro'
-                last_name: ~            # do not import social data to this field
-                profile_image: 'picture'
+                  first_name: 'firstname'
+                  last_name: 'lastname'
+                  profile_image: 'profile_image'
+
+            # the following lines set app ids and secrets per siteaccess
+
+            resource_owners:
+                facebook:
+                    id:         987654321
+                    secret:     987654321
+                    user_group: 12
 ```
 
 # Configure the firewall
