@@ -1,6 +1,4 @@
 parameters:
-
-
     netgen_social_connect.base_urls:
         facebook: https://www.facebook.com/app_scoped_user_id/
         twitter:  https://twitter.com/intent/user?user_id=
