@@ -24,31 +24,6 @@ public function registerBundles()
 }
 ```
 
-# Be sure to add the Doctrine ORM mapping:
-```
-# ezpublish/config/config.yml
-
-# either manually
-doctrine:
-    orm:
-        entity_managers:
-            default:
-                connection: default
-                mappings:
-                    NetgenEzSocialConnectBundle:  ~
-
-# or automatically:
-doctrine:
-    orm:
-        auto_mapping: true
-```
-
-# Update the database
-```
-php ezpublish/console doctrine:schema:update --force
-```
-This will add the ngsocialconnect table to the database.
-
 # Import the routing
 ```
 # ezpublish/config/routing.yml
@@ -182,6 +157,12 @@ security:
                 provider: ezpublish
             logout: ~
 ```
+
+# Update the database
+```
+php ezpublish/console doctrine:schema:update --force
+```
+This will add the ngsocialconnect table to the database.
 
 # Include the template
 The last step is to include the template with social buttons in your login template.
