@@ -70,7 +70,7 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
      */
     public function prepend(ContainerBuilder $container)
     {
-        $configFile = __DIR__ . '/../Resources/config/doctrine.yml';
+        $configFile = __DIR__.'/../Resources/config/doctrine.yml';
         $config = Yaml::parse(file_get_contents($configFile));
         $container->prependExtensionConfig('doctrine', $config);
         $container->addResource(new FileResource($configFile));
