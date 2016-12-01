@@ -95,6 +95,7 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
         $container->prependExtensionConfig('doctrine', $config);
         $container->addResource(new FileResource($configFile));
 
+        $this->addDefaultParameters($container);
         $this->setHwiFallbackData($container);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
@@ -125,5 +126,24 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
                 $this->hwiFallbackData[$resourceOwnerName]['secret'] = $resourceOwnerValues['client_secret'];
             }
         }
+    }
+
+    /**
+     * Adds default settings required for siteaccess-aware configuration.
+     * See: https://doc.ez.no/display/EZP/How+to+expose+SiteAccess+aware+configuration+for+your+bundle
+     *
+     * @param ContainerBuilder $container
+     */
+    private function addDefaultParameters(ContainerBuilder $container)
+    {
+        foreach (array('facebook', 'twitter', 'linkedin', 'google') as $resourceOwnerName) {
+            foreach (array('id' => 'DEFAULT', 'secret' => 'DEFAULT', 'user_group' => 11) as $parameterName => $parameterValue) {
+                $container->setParameter("netgen_social_connect.default.{$resourceOwnerName}.{$parameterName}", $parameterValue);
+            }
+        }
+
+        $container->setParameter('netgen_social_connect.default.first_name', 'first_named');
+        $container->setParameter('netgen_social_connect.default.last_name', 'last_name');
+        $container->setParameter('netgen_social_connect.default.profile_image', 'image');
     }
 }
