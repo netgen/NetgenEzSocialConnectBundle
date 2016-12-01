@@ -27,7 +27,7 @@ class AddConfigResolverCompilerPass implements CompilerPassInterface
         $resourceOwners = !empty($config['resource_owners']) ? $config['resource_owners'] : array();
 
         foreach ($resourceOwners as $name => $owner) {
-            if ($owner['useConfigResolver']) {
+            if ($owner['use_config_resolver']) {
                 $resourceOwnerDefinition = $container->findDefinition('hwi_oauth.resource_owner.'.$name);
                 $resourceOwnerDefinition->addMethodCall('setConfigResolver', array(new Reference('ezpublish.config.resolver')));
             }
