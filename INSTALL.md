@@ -33,13 +33,6 @@ _netgen_ez_social_login:
     prefix:   /login
 ```
 
-# Configure resource owners (social networks)
-```
-# ezpublish/config/config.yml
-
-
-```
-
 # Configure bundle-specific parameters - global id/secrets
 
 If we are using the same id/secrets for all siteaccesses), define the HWI id/secret parameters above as literals, and omit the netgen_social_connect id/secrets:
