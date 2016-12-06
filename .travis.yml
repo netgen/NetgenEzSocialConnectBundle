@@ -15,7 +15,7 @@ matrix:
 # test only master (+ pull requests)
 branches:
   only:
-    - feature/tests
+    - master
 
 # install dependencies
 install:
