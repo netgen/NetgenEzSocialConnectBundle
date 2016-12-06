@@ -19,7 +19,7 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
 {
     /**
      * Stores HWI resource owner data if it's not dynamically set.
-     * Example contents: ['facebook' => ['id' => '12345678', 'secret' => '12345678' ]]
+     * Example content: ['facebook' => ['id' => '12345678', 'secret' => '12345678' ]]
      *
      * @var array
      */
