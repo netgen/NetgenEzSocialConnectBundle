@@ -19,17 +19,22 @@ branches:
 
 # install dependencies
 install:
+    - phpenv config-rm xdebug.ini
     - travis_wait composer install
 
 # execute phpunit as the script command
+# only run codecov on 7.0 because it doesn't need xdebug
 script:
-  - ./vendor/bin/phpunit -d memory_limit=-1 --colors -c phpunit.xml --coverage-clover=coverage.xml
+  - if [[ ${TRAVIS_PHP_VERSION} == "7.0" ]];
+     then phpdbg -qrr ./vendor/bin/phpunit -d memory_limit=-1 --colors -c phpunit.xml --coverage-clover=coverage.xml;
+     else ./vendor/bin/phpunit -d memory_limit=-1 --colors -c phpunit.xml;
+    fi;
 
 # disable mail notifications
 notification:
   email: false
 
-# increase memory limit to 2G
+# increase memory limit to 3G
 before_install:
     - phpenv config-add travis.php.ini
 
@@ -42,4 +47,6 @@ sudo: false
 
 # send coverage to codecov.io
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - if [[ ${TRAVIS_PHP_VERSION} == "7.0" ]]
+    then bash <(curl -s https://codecov.io/bash);
+   fi;
