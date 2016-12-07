@@ -35,7 +35,7 @@ _netgen_ez_social_login:
 
 # Configure bundle-specific parameters - global id/secrets
 
-If we are using the same id/secrets for all siteaccesses), define the HWI id/secret parameters above as literals, and omit the netgen_social_connect id/secrets:
+If we are using the same id/secrets for all siteaccesses), define the HWI id/secret parameters above, and omit the netgen_social_connect id/secrets:
 
 
 ```
@@ -72,7 +72,7 @@ netgen_social_connect:
 
 # Configure bundle-specific parameters - siteaccess-specific id/secrets
 
-Here's a sample configuration. Any values not present in other siteaccesses are taken from 'default'.
+Here's a sample configuration. Any values not present in netgen_social_connect => system in other siteaccesses are taken from 'default'.
 Note the line "use_config_resolver: true":
 
 ```
@@ -84,31 +84,32 @@ hwi_oauth:
     resource_owners:
         facebook:
             type: facebook
-            client_id: %netgen_social_connect.default.facebook.id%
-            client_secret: %netgen_social_connect.default.facebook.secret%
+            client_id: _placeholder
+            client_secret: _placeholder
             scope: "email"
             infos_url: "https://graph.facebook.com/me?fields=id,name,email,picture.type(large)"
             paths:
                 profilepicture: picture.data.url
         twitter:
             type: twitter
-            client_id: %netgen_social_connect.default.twitter.id%
-            client_secret: %netgen_social_connect.default.twitter.secret%
+            client_id: _placeholder
+            client_secret: _placeholder
             scope: "email"
         linkedin:
             type: linkedin
-            client_id: %netgen_social_connect.default.linkedin.id%
-            client_secret: %netgen_social_connect.default.linkedin.secret%
+            client_id: _placeholder
+            client_secret: _placeholder
             scope: "r_emailaddress"
         google:
             type: google
-            client_id: %netgen_social_connect.default.google.id%
-            client_secret: %netgen_social_connect.default.google.secret%
+            client_id: _placeholder
+            client_secret: _placeholder
             scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
 
 netgen_social_connect:
     resource_owners:
         facebook: { use_config_resolver_: true }
+        twitter: { use_config_resolver_: true }
     system:
         default:
 
@@ -129,6 +130,10 @@ netgen_social_connect:
                     id:         123456789
                     secret:     123456789
                     user_group: 11
+                twitter:
+                    id:         31415926535
+                    secret:     31415926535
+                    user_group: 11                    
         administration_group:
             user_content_type_identifier: user_admin
 
