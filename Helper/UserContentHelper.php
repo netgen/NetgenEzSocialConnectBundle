@@ -272,9 +272,6 @@ class UserContentHelper
                 }
             );
 
-        } catch (\eZ\Publish\API\Repository\Exceptions\UnauthorizedException $e) {
-            $message = 'User not allowed to update the user object.';
-
         } catch (\eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException $e) {
             $message = 'The field input is not valid.';
 
