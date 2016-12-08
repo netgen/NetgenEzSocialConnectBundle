@@ -18,7 +18,7 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Psr\Log\LoggerInterface;
 use eZ\Publish\Core\Helper\FieldHelper;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use InvalidArgumentException;
 
 class UserContentHelper
 {
@@ -446,14 +446,13 @@ class UserContentHelper
                 $userCreateStruct->setField($fieldDefinitionIdentifier, $value);
             }
 
-            return $userCreateStruct;
-        }
-
-        if ($this->logger instanceof LoggerInterface) {
+        } else if ($this->logger instanceof LoggerInterface) {
             $this->logger->error("SocialConnect: Could not map  {$fieldDefinitionIdentifier} to user content. Field does not exist.");
 
-            throw new AuthenticationException();
+            throw new InvalidArgumentException();
         }
+
+        return $userCreateStruct;
     }
 
     /**
