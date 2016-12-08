@@ -208,11 +208,7 @@ class UserContentHelper
      */
     protected function contentFieldExists(Content $content, $fieldIdentifier)
     {
-        return array_reduce($content->getFields(), function($accumulator, Field $field) use ($fieldIdentifier) {
-            if ($field->fieldDefIdentifier === $fieldIdentifier) $accumulator = true;
-
-            return $accumulator;
-        }, $initial = false);
+        return isset($content->getFields()[$fieldIdentifier]);
     }
 
     /**
