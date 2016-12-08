@@ -5,7 +5,7 @@ This bundle uses HWIOAuthBundle, and the installation process is similar.
 # Add bundle to the project via composer
 ```
     ...
-    "netgen/ez-social-connect": "~0.9",
+    "netgen/ez-social-connect": "^1.0",
     ...
 ```
 
