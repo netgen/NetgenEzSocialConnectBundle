@@ -50,7 +50,6 @@ hwi_oauth:
             client_id: "123456789"
             client_secret: "123456789"
 
-# ezpublish/config/config.yml
 netgen_social_connect:
     system:
         default:
