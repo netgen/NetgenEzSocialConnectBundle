@@ -3,6 +3,11 @@
 namespace Netgen\Bundle\EzSocialConnectBundle\Helper;
 
 use eZ\Publish\API\Repository\Repository;
+use eZ\Publish\API\Repository\Values\Content\Content;
+use eZ\Publish\API\Repository\Values\Content\Field;
+use eZ\Publish\API\Repository\Values\ContentType\ContentType;
+use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
+use eZ\Publish\API\Repository\Values\User\UserCreateStruct;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\API\Repository\Values\User\User;
 use Netgen\Bundle\EzSocialConnectBundle\Exception\MissingConfigurationException;
@@ -13,6 +18,7 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Psr\Log\LoggerInterface;
 use eZ\Publish\Core\Helper\FieldHelper;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository;
+use InvalidArgumentException;
 
 class UserContentHelper
 {
@@ -115,6 +121,10 @@ class UserContentHelper
     {
         $data = file_get_contents($imageLink);
 
+        if (!$data) {
+            throw new IOException('Could not download image.');
+        }
+
         preg_match("/.+\.(jpg|png|jpeg|gif)/", $imageLink, $imageName);
 
         if (!empty($imageName[0])) {
@@ -146,7 +156,11 @@ class UserContentHelper
     public function addProfileImage(User $user, $imageLink, $language = null)
     {
         $imageFieldIdentifier = $this->imageFieldIdentifier;
-        if (empty($imageFieldIdentifier)
+
+        $imageFieldExists = $this->contentFieldExists($user->content, $imageFieldIdentifier);
+
+        if (!$imageFieldExists
+            || empty($imageFieldIdentifier)
             || !$this->fieldHelper->isFieldEmpty($user->content, $imageFieldIdentifier, $language)
         ) {
             return false;
@@ -155,12 +169,12 @@ class UserContentHelper
         try {
             $imageFileName = $this->downloadExternalImage($imageLink);
         } catch (IOException $e) {
-            $this->logger->error("Problem while saving image {$imageLink}: ".$e->getMessage());
+            $this->logger->error("SocialConnect: Problem while saving image {$imageLink}: ".$e->getMessage());
 
             return false;
         }
 
-        $this->logger->notice("Local image created: {$imageFileName}.");
+        $this->logger->notice("SocialConnect: Local image created: {$imageFileName}.");
 
         if (!$language) {
             $language = $this->getFirstConfiguredLanguage();
@@ -184,6 +198,18 @@ class UserContentHelper
         return true;
     }
 
+    /**
+     * Before checking if a field is empty, we are interested in whether it exists at all.
+     *
+     * @param \eZ\Publish\API\Repository\Values\Content\Content $content
+     * @param string $fieldIdentifier
+     *
+     * @return bool
+     */
+    protected function contentFieldExists(Content $content, $fieldIdentifier)
+    {
+        return isset($content->getFields()[$fieldIdentifier]);
+    }
 
     /**
      * Creates ez user from OAuthEzUser entity.
@@ -223,13 +249,21 @@ class UserContentHelper
      *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      * @param array                                       $fields
+     *
+     * @return void
      */
     public function updateUserFields(User $user, array $fields)
     {
         try {
             $userUpdateStruct = $this->getRepository()->getUserService()->newUserUpdateStruct();
+
             foreach ($fields as $name => $value) {
-                $userUpdateStruct->$name = $value;
+                if ($this->contentFieldExists($user, $name)) {
+                    $userUpdateStruct->$name = $value;
+                } else if ($this->logger instanceof LoggerInterface) {
+
+                    $this->logger->error("SocialConnect: User class has no field '{$name}'");
+                }
             }
 
             $this->getRepository()->sudo(
@@ -237,13 +271,13 @@ class UserContentHelper
                     return $repository->getUserService()->updateUser($user, $userUpdateStruct);
                 }
             );
+
         } catch (\Exception $e) {
-            // fail silently - just create a log
-            if ($this->logger !== null) {
+            if ($this->logger instanceof LoggerInterface) {
                 $fieldNames = array_keys($fields);
                 $fieldNamesString = implode(', ', $fieldNames);
 
-                $this->logger->error("SocialConnect - failed to update fields '{$fieldNamesString}' on user with id {$user->id}");
+                $this->logger->error("SocialConnect: User Id {$user->id}, field {$fieldNamesString} failed to update: ".PHP_EOL.$e->getMessage());
             }
         }
     }
@@ -323,7 +357,7 @@ class UserContentHelper
                 $imageFileName = $this->downloadExternalImage($imageLink);
                 $userCreateStruct->setField($this->imageFieldIdentifier, $imageFileName);
             } catch (IOException $e) {
-                $this->logger->error("Problem while saving image {$imageLink}: " . $e->getMessage());
+                $this->logger->error("SocialConnect: Problem while saving image {$imageLink}: " . $e->getMessage());
             }
         }
 
@@ -361,7 +395,7 @@ class UserContentHelper
      *
      * @return \eZ\Publish\API\Repository\Values\User\UserCreateStruct
      */
-    public function getUserCreateStruct(OAuthEzUser $oauthEzUser, $contentType, $language)
+    public function getUserCreateStruct(OAuthEzUser $oauthEzUser, ContentType $contentType, $language)
     {
         $username = $oauthEzUser->getUsername();
         $password = $this->createPassword($oauthEzUser->getOriginalId(), $username);
@@ -373,16 +407,39 @@ class UserContentHelper
             $username, $oauthEzUser->getEmail(), $password, $language, $contentType
         );
 
-        if (!empty($firstName) && !empty($this->firstNameIdentifier)) {
-            $userCreateStruct->setField($this->firstNameIdentifier, $firstName);
-        }
+        $userCreateStruct = $this->addFieldIfExists($userCreateStruct, $contentType, $this->getFirstNameIdentifier(), $firstName);
+        $userCreateStruct = $this->addFieldIfExists($userCreateStruct, $contentType, $this->getLastNameIdentifier(), $lastName);
 
-        if (!empty($lastName) && !empty($this->lastNameIdentifier)) {
-            $userCreateStruct->setField($this->lastNameIdentifier, $lastName);
+        if ($this->isImageFieldDefined()
+            && $contentType->getFieldDefinition($this->imageFieldIdentifier) instanceof FieldDefinition) {
+            $userCreateStruct = $this->getImageIfExists($userCreateStruct, $imageLink);
         }
-
-        $userCreateStruct = $this->getImageIfExists($userCreateStruct, $imageLink);
         $userCreateStruct->enabled = true;
+
+        return $userCreateStruct;
+    }
+
+    /**
+     * @param \eZ\Publish\API\Repository\Values\User\UserCreateStruct $userCreateStruct
+     * @param string $fieldDefinitionIdentifier
+     * @param mixed $value
+     *
+     * @return \eZ\Publish\API\Repository\Values\User\UserCreateStruct
+     */
+    public function addFieldIfExists(UserCreateStruct $userCreateStruct, ContentType $contentType, $fieldDefinitionIdentifier, $value)
+    {
+        $fieldDefinition = $contentType->getFieldDefinition($fieldDefinitionIdentifier);
+
+        if ($fieldDefinition instanceof FieldDefinition) {
+            if (!empty($value)) {
+                $userCreateStruct->setField($fieldDefinitionIdentifier, $value);
+            }
+
+        } else if ($this->logger instanceof LoggerInterface) {
+            $this->logger->error("SocialConnect: Could not map  {$fieldDefinitionIdentifier} to user content. Field does not exist.");
+
+            throw new InvalidArgumentException();
+        }
 
         return $userCreateStruct;
     }
@@ -417,5 +474,32 @@ class UserContentHelper
     protected function getRepository()
     {
         return $this->repository;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return string
+     */
+    public function getFirstNameIdentifier()
+    {
+        return $this->firstNameIdentifier;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return string
+     */
+    public function getLastNameIdentifier()
+    {
+        return $this->lastNameIdentifier;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * @return bool
+     */
+    public function isImageFieldDefined()
+    {
+        return !empty($this->imageFieldIdentifier);
     }
 }

@@ -27,7 +27,7 @@ class Configuration extends SiteaccessAwareConfiguration implements Configuratio
                         ->normalizeKeys(false)
                         ->prototype('array')
                             ->children()
-                                ->scalarNode('useConfigResolver')->end()
+                                ->scalarNode('use_config_resolver')->end()
                             ->end()
                         ->end()
                 ->end()
