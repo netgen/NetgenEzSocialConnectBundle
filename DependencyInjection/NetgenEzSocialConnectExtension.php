@@ -116,15 +116,8 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
         foreach ($extensionConfig['resource_owners'] as $resourceOwnerName => $resourceOwnerValues)
         {
             $this->hwiFallbackData[$resourceOwnerName] = array();
-
-            // Do nothing if hwi configuration has dynamic parameters (i.e. we are using siteaccess-aware configuration)
-            if (mb_strpos('%', $resourceOwnerValues['client_id']) === false) {
-                $this->hwiFallbackData[$resourceOwnerName]['id'] = $resourceOwnerValues['client_id'];
-            }
-
-            if (mb_strpos('%', $resourceOwnerValues['client_secret']) === false) {
-                $this->hwiFallbackData[$resourceOwnerName]['secret'] = $resourceOwnerValues['client_secret'];
-            }
+            $this->hwiFallbackData[$resourceOwnerName]['id'] = $resourceOwnerValues['client_id'];
+            $this->hwiFallbackData[$resourceOwnerName]['secret'] = $resourceOwnerValues['client_secret'];
         }
     }
 
