@@ -272,24 +272,13 @@ class UserContentHelper
                 }
             );
 
-        } catch (\eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException $e) {
-            $message = 'The field input is not valid.';
-
-        } catch (\eZ\Publish\API\Repository\Exceptions\ContentValidationException $e) {
-            $message = 'Required field is empty.';
-
-        } catch (\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException $e) {
-            $message = 'Field type does not accept this value.';
-
         } catch (\Exception $e) {
-            $message = $e->getMessage();
-        }
+            if ($this->logger instanceof LoggerInterface) {
+                $fieldNames = array_keys($fields);
+                $fieldNamesString = implode(', ', $fieldNames);
 
-        if (isset($e) && $this->logger instanceof LoggerInterface) {
-            $fieldNames = array_keys($fields);
-            $fieldNamesString = implode(', ', $fieldNames);
-
-            $this->logger->error("SocialConnect: User Id {$user->id}, field {$fieldNamesString} failed to update: ".PHP_EOL.$message);
+                $this->logger->error("SocialConnect: User Id {$user->id}, field {$fieldNamesString} failed to update: ".PHP_EOL.$e->getMessage());
+            }
         }
     }
 
