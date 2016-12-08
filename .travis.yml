@@ -8,9 +8,9 @@ matrix:
     # mark as finished before allow_failures are run
     fast_finish: true
     include:
-        - php: 5.5
         - php: 5.6
         - php: 7.0
+        - php: 7.1
 
 # test only master (+ pull requests)
 branches:
@@ -25,9 +25,9 @@ install:
 # execute phpunit as the script command
 # only run codecov on 7.0 because it doesn't need xdebug
 script:
-  - if [[ ${TRAVIS_PHP_VERSION} == "7.0" ]];
-     then phpdbg -qrr ./vendor/bin/phpunit -d memory_limit=-1 --colors -c phpunit.xml --coverage-clover=coverage.xml;
-     else ./vendor/bin/phpunit -d memory_limit=-1 --colors -c phpunit.xml;
+  - if [[ ${TRAVIS_PHP_VERSION} == "5.6" ]];
+     then ./vendor/bin/phpunit -d memory_limit=-1 --colors -c phpunit.xml;
+     else phpdbg -qrr ./vendor/bin/phpunit -d memory_limit=-1 --colors -c phpunit.xml --coverage-clover=coverage.xml; 
     fi;
 
 # disable mail notifications
@@ -47,6 +47,6 @@ sudo: false
 
 # send coverage to codecov.io
 after_success:
-  - if [[ ${TRAVIS_PHP_VERSION} == "7.0" ]]
+  - if [[ ${TRAVIS_PHP_VERSION} != "5.6" ]]
     then bash <(curl -s https://codecov.io/bash);
    fi;
