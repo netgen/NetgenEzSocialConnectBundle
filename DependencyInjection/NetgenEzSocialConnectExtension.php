@@ -113,8 +113,7 @@ class NetgenEzSocialConnectExtension extends Extension implements PrependExtensi
         $extensionConfig = $container->getExtensionConfig('hwi_oauth');
         $extensionConfig = reset($extensionConfig);
 
-        foreach ($extensionConfig['resource_owners'] as $resourceOwnerName => $resourceOwnerValues)
-        {
+        foreach ($extensionConfig['resource_owners'] as $resourceOwnerName => $resourceOwnerValues) {
             $this->hwiFallbackData[$resourceOwnerName] = array();
             $this->hwiFallbackData[$resourceOwnerName]['id'] = $resourceOwnerValues['client_id'];
             $this->hwiFallbackData[$resourceOwnerName]['secret'] = $resourceOwnerValues['client_secret'];
