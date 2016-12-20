@@ -27,4 +27,4 @@ For installation instructions, see [INSTALL.md](https://github.com/netgen/Netgen
 * Copyright (C) 2016 Netgen. All rights reserved.
 
 ## License
-* http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License v2
+* [GNU GPLv2](https://github.com/netgen/NetgenEzSocialConnectBundle/blob/master/LICENSE)
