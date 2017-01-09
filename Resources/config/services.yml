@@ -47,3 +47,9 @@ services:
         factory: ['@doctrine.orm.default_entity_manager', getRepository]
         arguments:
             - Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
+
+    netgen.social_connect.deleteuser_slot:
+        class: Netgen\Bundle\EzSocialConnectBundle\Slot\DeleteOAuthEzOnUDeleteUserSlot
+        arguments: ['@netgen.social_connect.repository.oauthez']
+        tags:
+            - { name: ezpublish.api.slot, signal: UserService\DeleteUserSignal }

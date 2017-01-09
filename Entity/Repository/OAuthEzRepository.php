@@ -43,7 +43,6 @@ class OAuthEzRepository extends EntityRepository
         $this->getEntityManager()->flush();
     }
 
-
     /**
      * Loads from table by eZ user id and resource name.
      *
@@ -59,6 +58,20 @@ class OAuthEzRepository extends EntityRepository
             'ezUserId' => $ezUserId,
             'resourceName' => $resourceOwnerName,
         ), $onlyDisconnectable);
+    }
+
+    /**
+     * Loads all from table by eZ user id.
+     *
+     * @param string    $ezUserId
+     *
+     * @return null|\Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz
+     */
+    public function loadAllFromTableByEzId($ezUserId)
+    {
+        return $this->findBy(array(
+            'ezUserId' => $ezUserId,
+        ));
     }
 
     /**
