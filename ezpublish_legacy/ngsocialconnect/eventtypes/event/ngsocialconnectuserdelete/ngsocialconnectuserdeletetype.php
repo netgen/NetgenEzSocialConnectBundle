@@ -1,12 +1,12 @@
 <?php
 
-class SocialConnectUserDeleteType extends eZWorkflowEventType
+class NgSocialConnectUserDeleteType extends eZWorkflowEventType
 {
-    const WORKFLOW_TYPE_STRING = "socialconnectuserdelete";
+    const WORKFLOW_TYPE_STRING = "ngsocialconnectuserdelete";
 
     public function __construct()
     {
-        parent::__construct(SocialConnectUserDeleteType::WORKFLOW_TYPE_STRING, 'SocialConnect User Delete');
+        parent::__construct(NgSocialConnectUserDeleteType::WORKFLOW_TYPE_STRING, 'NgSocialConnect User Delete');
     }
 
     public function execute($process, $event)
@@ -19,9 +19,9 @@ class SocialConnectUserDeleteType extends eZWorkflowEventType
             $contentIds[] = eZContentObject::fetchByNodeID($nodeId)->attribute('id');
         }
 
-        $kernel = \ezpKernel::instance();
+        $kernel = ezpKernel::instance();
 
-        /** @var \Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository $OAuthEzRepository */
+        /** @var Netgen\Bundle\EzSocialConnectBundle\Entity\Repository\OAuthEzRepository $OAuthEzRepository */
         $OAuthEzRepository = $kernel->getServiceContainer()->get('netgen.social_connect.repository.oauthez');
 
         foreach ($contentIds as $contentId) {
@@ -32,8 +32,8 @@ class SocialConnectUserDeleteType extends eZWorkflowEventType
             }
         }
 
-        return \eZWorkflowType::STATUS_ACCEPTED;
+        return eZWorkflowType::STATUS_ACCEPTED;
     }
 }
 
-eZWorkflowEventType::registerEventType(SocialConnectUserDeleteType::WORKFLOW_TYPE_STRING, 'SocialConnectUserDeleteType');
+eZWorkflowEventType::registerEventType(NgSocialConnectUserDeleteType::WORKFLOW_TYPE_STRING, 'NgSocialConnectUserDeleteType');

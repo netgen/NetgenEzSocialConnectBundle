@@ -1,8 +1,8 @@
 <?php /* #?ini charset="utf-8"?
 
 [EventSettings]
-ExtensionDirectories[]=socialconnect
-AvailableEventTypes[]=event_socialconnectuserdelete
+ExtensionDirectories[]=ngsocialconnect
+AvailableEventTypes[]=event_ngsocialconnectuserdelete
 
 [OperationSettings]
 # List of available trigger operations.
