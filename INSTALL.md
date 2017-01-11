@@ -205,3 +205,13 @@ If you would like your existing users to be able to connect their ez account to 
 ```
 {% include 'NetgenEzSocialConnectBundle:social:connect_user.html.twig' %}
 ```
+
+# Deleting users in the legacy administration (OPTIONAL)
+If you want the deletion of users in the legacy administration to trigger their removal from the socialconnect table, the steps are as follows:
+
+1. Run `composer install` before doing anything.
+2. In the eZ administration, create a workflow group if none exist. You can name it 'SocialConnect', but the name is not important.
+3. Create a new workflow in your workflow group.
+4. In the workflow, you will probably want to create an `Event / Multiplexer` to only make it affect `User` objects ('Classes to run workflow:')
+5. Next, add an `Event / SocialConnect User Delete` to your workflow.
+6. Finally, open the `Triggers` tab in the administration and select your workflow in the `content delete after` trigger.
