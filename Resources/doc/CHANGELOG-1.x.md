@@ -2,7 +2,7 @@ Netgen eZSocialConnect Bundle 1.x changelog
 ================================
 
 
-1.1 (2017-01-30)
+1.0.1 (2017-01-30)
 ----------------
 
 * Add explicit license to the project
