@@ -16,7 +16,7 @@
         "doctrine/orm": "~2.4"
     },
     "require-dev": {
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "^4.8|^5.7"
     },
     "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
     "autoload": {
