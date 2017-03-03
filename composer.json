@@ -1,6 +1,7 @@
 {
     "name": "netgen/ez-social-connect",
     "description": "Bundle for eZ Publish which enables sign in with various social networks",
+    "type": "ezplatform-bundle",
     "license": "GPL-2.0",
     "authors": [
         {
