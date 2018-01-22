@@ -5,8 +5,9 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Tests\OAuth;
 
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
+use PHPUnit\Framework\TestCase;
 
-class eZUserProviderTest extends \PHPUnit_Framework_TestCase
+class eZUserProviderTest extends TestCase
 {
     public function testGetUserIfAlreadyLinked()
     {

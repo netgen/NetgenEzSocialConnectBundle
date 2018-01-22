@@ -5,8 +5,9 @@ namespace Netgen\Bundle\EzSocialConnectBundle\Tests\OAuth;
 use eZ\Publish\Core\Repository\Values\ContentType\FieldDefinition;
 use Netgen\Bundle\EzSocialConnectBundle\Entity\OAuthEz;
 use Netgen\Bundle\EzSocialConnectBundle\OAuth\OAuthEzUser;
+use PHPUnit\Framework\TestCase;
 
-class UserContentHelperTest extends \PHPUnit_Framework_TestCase
+class UserContentHelperTest extends TestCase
 {
     public function testGetUserCreateStruct()
     {

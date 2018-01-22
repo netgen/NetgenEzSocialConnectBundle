@@ -2,6 +2,15 @@
     "name": "netgen/ez-social-connect",
     "description": "Bundle for eZ Publish which enables sign in with various social networks",
     "type": "ezplatform-bundle",
+    "keywords": [
+        "ezpublish",
+        "ezplatform",
+        "netgen",
+        "ez-social-connect",
+        "oauth",
+        "social-login"
+    ],
+    "homepage": "https://github.com/netgen/NetgenEzSocialConnectBundle",
     "license": "GPL-2.0-only",
     "authors": [
         {
@@ -17,10 +26,14 @@
     },
     "require-dev": {
         "ezsystems/ezpublish-kernel": "6.12",
-        "phpunit/phpunit": "^5.7"
+        "phpunit/phpunit": "^5.7|^6.0"
     },
     "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
     "autoload": {
         "psr-0": { "Netgen\\Bundle\\EzSocialConnectBundle": "" }
+    },
+    "scripts": {
+        "test": "@php vendor/bin/phpunit --colors=always",
+        "coverage": "@php -dzend_extension=xdebug.so vendor/bin/phpunit --colors=always"
     }
 }
