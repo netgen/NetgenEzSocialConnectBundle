@@ -373,7 +373,7 @@ class eZUserProviderTest extends \PHPUnit_Framework_TestCase
     {
         return $this->getMockBuilder('\eZ\Publish\API\Repository\Values\User\User')
             ->disableOriginalConstructor()
-            ->setMethods(array('getAPIUser', 'getVersionInfo', 'getFields', 'getFieldValue', 'getFieldsByLanguage'))
+            ->setMethods(array('getAPIUser', 'getVersionInfo', 'getFields', 'getFieldValue', 'getFieldsByLanguage', 'getField'))
             ->getMock();
     }
 
