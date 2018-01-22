@@ -4,7 +4,7 @@
 [![Code Coverage](https://img.shields.io/codecov/c/github/netgen/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://codecov.io/gh/netgen/NetgenEzSocialConnectBundle)
 [![Downloads](https://img.shields.io/packagist/dt/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect)
 [![Latest stable](https://img.shields.io/packagist/v/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect)
-[![License](https://img.shields.io/packagist/l/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect)
+[![License](https://img.shields.io/github/license/netgen/NetgenEzSocialConnectBundle.svg?style=flat-square)](LICENSE)
 
 As the impact of social media grows, most sites like to provide login via social networks like Facebook and Twitter.
 This bundle makes use of [HWIOAuthBundle](https://github.com/hwi/HWIOAuthBundle) to provide the ability to log in to eZPublish-based sites via social networks.
@@ -24,7 +24,7 @@ For installation instructions, see [INSTALL.md](https://github.com/netgen/Netgen
 * The bundle is based on HWIOAuthBundle 0.4, which supports Symfony >= 2.3, < 3.0. Symfony 3 is not supported yet.
 
 ## Copyright
-* Copyright (C) 2016 Netgen. All rights reserved.
+* Copyright (C) 2018 Netgen. All rights reserved.
 
 ## License
 * [GNU GPLv2](https://github.com/netgen/NetgenEzSocialConnectBundle/blob/master/LICENSE)
