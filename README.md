@@ -1,8 +1,8 @@
 # NetgenEzSocialConnectBundle
 
-[![Build Status](https://img.shields.io/travis/netgen/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://travis-ci.org/netgen/NetgenEzSocialConnectBundle.svg)
+[![Build Status](https://img.shields.io/travis/netgen/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://travis-ci.org/netgen/NetgenEzSocialConnectBundle)
 [![Code Coverage](https://img.shields.io/codecov/c/github/netgen/NetgenEzSocialConnectBundle.svg?style=flat-square)](https://codecov.io/gh/netgen/NetgenEzSocialConnectBundle)
-[![Downloads](https://img.shields.io/packagist/dt/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect)
+[![Downloads](https://img.shields.io/packagist/dt/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect/stats)
 [![Latest stable](https://img.shields.io/packagist/v/netgen/ez-social-connect.svg?style=flat-square)](https://packagist.org/packages/netgen/ez-social-connect)
 [![License](https://img.shields.io/github/license/netgen/NetgenEzSocialConnectBundle.svg?style=flat-square)](LICENSE)
 
