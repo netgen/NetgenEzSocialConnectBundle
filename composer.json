@@ -30,7 +30,14 @@
     },
     "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
     "autoload": {
-        "psr-0": { "Netgen\\Bundle\\EzSocialConnectBundle": "" }
+        "psr-4": { 
+            "Netgen\\Bundle\\EzSocialConnectBundle\\": "bundle" 
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Netgen\\Bundle\\EzSocialConnectBundle\\Tests\\": "tests"
+        }
     },
     "scripts": {
         "test": "@php vendor/bin/phpunit --colors=always",

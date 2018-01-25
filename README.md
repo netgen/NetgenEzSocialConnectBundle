@@ -10,7 +10,7 @@ As the impact of social media grows, most sites like to provide login via social
 This bundle makes use of [HWIOAuthBundle](https://github.com/hwi/HWIOAuthBundle) to provide the ability to log in to eZPublish-based sites via social networks.
 
 ## Installation
-For installation instructions, see [INSTALL.md](https://github.com/netgen/NetgenEzSocialConnectBundle/blob/master/INSTALL.md).
+For installation instructions, see [INSTALL.md](doc/INSTALL.md).
 
 ## Features
 * A new eZ user is created when logging in with social network for the first time.
