@@ -28,9 +28,15 @@
         "ezsystems/ezpublish-kernel": "6.12",
         "phpunit/phpunit": "^5.7|^6.0"
     },
-    "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
     "autoload": {
-        "psr-0": { "Netgen\\Bundle\\EzSocialConnectBundle": "" }
+        "psr-4": { 
+            "Netgen\\Bundle\\EzSocialConnectBundle\\": "bundle" 
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Netgen\\Bundle\\EzSocialConnectBundle\\Tests\\": "tests"
+        }
     },
     "scripts": {
         "test": "@php vendor/bin/phpunit --colors=always",
