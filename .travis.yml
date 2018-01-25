@@ -21,7 +21,7 @@ branches:
 # install dependencies
 install:
     - phpenv config-rm xdebug.ini
-    - travis_wait composer install
+    - composer install
 
 # execute phpunit as the script command
 # only run codecov on 7.0 because it doesn't need xdebug
