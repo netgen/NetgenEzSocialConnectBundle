@@ -28,7 +28,6 @@
         "ezsystems/ezpublish-kernel": "6.12",
         "phpunit/phpunit": "^5.7|^6.0"
     },
-    "target-dir": "Netgen/Bundle/EzSocialConnectBundle",
     "autoload": {
         "psr-4": { 
             "Netgen\\Bundle\\EzSocialConnectBundle\\": "bundle" 
