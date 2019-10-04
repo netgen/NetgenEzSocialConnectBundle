@@ -20,12 +20,11 @@
         }
     ],
     "require": {
-        "ezsystems/ezpublish-kernel": "*",
+        "ezsystems/ezpublish-kernel": "^6.13",
         "hwi/oauth-bundle": "~0.4.0",
         "doctrine/orm": "~2.4"
     },
     "require-dev": {
-        "ezsystems/ezpublish-kernel": "6.12",
         "phpunit/phpunit": "^5.7|^6.0"
     },
     "autoload": {
