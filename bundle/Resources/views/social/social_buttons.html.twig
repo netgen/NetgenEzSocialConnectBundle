@@ -1,11 +1,22 @@
 <div id="fb-root"></div>
-<script src="https://apis.google.com/js/client:platform.js" async defer></script>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+
+<script>
+  function onSignIn(googleUser) {
+    // var profile = googleUser.getBasicProfile();
+    // console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+    // console.log('Name: ' + profile.getName());
+    // console.log('Image URL: ' + profile.getImageUrl());
+    // console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+    document.location = "{{ url("hwi_oauth_service_redirect", {service: "google"}) }}";
+  }
+</script>
 
 <script type="text/javascript" src="//platform.linkedin.com/in.js">
     api_key:  {{ ezpublish.configResolver.getParameter( 'linkedin.id', 'netgen_social_connect' ) }}
     authorize: true
     onLoad: onLinkedInLoad
-    scope:r_basicprofile r_emailaddress
+    scope:r_basicprofile_r_emailaddress
 </script>
 
 <script type="text/javascript">
@@ -74,7 +85,7 @@
     }
 
     function signinCallback(authResult) {
-        
+
         // Only redirect to Google OAuth if the user explicitly requests it
         if (authResult['status']['signed_in'] && authResult.status.method == 'PROMPT') {
             // Update the app to reflect a signed in user
@@ -93,23 +104,13 @@
 
     }
 </script>
-<script type="in/Login"></script>
+{#<script type="in/Login"></script>#}
 
 {% for owner in hwi_oauth_resource_owners() %}
     {% if owner == "facebook" %}
-        <fb:login-button scope="public_profile,email" onlogin="fb_login();">
-        </fb:login-button>
+        <fb:login-button scope="public_profile,email" onlogin="fb_login();"></fb:login-button>
     {% elseif owner == "google" %}
-        <span id="signinButton">
-            <span
-                    class="g-signin"
-                    data-callback="signinCallback"
-                    data-clientid="{{ ezpublish.configResolver.getParameter( 'google.id', 'netgen_social_connect' ) }}"
-                    data-cookiepolicy="single_host_origin"
-                    data-scope="email profile"
-                    data-width="icon-only" data-theme="light" >
-            </span>
-        </span>
+        <div class="g-signin2" data-onsuccess="onSignIn"></div>
     {% else %}
         <a href="{{ hwi_oauth_login_url(owner) }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
     {% endif %}
