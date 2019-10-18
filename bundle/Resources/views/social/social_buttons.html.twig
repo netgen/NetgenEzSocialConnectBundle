@@ -8,103 +8,103 @@
 </script>
 
 <script type="text/javascript" src="//platform.linkedin.com/in.js">
-    api_key:  {{ ezpublish.configResolver.getParameter( 'linkedin.id', 'netgen_social_connect' ) }}
+  api_key:  {{ ezpublish.configResolver.getParameter( 'linkedin.id', 'netgen_social_connect' ) }}
     authorize: true
-    onLoad: onLinkedInLoad
-    scope:r_basicprofile_r_emailaddress
+  onLoad: onLinkedInLoad
+  scope:r_basicprofile_r_emailaddress
 </script>
 
 <script type="text/javascript">
 
-    // Setup an event listener to make an API call once auth is complete
-    function onLinkedInLoad() {
-        IN.Event.on(IN, "auth", getProfileData);
-    }
+  // Setup an event listener to make an API call once auth is complete
+  function onLinkedInLoad() {
+    IN.Event.on(IN, "auth", getProfileData);
+  }
 
-    // Handle the successful return from the API call
-    function onSuccess(data) {
-        console.log(data);
-        document.location = "{{ url("hwi_oauth_service_redirect", {service: "linkedin"}) }}";
-    }
+  // Handle the successful return from the API call
+  function onSuccess(data) {
+    console.log(data);
+    document.location = "{{ url("hwi_oauth_service_redirect", {service: "linkedin"}) }}";
+  }
 
-    // Handle an error response from the API call
-    function onError(error) {
-        console.log(error);
-    }
+  // Handle an error response from the API call
+  function onError(error) {
+    console.log(error);
+  }
 
-    // Use the API call wrapper to request the member's basic profile data
-    function getProfileData() {
-        IN.API.Raw("/people/~").result(onSuccess).error(onError);
-    }
+  // Use the API call wrapper to request the member's basic profile data
+  function getProfileData() {
+    IN.API.Raw("/people/~").result(onSuccess).error(onError);
+  }
 
 </script>
 
 <script>
-    window.fbAsyncInit = function() {
-        // init the FB JS SDK
-        FB.init({
-            appId      : '{{ ezpublish.configResolver.getParameter( 'facebook.id', 'netgen_social_connect' )|raw|escape( 'js' ) }}',                        // App ID from the app dashboard
-            channelUrl : '//ezpublish.ezsc',      // Channel file for x-domain comms
-            status     : true,                                 // Check Facebook Login status
-            xfbml      : true,                                  // Look for social plugins on the page
-            version:  'v2.0'
-        });
-    };
+  window.fbAsyncInit = function() {
+    // init the FB JS SDK
+    FB.init({
+      appId      : '{{ ezpublish.configResolver.getParameter( 'facebook.id', 'netgen_social_connect' )|raw|escape( 'js' ) }}',                        // App ID from the app dashboard
+      channelUrl : '//ezpublish.ezsc',      // Channel file for x-domain comms
+      status     : true,                                 // Check Facebook Login status
+      xfbml      : true,                                  // Look for social plugins on the page
+      version:  'v2.0'
+    });
+  };
 
-    // Load the SDK asynchronously
-    (function(d, s, id){
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) {return;}
-        js = d.createElement(s); js.id = id;
-        js.src = "//connect.facebook.net/en_US/all.js";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
+  // Load the SDK asynchronously
+  (function(d, s, id){
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {return;}
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
 
-    function fb_login() {
-        FB.getLoginStatus(function(response) {
-            if (response.status === 'connected') {
-                // connected
-                //alert('Already connected, redirect to login page to create token.');
-                document.location = "{{ url("hwi_oauth_service_redirect", {service: "facebook"}) }}";
-            } else {
-                // not_authorized
-                FB.login(function(response) {
-                    if (response.authResponse) {
-                        document.location = "{{ url("hwi_oauth_service_redirect", {service: "facebook"}) }}";
-                    } else {
-                        //alert('Cancelled.');
-                    }
-                }, {scope: 'email'});
-            }
-        });
+  function fb_login() {
+    FB.getLoginStatus(function(response) {
+      if (response.status === 'connected') {
+        // connected
+        //alert('Already connected, redirect to login page to create token.');
+        document.location = "{{ url("hwi_oauth_service_redirect", {service: "facebook"}) }}";
+      } else {
+        // not_authorized
+        FB.login(function(response) {
+          if (response.authResponse) {
+            document.location = "{{ url("hwi_oauth_service_redirect", {service: "facebook"}) }}";
+          } else {
+            //alert('Cancelled.');
+          }
+        }, {scope: 'email'});
+      }
+    });
+  }
+
+  function signinCallback(authResult) {
+
+    // Only redirect to Google OAuth if the user explicitly requests it
+    if (authResult['status']['signed_in'] && authResult.status.method == 'PROMPT') {
+      // Update the app to reflect a signed in user
+      // Hide the sign-in button now that the user is authorized, for example:
+      //document.getElementById('signinButton').setAttribute('style', 'display: none');
+
+      document.location = "{{ url("hwi_oauth_service_redirect", {service: "google"}) }}";
+    } else {
+      // Update the app to reflect a signed out user
+      // Possible error values:
+      //   "user_signed_out" - User is signed-out
+      //   "access_denied" - User denied access to your app
+      //   "immediate_failed" - Could not automatically log in the user
+      console.log('Sign-in state: ' + authResult['error']);
     }
 
-    function signinCallback(authResult) {
-
-        // Only redirect to Google OAuth if the user explicitly requests it
-        if (authResult['status']['signed_in'] && authResult.status.method == 'PROMPT') {
-            // Update the app to reflect a signed in user
-            // Hide the sign-in button now that the user is authorized, for example:
-            //document.getElementById('signinButton').setAttribute('style', 'display: none');
-
-            document.location = "{{ url("hwi_oauth_service_redirect", {service: "google"}) }}";
-        } else {
-            // Update the app to reflect a signed out user
-            // Possible error values:
-            //   "user_signed_out" - User is signed-out
-            //   "access_denied" - User denied access to your app
-            //   "immediate_failed" - Could not automatically log in the user
-            console.log('Sign-in state: ' + authResult['error']);
-        }
-
-    }
+  }
 </script>
 {#<script type="in/Login"></script>#}
 
 {% for owner in hwi_oauth_resource_owners() %}
     {% if owner == "facebook" %}
         <div class="facebook">
-            <fb:login-button scope="public_profile,email" onlogin="fb_login();"></fb:login-button>
+            <div class="fb-login-button" data-width="" data-size="large" data-button-type="login_with" data-auto-logout-link="false" data-use-continue-as="false"></div>
         </div>
     {% elseif owner == "google" %}
         <div class="google">
