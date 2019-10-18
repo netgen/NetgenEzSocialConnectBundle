@@ -103,10 +103,10 @@
 
 {% for owner in hwi_oauth_resource_owners() %}
     {% if owner == "facebook" %}
-        <fb:login-button scope="public_profile,email" onlogin="fb_login();"></fb:login-button>
+        <fb:login-button scope="public_profile,email" onlogin="fb_login();" class="facebook"></fb:login-button>
     {% elseif owner == "google" %}
-        <div class="g-signin2" data-onsuccess="onSignIn"></div>
+        <div class="g-signin2 google" data-onsuccess="onSignIn"></div>
     {% else %}
-        <a href="{{ hwi_oauth_login_url(owner) }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
+        <a href="{{ hwi_oauth_login_url(owner) }}" class="{{ owner | trans({}, 'HWIOAuthBundle') }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
     {% endif %}
 {% endfor %}
