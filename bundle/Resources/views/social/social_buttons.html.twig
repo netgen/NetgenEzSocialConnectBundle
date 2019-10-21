@@ -116,9 +116,9 @@
             <div class="fb-login-button" data-width="" data-size="large" data-button-type="login_with" data-auto-logout-link="false" data-use-continue-as="false"></div>
         </div>
     {% elseif owner == "google" %}
-        <div class="google">
-            <div class="g-signin2" data-onsuccess="onSignIn"></div>
-        </div>
+{#        <div class="google">#}
+{#            <div class="g-signin2" data-onsuccess="onSignIn"></div>#}
+{#        </div>#}
     {% else %}
         <div class="{{ owner | trans({}, 'HWIOAuthBundle') }}">
             <a href="{{ hwi_oauth_login_url(owner) }}">{{ owner | trans({}, 'HWIOAuthBundle') }}</a> <br />
