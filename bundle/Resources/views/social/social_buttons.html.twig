@@ -3,7 +3,16 @@
 
 <script>
   function onSignIn(googleUser) {
-    document.location = "{{ url("hwi_oauth_service_redirect", {service: "google"}) }}";
+    var profile = googleUser.getBasicProfile();
+    console.log('ID: ' + profile.getId());
+    console.log('Name: ' + profile.getName());
+    console.log('Image URL: ' + profile.getImageUrl());
+    console.log('Email: ' + profile.getEmail());
+
+    var isLoggedIn = {% if app.user %} true {%  else %} false {% endif %};
+      if (!isLoggedIn) {
+        document.location = "{{ url("hwi_oauth_service_redirect", {service: "google"}) }}";
+      }
   }
 </script>
 
@@ -99,7 +108,7 @@
 
   }
 </script>
-{#<script type="in/Login"></script>#}
+<script type="in/Login"></script>
 
 {% for owner in hwi_oauth_resource_owners() %}
     {% if owner == "facebook" %}

@@ -4,5 +4,3 @@ parameters:
         #twitter:  https://twitter.com/intent/user?user_id=
         twitter:  https://api.twitter.com/oauth/authenticate?oauth_token=
         google:   https://plus.google.com/
-
-
